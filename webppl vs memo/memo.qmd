@@ -12,12 +12,12 @@ from memo import memo
 
 cards = np.array([1, 2, 3])
 
-@memo(save_comic="cards-comic")
+@memo(save_comic="memo-comic-card")
 def alice_chooses_card_E():
     alice: chooses(c in cards, wpp=1)
     return E[alice.c]
 
-# Comic representation of the modeling: ./cards-comic.png
+# Comic representation of the modeling: ./memo-comic-card.png
 ```
 
 ```{python}
@@ -32,7 +32,7 @@ import jax.numpy as np
 
 possible_values = np.array(range(1,101)) / 100
 
-@memo(save_comic="memo-comic")
+@memo(save_comic="memo-comic-bc")
 def model[query_v: possible_values]():
     # establish prior in the observer's frame: that a value generator has some value from .01 to 1
     value_gen: given(v in possible_values, wpp=1)
@@ -50,7 +50,7 @@ def model[query_v: possible_values]():
     # or return the expected value in the valuator's frame:
     # return valuator[E[value_gen.v]]
 
-# Comic representation of the modeling: ./memo-comic.png
+# Comic representation of the modeling: ./memo-comic-bc.png
 ```
 
 ```{python}
