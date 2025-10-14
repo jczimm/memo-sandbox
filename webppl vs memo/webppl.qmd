@@ -1,0 +1,68 @@
+---
+format: html
+---
+
+### Cards
+
+```{r}
+library(tidyverse)
+alice_chooses_card_model <- '
+var alice_chooses_card = function() {
+   var card = sample(Categorical({ vs: [1,2,3] }))
+   return card
+}
+var dist = Infer(alice_chooses_card)
+expectation(dist)
+'
+alice_chooses_card_E <- rwebppl::webppl(alice_chooses_card_model)
+```
+
+```{r}
+show(alice_chooses_card_E)
+```
+
+### Basic conditioning
+
+<!--
+ran this, but not sure if needed anymore
+```r
+suppressMessages(devtools::install_github("IRkernel/IRkernel"))
+IRkernel::installspec()
+
+try(reticulate::install_miniconda(), silent=TRUE) # inspired by https://github.com/rstudio/reticulate/issues/1650#issuecomment-2312389854; necessary until https://github.com/rstudio/reticulate/issues/1650 is closed
+reticulate::use_python("./.pixi/envs/default/bin/python3")
+```
+-->
+
+```{r}
+library(tidyverse)
+basic_inference_model <- '
+var model = function() {
+   // uniform prior of true value, discretized for parity with memo
+   var value = randomInteger(101) / 100; // uniform(0, 1)
+
+   // someone has observed that value is >.5
+   condition(value > .5)
+   
+   // return the estimated probability of each possible value
+   return value
+}
+var dist = Infer(model)
+dist
+
+// alternatively, output the expected value:
+// expectation(dist)
+'
+posterior <- rwebppl::webppl(basic_inference_model) |>
+   arrange(support)
+
+# extra: could compute E of posterior manually like this
+# posteriorE <- sum(as.numeric(posterior$prob) * as.numeric(posterior$support))
+# posteriorE
+
+posterior |>
+   # fill in missing support (HACK: need to round support values to ensure compatibility when calling `complete`)
+   mutate(support = round(support, 3)) |>
+   complete(support = seq(0, 1, by = 0.01) |> round(3), fill = list(prob = 0)) |>
+   ggplot() + geom_line(aes(x=support, y=prob)) + lims(x=c(0,1), y=c(0, NA))
+```

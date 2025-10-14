@@ -1,0 +1,14 @@
+---
+format:
+  html:
+    embed-resources: true
+notebook-links: false
+---
+
+## [WebPPL](./webppl.qmd)
+
+{{< embed webppl.qmd >}}
+
+## [memo](./memo.qmd)
+
+{{< embed memo.qmd >}}
