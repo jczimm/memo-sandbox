@@ -106,14 +106,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </head>
 
-<body class="fullcontent quarto-light">
+<body class="quarto-light">
 
 <div id="quarto-search-results"></div>
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#mcmc" id="toc-mcmc" class="nav-link active" data-scroll-target="#mcmc">1 - mcmc</a></li>
+  <li><a href="#enumeration" id="toc-enumeration" class="nav-link" data-scroll-target="#enumeration">2 - enumeration</a></li>
+  <li><a href="#comparison-across-scenarios" id="toc-comparison-across-scenarios" class="nav-link" data-scroll-target="#comparison-across-scenarios">3 - comparison across scenarios</a>
+  <ul class="collapse">
+  <li><a href="#paper-results" id="toc-paper-results" class="nav-link" data-scroll-target="#paper-results">paper results</a></li>
+  <li><a href="#strength-prior-110" id="toc-strength-prior-110" class="nav-link" data-scroll-target="#strength-prior-110">strength prior [1,10]</a></li>
+  <li><a href="#mcmc-with-discrete-prior-110" id="toc-mcmc-with-discrete-prior-110" class="nav-link" data-scroll-target="#mcmc-with-discrete-prior-110">mcmc with discrete prior [1,10]</a></li>
+  <li><a href="#strength-prior-110-1" id="toc-strength-prior-110-1" class="nav-link" data-scroll-target="#strength-prior-110-1">strength prior (1,10)</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
 <!-- main -->
 <main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
 
@@ -513,10 +529,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>TODO (in-progress) determine if need to use (1,10) (or another variant) instead of [1,10] for strength prior</li>
 </ul></li>
 <li><ol start="4" type="1">
-<li>TODO memo enumerate, with same parameters as webppl enumerate (xiang2023-exp1-round3-memo.qmd)</li>
+<li>TODO finish memo enumerate, with same parameters as webppl enumerate (xiang2023-exp1-round3-memo.qmd); and log all the stats (see <code>stats</code>)</li>
 </ol></li>
 <li><ol start="5" type="1">
-<li>moonshot: memo enumerate, but the equilibrium-finding process uses memo frames (still accelerated by JAX, but now in the language of memo)</li>
+<li>moonshot: memo enumerate, but the equilibrium-finding process uses memo frames in order to model agent’s uncertainty about each other (still accelerated by JAX, but now in the language of memo, and considering the uncertainty)</li>
 </ol></li>
 </ul>
 <p>TODO: recreate compensatory effort and solitary effort models in memo; simple, no need to validate incrementally like doing for joint effort model</p>
@@ -762,400 +778,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="summarize" class="level4">
 <h4 class="anchored" data-anchor-id="summarize">summarize</h4>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>compare_results <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    P_results_summary <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>        <span class="at">scenario =</span> <span class="fu">c</span>(<span class="st">"F,F;F,F"</span>,<span class="st">"F,F;F,L"</span>,<span class="st">"F,L;F,L"</span>,<span class="st">"F,F;L,L"</span>,<span class="st">"F,L;L,L"</span>,<span class="st">"L,L;L,L"</span>),</span>
-<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">MCMC_continuous =</span> <span class="fu">c</span>(</span>
-<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>            MCMC_continuous_ffff<span class="sc">$</span>P,</span>
-<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>            MCMC_continuous_fffl<span class="sc">$</span>P,</span>
-<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>            MCMC_continuous_flfl<span class="sc">$</span>P,</span>
-<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>            MCMC_continuous_ffll<span class="sc">$</span>P,</span>
-<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>            MCMC_continuous_flll<span class="sc">$</span>P,</span>
-<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>            MCMC_continuous_llll<span class="sc">$</span>P</span>
-<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">MCMC_discrete =</span> <span class="fu">c</span>(</span>
-<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>            MCMC_discrete_ffff<span class="sc">$</span>P,</span>
-<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>            MCMC_discrete_fffl<span class="sc">$</span>P,</span>
-<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>            MCMC_discrete_flfl<span class="sc">$</span>P,</span>
-<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>            MCMC_discrete_ffll<span class="sc">$</span>P,</span>
-<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a>            MCMC_discrete_flll<span class="sc">$</span>P,</span>
-<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a>            MCMC_discrete_llll<span class="sc">$</span>P</span>
-<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a>        <span class="at">enumerate =</span> <span class="fu">c</span>(</span>
-<span id="cb28-21"><a href="#cb28-21" aria-hidden="true" tabindex="-1"></a>            enumerate_ffff<span class="sc">$</span>P,</span>
-<span id="cb28-22"><a href="#cb28-22" aria-hidden="true" tabindex="-1"></a>            enumerate_fffl<span class="sc">$</span>P,</span>
-<span id="cb28-23"><a href="#cb28-23" aria-hidden="true" tabindex="-1"></a>            enumerate_flfl<span class="sc">$</span>P,</span>
-<span id="cb28-24"><a href="#cb28-24" aria-hidden="true" tabindex="-1"></a>            enumerate_ffll<span class="sc">$</span>P,</span>
-<span id="cb28-25"><a href="#cb28-25" aria-hidden="true" tabindex="-1"></a>            enumerate_flll<span class="sc">$</span>P,</span>
-<span id="cb28-26"><a href="#cb28-26" aria-hidden="true" tabindex="-1"></a>            enumerate_llll<span class="sc">$</span>P</span>
-<span id="cb28-27"><a href="#cb28-27" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb28-28"><a href="#cb28-28" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb28-29"><a href="#cb28-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-30"><a href="#cb28-30" aria-hidden="true" tabindex="-1"></a>    <span class="co"># from $aStrength_posterior and $bStrength_posterior</span></span>
-<span id="cb28-31"><a href="#cb28-31" aria-hidden="true" tabindex="-1"></a>    posteriors_summary <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb28-32"><a href="#cb28-32" aria-hidden="true" tabindex="-1"></a>        <span class="at">MCMC_continuous =</span> <span class="fu">list</span>(</span>
-<span id="cb28-33"><a href="#cb28-33" aria-hidden="true" tabindex="-1"></a>            <span class="at">a =</span> <span class="fu">list</span>(</span>
-<span id="cb28-34"><a href="#cb28-34" aria-hidden="true" tabindex="-1"></a>                <span class="at">ffff =</span> MCMC_continuous_ffff<span class="sc">$</span>aStrength_posterior,</span>
-<span id="cb28-35"><a href="#cb28-35" aria-hidden="true" tabindex="-1"></a>                <span class="at">fffl =</span> MCMC_continuous_fffl<span class="sc">$</span>aStrength_posterior,</span>
-<span id="cb28-36"><a href="#cb28-36" aria-hidden="true" tabindex="-1"></a>                <span class="at">flfl =</span> MCMC_continuous_flfl<span class="sc">$</span>aStrength_posterior,</span>
-<span id="cb28-37"><a href="#cb28-37" aria-hidden="true" tabindex="-1"></a>                <span class="at">ffll =</span> MCMC_continuous_ffll<span class="sc">$</span>aStrength_posterior,</span>
-<span id="cb28-38"><a href="#cb28-38" aria-hidden="true" tabindex="-1"></a>                <span class="at">flll =</span> MCMC_continuous_flll<span class="sc">$</span>aStrength_posterior,</span>
-<span id="cb28-39"><a href="#cb28-39" aria-hidden="true" tabindex="-1"></a>                <span class="at">llll =</span> MCMC_continuous_llll<span class="sc">$</span>aStrength_posterior</span>
-<span id="cb28-40"><a href="#cb28-40" aria-hidden="true" tabindex="-1"></a>            ),</span>
-<span id="cb28-41"><a href="#cb28-41" aria-hidden="true" tabindex="-1"></a>            <span class="at">b =</span> <span class="fu">list</span>(</span>
-<span id="cb28-42"><a href="#cb28-42" aria-hidden="true" tabindex="-1"></a>                <span class="at">ffff =</span> MCMC_continuous_ffff<span class="sc">$</span>bStrength_posterior,</span>
-<span id="cb28-43"><a href="#cb28-43" aria-hidden="true" tabindex="-1"></a>                <span class="at">fffl =</span> MCMC_continuous_fffl<span class="sc">$</span>bStrength_posterior,</span>
-<span id="cb28-44"><a href="#cb28-44" aria-hidden="true" tabindex="-1"></a>                <span class="at">flfl =</span> MCMC_continuous_flfl<span class="sc">$</span>bStrength_posterior,</span>
-<span id="cb28-45"><a href="#cb28-45" aria-hidden="true" tabindex="-1"></a>                <span class="at">ffll =</span> MCMC_continuous_ffll<span class="sc">$</span>bStrength_posterior,</span>
-<span id="cb28-46"><a href="#cb28-46" aria-hidden="true" tabindex="-1"></a>                <span class="at">flll =</span> MCMC_continuous_flll<span class="sc">$</span>bStrength_posterior,</span>
-<span id="cb28-47"><a href="#cb28-47" aria-hidden="true" tabindex="-1"></a>                <span class="at">llll =</span> MCMC_continuous_llll<span class="sc">$</span>bStrength_posterior</span>
-<span id="cb28-48"><a href="#cb28-48" aria-hidden="true" tabindex="-1"></a>            )</span>
-<span id="cb28-49"><a href="#cb28-49" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb28-50"><a href="#cb28-50" aria-hidden="true" tabindex="-1"></a>        <span class="at">MCMC_discrete =</span> <span class="fu">list</span>(</span>
-<span id="cb28-51"><a href="#cb28-51" aria-hidden="true" tabindex="-1"></a>            <span class="at">a =</span> <span class="fu">list</span>(</span>
-<span id="cb28-52"><a href="#cb28-52" aria-hidden="true" tabindex="-1"></a>                <span class="at">ffff =</span> MCMC_discrete_ffff<span class="sc">$</span>aStrength_posterior,</span>
-<span id="cb28-53"><a href="#cb28-53" aria-hidden="true" tabindex="-1"></a>                <span class="at">fffl =</span> MCMC_discrete_fffl<span class="sc">$</span>aStrength_posterior,</span>
-<span id="cb28-54"><a href="#cb28-54" aria-hidden="true" tabindex="-1"></a>                <span class="at">flfl =</span> MCMC_discrete_flfl<span class="sc">$</span>aStrength_posterior,</span>
-<span id="cb28-55"><a href="#cb28-55" aria-hidden="true" tabindex="-1"></a>                <span class="at">ffll =</span> MCMC_discrete_ffll<span class="sc">$</span>aStrength_posterior,</span>
-<span id="cb28-56"><a href="#cb28-56" aria-hidden="true" tabindex="-1"></a>                <span class="at">flll =</span> MCMC_discrete_flll<span class="sc">$</span>aStrength_posterior,</span>
-<span id="cb28-57"><a href="#cb28-57" aria-hidden="true" tabindex="-1"></a>                <span class="at">llll =</span> MCMC_discrete_llll<span class="sc">$</span>aStrength_posterior</span>
-<span id="cb28-58"><a href="#cb28-58" aria-hidden="true" tabindex="-1"></a>            ),</span>
-<span id="cb28-59"><a href="#cb28-59" aria-hidden="true" tabindex="-1"></a>            <span class="at">b =</span> <span class="fu">list</span>(</span>
-<span id="cb28-60"><a href="#cb28-60" aria-hidden="true" tabindex="-1"></a>                <span class="at">ffff =</span> MCMC_discrete_ffff<span class="sc">$</span>bStrength_posterior,</span>
-<span id="cb28-61"><a href="#cb28-61" aria-hidden="true" tabindex="-1"></a>                <span class="at">fffl =</span> MCMC_discrete_fffl<span class="sc">$</span>bStrength_posterior,</span>
-<span id="cb28-62"><a href="#cb28-62" aria-hidden="true" tabindex="-1"></a>                <span class="at">flfl =</span> MCMC_discrete_flfl<span class="sc">$</span>bStrength_posterior,</span>
-<span id="cb28-63"><a href="#cb28-63" aria-hidden="true" tabindex="-1"></a>                <span class="at">ffll =</span> MCMC_discrete_ffll<span class="sc">$</span>bStrength_posterior,</span>
-<span id="cb28-64"><a href="#cb28-64" aria-hidden="true" tabindex="-1"></a>                <span class="at">flll =</span> MCMC_discrete_flll<span class="sc">$</span>bStrength_posterior,</span>
-<span id="cb28-65"><a href="#cb28-65" aria-hidden="true" tabindex="-1"></a>                <span class="at">llll =</span> MCMC_discrete_llll<span class="sc">$</span>bStrength_posterior</span>
-<span id="cb28-66"><a href="#cb28-66" aria-hidden="true" tabindex="-1"></a>            )</span>
-<span id="cb28-67"><a href="#cb28-67" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb28-68"><a href="#cb28-68" aria-hidden="true" tabindex="-1"></a>        <span class="at">enumerate =</span> <span class="fu">list</span>(</span>
-<span id="cb28-69"><a href="#cb28-69" aria-hidden="true" tabindex="-1"></a>            <span class="at">a =</span> <span class="fu">list</span>(</span>
-<span id="cb28-70"><a href="#cb28-70" aria-hidden="true" tabindex="-1"></a>                <span class="at">ffff =</span> enumerate_ffff<span class="sc">$</span>aStrength_posterior,</span>
-<span id="cb28-71"><a href="#cb28-71" aria-hidden="true" tabindex="-1"></a>                <span class="at">fffl =</span> enumerate_fffl<span class="sc">$</span>aStrength_posterior,</span>
-<span id="cb28-72"><a href="#cb28-72" aria-hidden="true" tabindex="-1"></a>                <span class="at">flfl =</span> enumerate_flfl<span class="sc">$</span>aStrength_posterior,</span>
-<span id="cb28-73"><a href="#cb28-73" aria-hidden="true" tabindex="-1"></a>                <span class="at">ffll =</span> enumerate_ffll<span class="sc">$</span>aStrength_posterior,</span>
-<span id="cb28-74"><a href="#cb28-74" aria-hidden="true" tabindex="-1"></a>                <span class="at">flll =</span> enumerate_flll<span class="sc">$</span>aStrength_posterior,</span>
-<span id="cb28-75"><a href="#cb28-75" aria-hidden="true" tabindex="-1"></a>                <span class="at">llll =</span> enumerate_llll<span class="sc">$</span>aStrength_posterior</span>
-<span id="cb28-76"><a href="#cb28-76" aria-hidden="true" tabindex="-1"></a>            ),</span>
-<span id="cb28-77"><a href="#cb28-77" aria-hidden="true" tabindex="-1"></a>            <span class="at">b =</span> <span class="fu">list</span>(</span>
-<span id="cb28-78"><a href="#cb28-78" aria-hidden="true" tabindex="-1"></a>                <span class="at">ffff =</span> enumerate_ffff<span class="sc">$</span>bStrength_posterior,</span>
-<span id="cb28-79"><a href="#cb28-79" aria-hidden="true" tabindex="-1"></a>                <span class="at">fffl =</span> enumerate_fffl<span class="sc">$</span>bStrength_posterior,</span>
-<span id="cb28-80"><a href="#cb28-80" aria-hidden="true" tabindex="-1"></a>                <span class="at">flfl =</span> enumerate_flfl<span class="sc">$</span>bStrength_posterior,</span>
-<span id="cb28-81"><a href="#cb28-81" aria-hidden="true" tabindex="-1"></a>                <span class="at">ffll =</span> enumerate_ffll<span class="sc">$</span>bStrength_posterior,</span>
-<span id="cb28-82"><a href="#cb28-82" aria-hidden="true" tabindex="-1"></a>                <span class="at">flll =</span> enumerate_flll<span class="sc">$</span>bStrength_posterior,</span>
-<span id="cb28-83"><a href="#cb28-83" aria-hidden="true" tabindex="-1"></a>                <span class="at">llll =</span> enumerate_llll<span class="sc">$</span>bStrength_posterior</span>
-<span id="cb28-84"><a href="#cb28-84" aria-hidden="true" tabindex="-1"></a>            )</span>
-<span id="cb28-85"><a href="#cb28-85" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb28-86"><a href="#cb28-86" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb28-87"><a href="#cb28-87" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-88"><a href="#cb28-88" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>(<span class="st">"Now compare visually"</span>)</span>
-<span id="cb28-89"><a href="#cb28-89" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-90"><a href="#cb28-90" aria-hidden="true" tabindex="-1"></a>    <span class="fu">show</span>(P_results_summary)</span>
-<span id="cb28-91"><a href="#cb28-91" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-92"><a href="#cb28-92" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Convert posteriors_summary to tidy format for plotting</span></span>
-<span id="cb28-93"><a href="#cb28-93" aria-hidden="true" tabindex="-1"></a>    posteriors_tidy <span class="ot">&lt;-</span> <span class="fu">map_dfr</span>(<span class="fu">names</span>(posteriors_summary), <span class="cf">function</span>(method_name) {</span>
-<span id="cb28-94"><a href="#cb28-94" aria-hidden="true" tabindex="-1"></a>        <span class="fu">map_dfr</span>(<span class="fu">c</span>(<span class="st">"a"</span>, <span class="st">"b"</span>), <span class="cf">function</span>(agent) {</span>
-<span id="cb28-95"><a href="#cb28-95" aria-hidden="true" tabindex="-1"></a>            <span class="fu">map_dfr</span>(<span class="fu">names</span>(posteriors_summary[[method_name]][[agent]]), <span class="cf">function</span>(scenario) {</span>
-<span id="cb28-96"><a href="#cb28-96" aria-hidden="true" tabindex="-1"></a>            <span class="fu">tibble</span>(</span>
-<span id="cb28-97"><a href="#cb28-97" aria-hidden="true" tabindex="-1"></a>                <span class="at">method =</span> method_name,</span>
-<span id="cb28-98"><a href="#cb28-98" aria-hidden="true" tabindex="-1"></a>                <span class="at">agent =</span> agent,</span>
-<span id="cb28-99"><a href="#cb28-99" aria-hidden="true" tabindex="-1"></a>                <span class="at">scenario =</span> scenario,</span>
-<span id="cb28-100"><a href="#cb28-100" aria-hidden="true" tabindex="-1"></a>                <span class="at">strength =</span> posteriors_summary[[method_name]][[agent]][[scenario]]</span>
-<span id="cb28-101"><a href="#cb28-101" aria-hidden="true" tabindex="-1"></a>            )</span>
-<span id="cb28-102"><a href="#cb28-102" aria-hidden="true" tabindex="-1"></a>            })</span>
-<span id="cb28-103"><a href="#cb28-103" aria-hidden="true" tabindex="-1"></a>        })</span>
-<span id="cb28-104"><a href="#cb28-104" aria-hidden="true" tabindex="-1"></a>    })</span>
-<span id="cb28-105"><a href="#cb28-105" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-106"><a href="#cb28-106" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Plot density of posteriors for each scenario</span></span>
-<span id="cb28-107"><a href="#cb28-107" aria-hidden="true" tabindex="-1"></a>    <span class="fu">show</span>(</span>
-<span id="cb28-108"><a href="#cb28-108" aria-hidden="true" tabindex="-1"></a>        <span class="fu">ggplot</span>(posteriors_tidy, <span class="fu">aes</span>(<span class="at">x =</span> strength, <span class="at">color =</span> method, <span class="at">linetype =</span> agent)) <span class="sc">+</span></span>
-<span id="cb28-109"><a href="#cb28-109" aria-hidden="true" tabindex="-1"></a>            <span class="fu">geom_density</span>() <span class="sc">+</span></span>
-<span id="cb28-110"><a href="#cb28-110" aria-hidden="true" tabindex="-1"></a>            <span class="fu">facet_wrap</span>(<span class="sc">~</span>scenario, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
-<span id="cb28-111"><a href="#cb28-111" aria-hidden="true" tabindex="-1"></a>            <span class="fu">labs</span>(</span>
-<span id="cb28-112"><a href="#cb28-112" aria-hidden="true" tabindex="-1"></a>                <span class="at">title =</span> <span class="st">"Strength Posteriors Across Scenarios"</span>,</span>
-<span id="cb28-113"><a href="#cb28-113" aria-hidden="true" tabindex="-1"></a>                <span class="at">x =</span> <span class="st">"Strength"</span>,</span>
-<span id="cb28-114"><a href="#cb28-114" aria-hidden="true" tabindex="-1"></a>                <span class="at">y =</span> <span class="st">"Density"</span>,</span>
-<span id="cb28-115"><a href="#cb28-115" aria-hidden="true" tabindex="-1"></a>                <span class="at">color =</span> <span class="st">"Method"</span>,</span>
-<span id="cb28-116"><a href="#cb28-116" aria-hidden="true" tabindex="-1"></a>                <span class="at">linetype =</span> <span class="st">"Agent"</span></span>
-<span id="cb28-117"><a href="#cb28-117" aria-hidden="true" tabindex="-1"></a>            ) <span class="sc">+</span></span>
-<span id="cb28-118"><a href="#cb28-118" aria-hidden="true" tabindex="-1"></a>            <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb28-119"><a href="#cb28-119" aria-hidden="true" tabindex="-1"></a>            <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span>
-<span id="cb28-120"><a href="#cb28-120" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb28-121"><a href="#cb28-121" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-122"><a href="#cb28-122" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>(<span class="st">"Now separately for each method (or method and agent) and so that we can ensure that there are no missing posteriors"</span>)</span>
-<span id="cb28-123"><a href="#cb28-123" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-124"><a href="#cb28-124" aria-hidden="true" tabindex="-1"></a>    <span class="fu">show</span>(</span>
-<span id="cb28-125"><a href="#cb28-125" aria-hidden="true" tabindex="-1"></a>        <span class="fu">ggplot</span>(posteriors_tidy, <span class="fu">aes</span>(<span class="at">x =</span> strength, <span class="at">color =</span> method, <span class="at">linetype =</span> agent)) <span class="sc">+</span></span>
-<span id="cb28-126"><a href="#cb28-126" aria-hidden="true" tabindex="-1"></a>            <span class="fu">geom_density</span>() <span class="sc">+</span></span>
-<span id="cb28-127"><a href="#cb28-127" aria-hidden="true" tabindex="-1"></a>            <span class="fu">facet_grid</span>(method<span class="sc">~</span>scenario, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
-<span id="cb28-128"><a href="#cb28-128" aria-hidden="true" tabindex="-1"></a>            <span class="fu">labs</span>(</span>
-<span id="cb28-129"><a href="#cb28-129" aria-hidden="true" tabindex="-1"></a>                <span class="at">title =</span> <span class="st">"Strength Posteriors Across Scenarios"</span>,</span>
-<span id="cb28-130"><a href="#cb28-130" aria-hidden="true" tabindex="-1"></a>                <span class="at">x =</span> <span class="st">"Strength"</span>,</span>
-<span id="cb28-131"><a href="#cb28-131" aria-hidden="true" tabindex="-1"></a>                <span class="at">y =</span> <span class="st">"Density"</span>,</span>
-<span id="cb28-132"><a href="#cb28-132" aria-hidden="true" tabindex="-1"></a>                <span class="at">color =</span> <span class="st">"Method"</span>,</span>
-<span id="cb28-133"><a href="#cb28-133" aria-hidden="true" tabindex="-1"></a>                <span class="at">linetype =</span> <span class="st">"Agent"</span></span>
-<span id="cb28-134"><a href="#cb28-134" aria-hidden="true" tabindex="-1"></a>            ) <span class="sc">+</span></span>
-<span id="cb28-135"><a href="#cb28-135" aria-hidden="true" tabindex="-1"></a>            <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb28-136"><a href="#cb28-136" aria-hidden="true" tabindex="-1"></a>            <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span>
-<span id="cb28-137"><a href="#cb28-137" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb28-138"><a href="#cb28-138" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-139"><a href="#cb28-139" aria-hidden="true" tabindex="-1"></a>    <span class="fu">show</span>(</span>
-<span id="cb28-140"><a href="#cb28-140" aria-hidden="true" tabindex="-1"></a>        <span class="fu">ggplot</span>(posteriors_tidy, <span class="fu">aes</span>(<span class="at">x =</span> strength, <span class="at">color =</span> method, <span class="at">linetype =</span> agent)) <span class="sc">+</span></span>
-<span id="cb28-141"><a href="#cb28-141" aria-hidden="true" tabindex="-1"></a>            <span class="fu">geom_density</span>() <span class="sc">+</span></span>
-<span id="cb28-142"><a href="#cb28-142" aria-hidden="true" tabindex="-1"></a>            <span class="fu">facet_grid</span>(method<span class="sc">~</span>scenario<span class="sc">+</span>agent, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
-<span id="cb28-143"><a href="#cb28-143" aria-hidden="true" tabindex="-1"></a>            <span class="fu">labs</span>(</span>
-<span id="cb28-144"><a href="#cb28-144" aria-hidden="true" tabindex="-1"></a>                <span class="at">title =</span> <span class="st">"Strength Posteriors Across Scenarios"</span>,</span>
-<span id="cb28-145"><a href="#cb28-145" aria-hidden="true" tabindex="-1"></a>                <span class="at">x =</span> <span class="st">"Strength"</span>,</span>
-<span id="cb28-146"><a href="#cb28-146" aria-hidden="true" tabindex="-1"></a>                <span class="at">y =</span> <span class="st">"Density"</span>,</span>
-<span id="cb28-147"><a href="#cb28-147" aria-hidden="true" tabindex="-1"></a>                <span class="at">color =</span> <span class="st">"Method"</span>,</span>
-<span id="cb28-148"><a href="#cb28-148" aria-hidden="true" tabindex="-1"></a>                <span class="at">linetype =</span> <span class="st">"Agent"</span></span>
-<span id="cb28-149"><a href="#cb28-149" aria-hidden="true" tabindex="-1"></a>            ) <span class="sc">+</span></span>
-<span id="cb28-150"><a href="#cb28-150" aria-hidden="true" tabindex="-1"></a>            <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb28-151"><a href="#cb28-151" aria-hidden="true" tabindex="-1"></a>            <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span>
-<span id="cb28-152"><a href="#cb28-152" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb28-153"><a href="#cb28-153" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-154"><a href="#cb28-154" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>(<span class="st">"Compare all output values across methods"</span>)</span>
-<span id="cb28-155"><a href="#cb28-155" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-156"><a href="#cb28-156" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>(<span class="st">"Extract all final_table values into a comprehensive summary"</span>)</span>
-<span id="cb28-157"><a href="#cb28-157" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-158"><a href="#cb28-158" aria-hidden="true" tabindex="-1"></a>    all_results <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
-<span id="cb28-159"><a href="#cb28-159" aria-hidden="true" tabindex="-1"></a>        <span class="at">scenario =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"ffff"</span>,<span class="st">"fffl"</span>,<span class="st">"flfl"</span>,<span class="st">"ffll"</span>,<span class="st">"flll"</span>,<span class="st">"llll"</span>), <span class="dv">3</span>),</span>
-<span id="cb28-160"><a href="#cb28-160" aria-hidden="true" tabindex="-1"></a>        <span class="at">method =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"MCMC_continuous"</span>, <span class="st">"MCMC_discrete"</span>, <span class="st">"enumerate"</span>), <span class="at">each =</span> <span class="dv">6</span>),</span>
-<span id="cb28-161"><a href="#cb28-161" aria-hidden="true" tabindex="-1"></a>        <span class="at">startingE =</span> <span class="fu">c</span>(</span>
-<span id="cb28-162"><a href="#cb28-162" aria-hidden="true" tabindex="-1"></a>            <span class="co"># MCMC_continuous</span></span>
-<span id="cb28-163"><a href="#cb28-163" aria-hidden="true" tabindex="-1"></a>            MCMC_continuous_ffff<span class="sc">$</span>startingE, MCMC_continuous_fffl<span class="sc">$</span>startingE, MCMC_continuous_flfl<span class="sc">$</span>startingE,</span>
-<span id="cb28-164"><a href="#cb28-164" aria-hidden="true" tabindex="-1"></a>            MCMC_continuous_ffll<span class="sc">$</span>startingE, MCMC_continuous_flll<span class="sc">$</span>startingE, MCMC_continuous_llll<span class="sc">$</span>startingE,</span>
-<span id="cb28-165"><a href="#cb28-165" aria-hidden="true" tabindex="-1"></a>            <span class="co"># MCMC_discrete</span></span>
-<span id="cb28-166"><a href="#cb28-166" aria-hidden="true" tabindex="-1"></a>            MCMC_discrete_ffff<span class="sc">$</span>startingE, MCMC_discrete_fffl<span class="sc">$</span>startingE, MCMC_discrete_flfl<span class="sc">$</span>startingE,</span>
-<span id="cb28-167"><a href="#cb28-167" aria-hidden="true" tabindex="-1"></a>            MCMC_discrete_ffll<span class="sc">$</span>startingE, MCMC_discrete_flll<span class="sc">$</span>startingE, MCMC_discrete_llll<span class="sc">$</span>startingE,</span>
-<span id="cb28-168"><a href="#cb28-168" aria-hidden="true" tabindex="-1"></a>            <span class="co"># enumerate</span></span>
-<span id="cb28-169"><a href="#cb28-169" aria-hidden="true" tabindex="-1"></a>            enumerate_ffff<span class="sc">$</span>startingE, enumerate_fffl<span class="sc">$</span>startingE, enumerate_flfl<span class="sc">$</span>startingE,</span>
-<span id="cb28-170"><a href="#cb28-170" aria-hidden="true" tabindex="-1"></a>            enumerate_ffll<span class="sc">$</span>startingE, enumerate_flll<span class="sc">$</span>startingE, enumerate_llll<span class="sc">$</span>startingE</span>
-<span id="cb28-171"><a href="#cb28-171" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb28-172"><a href="#cb28-172" aria-hidden="true" tabindex="-1"></a>        <span class="at">aE =</span> <span class="fu">c</span>(</span>
-<span id="cb28-173"><a href="#cb28-173" aria-hidden="true" tabindex="-1"></a>            <span class="co"># MCMC_continuous</span></span>
-<span id="cb28-174"><a href="#cb28-174" aria-hidden="true" tabindex="-1"></a>            MCMC_continuous_ffff<span class="sc">$</span>final_table<span class="sc">$</span>aE, MCMC_continuous_fffl<span class="sc">$</span>final_table<span class="sc">$</span>aE, MCMC_continuous_flfl<span class="sc">$</span>final_table<span class="sc">$</span>aE,</span>
-<span id="cb28-175"><a href="#cb28-175" aria-hidden="true" tabindex="-1"></a>            MCMC_continuous_ffll<span class="sc">$</span>final_table<span class="sc">$</span>aE, MCMC_continuous_flll<span class="sc">$</span>final_table<span class="sc">$</span>aE, MCMC_continuous_llll<span class="sc">$</span>final_table<span class="sc">$</span>aE,</span>
-<span id="cb28-176"><a href="#cb28-176" aria-hidden="true" tabindex="-1"></a>            <span class="co"># MCMC_discrete</span></span>
-<span id="cb28-177"><a href="#cb28-177" aria-hidden="true" tabindex="-1"></a>            MCMC_discrete_ffff<span class="sc">$</span>final_table<span class="sc">$</span>aE, MCMC_discrete_fffl<span class="sc">$</span>final_table<span class="sc">$</span>aE, MCMC_discrete_flfl<span class="sc">$</span>final_table<span class="sc">$</span>aE,</span>
-<span id="cb28-178"><a href="#cb28-178" aria-hidden="true" tabindex="-1"></a>            MCMC_discrete_ffll<span class="sc">$</span>final_table<span class="sc">$</span>aE, MCMC_discrete_flll<span class="sc">$</span>final_table<span class="sc">$</span>aE, MCMC_discrete_llll<span class="sc">$</span>final_table<span class="sc">$</span>aE,</span>
-<span id="cb28-179"><a href="#cb28-179" aria-hidden="true" tabindex="-1"></a>            <span class="co"># enumerate</span></span>
-<span id="cb28-180"><a href="#cb28-180" aria-hidden="true" tabindex="-1"></a>            enumerate_ffff<span class="sc">$</span>final_table<span class="sc">$</span>aE, enumerate_fffl<span class="sc">$</span>final_table<span class="sc">$</span>aE, enumerate_flfl<span class="sc">$</span>final_table<span class="sc">$</span>aE,</span>
-<span id="cb28-181"><a href="#cb28-181" aria-hidden="true" tabindex="-1"></a>            enumerate_ffll<span class="sc">$</span>final_table<span class="sc">$</span>aE, enumerate_flll<span class="sc">$</span>final_table<span class="sc">$</span>aE, enumerate_llll<span class="sc">$</span>final_table<span class="sc">$</span>aE</span>
-<span id="cb28-182"><a href="#cb28-182" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb28-183"><a href="#cb28-183" aria-hidden="true" tabindex="-1"></a>        <span class="at">bE =</span> <span class="fu">c</span>(</span>
-<span id="cb28-184"><a href="#cb28-184" aria-hidden="true" tabindex="-1"></a>            <span class="co"># MCMC_continuous</span></span>
-<span id="cb28-185"><a href="#cb28-185" aria-hidden="true" tabindex="-1"></a>            MCMC_continuous_ffff<span class="sc">$</span>final_table<span class="sc">$</span>bE, MCMC_continuous_fffl<span class="sc">$</span>final_table<span class="sc">$</span>bE, MCMC_continuous_flfl<span class="sc">$</span>final_table<span class="sc">$</span>bE,</span>
-<span id="cb28-186"><a href="#cb28-186" aria-hidden="true" tabindex="-1"></a>            MCMC_continuous_ffll<span class="sc">$</span>final_table<span class="sc">$</span>bE, MCMC_continuous_flll<span class="sc">$</span>final_table<span class="sc">$</span>bE, MCMC_continuous_llll<span class="sc">$</span>final_table<span class="sc">$</span>bE,</span>
-<span id="cb28-187"><a href="#cb28-187" aria-hidden="true" tabindex="-1"></a>            <span class="co"># MCMC_discrete</span></span>
-<span id="cb28-188"><a href="#cb28-188" aria-hidden="true" tabindex="-1"></a>            MCMC_discrete_ffff<span class="sc">$</span>final_table<span class="sc">$</span>bE, MCMC_discrete_fffl<span class="sc">$</span>final_table<span class="sc">$</span>bE, MCMC_discrete_flfl<span class="sc">$</span>final_table<span class="sc">$</span>bE,</span>
-<span id="cb28-189"><a href="#cb28-189" aria-hidden="true" tabindex="-1"></a>            MCMC_discrete_ffll<span class="sc">$</span>final_table<span class="sc">$</span>bE, MCMC_discrete_flll<span class="sc">$</span>final_table<span class="sc">$</span>bE, MCMC_discrete_llll<span class="sc">$</span>final_table<span class="sc">$</span>bE,</span>
-<span id="cb28-190"><a href="#cb28-190" aria-hidden="true" tabindex="-1"></a>            <span class="co"># enumerate</span></span>
-<span id="cb28-191"><a href="#cb28-191" aria-hidden="true" tabindex="-1"></a>            enumerate_ffff<span class="sc">$</span>final_table<span class="sc">$</span>bE, enumerate_fffl<span class="sc">$</span>final_table<span class="sc">$</span>bE, enumerate_flfl<span class="sc">$</span>final_table<span class="sc">$</span>bE,</span>
-<span id="cb28-192"><a href="#cb28-192" aria-hidden="true" tabindex="-1"></a>            enumerate_ffll<span class="sc">$</span>final_table<span class="sc">$</span>bE, enumerate_flll<span class="sc">$</span>final_table<span class="sc">$</span>bE, enumerate_llll<span class="sc">$</span>final_table<span class="sc">$</span>bE</span>
-<span id="cb28-193"><a href="#cb28-193" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb28-194"><a href="#cb28-194" aria-hidden="true" tabindex="-1"></a>        <span class="at">aU =</span> <span class="fu">c</span>(</span>
-<span id="cb28-195"><a href="#cb28-195" aria-hidden="true" tabindex="-1"></a>            <span class="co"># MCMC_continuous</span></span>
-<span id="cb28-196"><a href="#cb28-196" aria-hidden="true" tabindex="-1"></a>            MCMC_continuous_ffff<span class="sc">$</span>final_table<span class="sc">$</span>aU, MCMC_continuous_fffl<span class="sc">$</span>final_table<span class="sc">$</span>aU, MCMC_continuous_flfl<span class="sc">$</span>final_table<span class="sc">$</span>aU,</span>
-<span id="cb28-197"><a href="#cb28-197" aria-hidden="true" tabindex="-1"></a>            MCMC_continuous_ffll<span class="sc">$</span>final_table<span class="sc">$</span>aU, MCMC_continuous_flll<span class="sc">$</span>final_table<span class="sc">$</span>aU, MCMC_continuous_llll<span class="sc">$</span>final_table<span class="sc">$</span>aU,</span>
-<span id="cb28-198"><a href="#cb28-198" aria-hidden="true" tabindex="-1"></a>            <span class="co"># MCMC_discrete</span></span>
-<span id="cb28-199"><a href="#cb28-199" aria-hidden="true" tabindex="-1"></a>            MCMC_discrete_ffff<span class="sc">$</span>final_table<span class="sc">$</span>aU, MCMC_discrete_fffl<span class="sc">$</span>final_table<span class="sc">$</span>aU, MCMC_discrete_flfl<span class="sc">$</span>final_table<span class="sc">$</span>aU,</span>
-<span id="cb28-200"><a href="#cb28-200" aria-hidden="true" tabindex="-1"></a>            MCMC_discrete_ffll<span class="sc">$</span>final_table<span class="sc">$</span>aU, MCMC_discrete_flll<span class="sc">$</span>final_table<span class="sc">$</span>aU, MCMC_discrete_llll<span class="sc">$</span>final_table<span class="sc">$</span>aU,</span>
-<span id="cb28-201"><a href="#cb28-201" aria-hidden="true" tabindex="-1"></a>            <span class="co"># enumerate</span></span>
-<span id="cb28-202"><a href="#cb28-202" aria-hidden="true" tabindex="-1"></a>            enumerate_ffff<span class="sc">$</span>final_table<span class="sc">$</span>aU, enumerate_fffl<span class="sc">$</span>final_table<span class="sc">$</span>aU, enumerate_flfl<span class="sc">$</span>final_table<span class="sc">$</span>aU,</span>
-<span id="cb28-203"><a href="#cb28-203" aria-hidden="true" tabindex="-1"></a>            enumerate_ffll<span class="sc">$</span>final_table<span class="sc">$</span>aU, enumerate_flll<span class="sc">$</span>final_table<span class="sc">$</span>aU, enumerate_llll<span class="sc">$</span>final_table<span class="sc">$</span>aU</span>
-<span id="cb28-204"><a href="#cb28-204" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb28-205"><a href="#cb28-205" aria-hidden="true" tabindex="-1"></a>        <span class="at">bU =</span> <span class="fu">c</span>(</span>
-<span id="cb28-206"><a href="#cb28-206" aria-hidden="true" tabindex="-1"></a>            <span class="co"># MCMC_continuous</span></span>
-<span id="cb28-207"><a href="#cb28-207" aria-hidden="true" tabindex="-1"></a>            MCMC_continuous_ffff<span class="sc">$</span>final_table<span class="sc">$</span>bU, MCMC_continuous_fffl<span class="sc">$</span>final_table<span class="sc">$</span>bU, MCMC_continuous_flfl<span class="sc">$</span>final_table<span class="sc">$</span>bU,</span>
-<span id="cb28-208"><a href="#cb28-208" aria-hidden="true" tabindex="-1"></a>            MCMC_continuous_ffll<span class="sc">$</span>final_table<span class="sc">$</span>bU, MCMC_continuous_flll<span class="sc">$</span>final_table<span class="sc">$</span>bU, MCMC_continuous_llll<span class="sc">$</span>final_table<span class="sc">$</span>bU,</span>
-<span id="cb28-209"><a href="#cb28-209" aria-hidden="true" tabindex="-1"></a>            <span class="co"># MCMC_discrete</span></span>
-<span id="cb28-210"><a href="#cb28-210" aria-hidden="true" tabindex="-1"></a>            MCMC_discrete_ffff<span class="sc">$</span>final_table<span class="sc">$</span>bU, MCMC_discrete_fffl<span class="sc">$</span>final_table<span class="sc">$</span>bU, MCMC_discrete_flfl<span class="sc">$</span>final_table<span class="sc">$</span>bU,</span>
-<span id="cb28-211"><a href="#cb28-211" aria-hidden="true" tabindex="-1"></a>            MCMC_discrete_ffll<span class="sc">$</span>final_table<span class="sc">$</span>bU, MCMC_discrete_flll<span class="sc">$</span>final_table<span class="sc">$</span>bU, MCMC_discrete_llll<span class="sc">$</span>final_table<span class="sc">$</span>bU,</span>
-<span id="cb28-212"><a href="#cb28-212" aria-hidden="true" tabindex="-1"></a>            <span class="co"># enumerate</span></span>
-<span id="cb28-213"><a href="#cb28-213" aria-hidden="true" tabindex="-1"></a>            enumerate_ffff<span class="sc">$</span>final_table<span class="sc">$</span>bU, enumerate_fffl<span class="sc">$</span>final_table<span class="sc">$</span>bU, enumerate_flfl<span class="sc">$</span>final_table<span class="sc">$</span>bU,</span>
-<span id="cb28-214"><a href="#cb28-214" aria-hidden="true" tabindex="-1"></a>            enumerate_ffll<span class="sc">$</span>final_table<span class="sc">$</span>bU, enumerate_flll<span class="sc">$</span>final_table<span class="sc">$</span>bU, enumerate_llll<span class="sc">$</span>final_table<span class="sc">$</span>bU</span>
-<span id="cb28-215"><a href="#cb28-215" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb28-216"><a href="#cb28-216" aria-hidden="true" tabindex="-1"></a>        <span class="at">jointU =</span> <span class="fu">c</span>(</span>
-<span id="cb28-217"><a href="#cb28-217" aria-hidden="true" tabindex="-1"></a>            <span class="co"># MCMC_continuous</span></span>
-<span id="cb28-218"><a href="#cb28-218" aria-hidden="true" tabindex="-1"></a>            MCMC_continuous_ffff<span class="sc">$</span>final_table<span class="sc">$</span>jointU, MCMC_continuous_fffl<span class="sc">$</span>final_table<span class="sc">$</span>jointU, MCMC_continuous_flfl<span class="sc">$</span>final_table<span class="sc">$</span>jointU,</span>
-<span id="cb28-219"><a href="#cb28-219" aria-hidden="true" tabindex="-1"></a>            MCMC_continuous_ffll<span class="sc">$</span>final_table<span class="sc">$</span>jointU, MCMC_continuous_flll<span class="sc">$</span>final_table<span class="sc">$</span>jointU, MCMC_continuous_llll<span class="sc">$</span>final_table<span class="sc">$</span>jointU,</span>
-<span id="cb28-220"><a href="#cb28-220" aria-hidden="true" tabindex="-1"></a>            <span class="co"># MCMC_discrete</span></span>
-<span id="cb28-221"><a href="#cb28-221" aria-hidden="true" tabindex="-1"></a>            MCMC_discrete_ffff<span class="sc">$</span>final_table<span class="sc">$</span>jointU, MCMC_discrete_fffl<span class="sc">$</span>final_table<span class="sc">$</span>jointU, MCMC_discrete_flfl<span class="sc">$</span>final_table<span class="sc">$</span>jointU,</span>
-<span id="cb28-222"><a href="#cb28-222" aria-hidden="true" tabindex="-1"></a>            MCMC_discrete_ffll<span class="sc">$</span>final_table<span class="sc">$</span>jointU, MCMC_discrete_flll<span class="sc">$</span>final_table<span class="sc">$</span>jointU, MCMC_discrete_llll<span class="sc">$</span>final_table<span class="sc">$</span>jointU,</span>
-<span id="cb28-223"><a href="#cb28-223" aria-hidden="true" tabindex="-1"></a>            <span class="co"># enumerate</span></span>
-<span id="cb28-224"><a href="#cb28-224" aria-hidden="true" tabindex="-1"></a>            enumerate_ffff<span class="sc">$</span>final_table<span class="sc">$</span>jointU, enumerate_fffl<span class="sc">$</span>final_table<span class="sc">$</span>jointU, enumerate_flfl<span class="sc">$</span>final_table<span class="sc">$</span>jointU,</span>
-<span id="cb28-225"><a href="#cb28-225" aria-hidden="true" tabindex="-1"></a>            enumerate_ffll<span class="sc">$</span>final_table<span class="sc">$</span>jointU, enumerate_flll<span class="sc">$</span>final_table<span class="sc">$</span>jointU, enumerate_llll<span class="sc">$</span>final_table<span class="sc">$</span>jointU</span>
-<span id="cb28-226"><a href="#cb28-226" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb28-227"><a href="#cb28-227" aria-hidden="true" tabindex="-1"></a>        <span class="at">P =</span> <span class="fu">c</span>(</span>
-<span id="cb28-228"><a href="#cb28-228" aria-hidden="true" tabindex="-1"></a>            <span class="co"># MCMC_continuous</span></span>
-<span id="cb28-229"><a href="#cb28-229" aria-hidden="true" tabindex="-1"></a>            MCMC_continuous_ffff<span class="sc">$</span>P, MCMC_continuous_fffl<span class="sc">$</span>P, MCMC_continuous_flfl<span class="sc">$</span>P,</span>
-<span id="cb28-230"><a href="#cb28-230" aria-hidden="true" tabindex="-1"></a>            MCMC_continuous_ffll<span class="sc">$</span>P, MCMC_continuous_flll<span class="sc">$</span>P, MCMC_continuous_llll<span class="sc">$</span>P,</span>
-<span id="cb28-231"><a href="#cb28-231" aria-hidden="true" tabindex="-1"></a>            <span class="co"># MCMC_discrete</span></span>
-<span id="cb28-232"><a href="#cb28-232" aria-hidden="true" tabindex="-1"></a>            MCMC_discrete_ffff<span class="sc">$</span>P, MCMC_discrete_fffl<span class="sc">$</span>P, MCMC_discrete_flfl<span class="sc">$</span>P,</span>
-<span id="cb28-233"><a href="#cb28-233" aria-hidden="true" tabindex="-1"></a>            MCMC_discrete_ffll<span class="sc">$</span>P, MCMC_discrete_flll<span class="sc">$</span>P, MCMC_discrete_llll<span class="sc">$</span>P,</span>
-<span id="cb28-234"><a href="#cb28-234" aria-hidden="true" tabindex="-1"></a>            <span class="co"># enumerate</span></span>
-<span id="cb28-235"><a href="#cb28-235" aria-hidden="true" tabindex="-1"></a>            enumerate_ffff<span class="sc">$</span>P, enumerate_fffl<span class="sc">$</span>P, enumerate_flfl<span class="sc">$</span>P,</span>
-<span id="cb28-236"><a href="#cb28-236" aria-hidden="true" tabindex="-1"></a>            enumerate_ffll<span class="sc">$</span>P, enumerate_flll<span class="sc">$</span>P, enumerate_llll<span class="sc">$</span>P</span>
-<span id="cb28-237"><a href="#cb28-237" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb28-238"><a href="#cb28-238" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb28-239"><a href="#cb28-239" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-240"><a href="#cb28-240" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Display the full comparison table</span></span>
-<span id="cb28-241"><a href="#cb28-241" aria-hidden="true" tabindex="-1"></a>    <span class="fu">show</span>(all_results)</span>
-<span id="cb28-242"><a href="#cb28-242" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-243"><a href="#cb28-243" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Pivot to wide format for easier comparison across methods</span></span>
-<span id="cb28-244"><a href="#cb28-244" aria-hidden="true" tabindex="-1"></a>    all_results_wide <span class="ot">&lt;-</span> all_results <span class="sc">%&gt;%</span></span>
-<span id="cb28-245"><a href="#cb28-245" aria-hidden="true" tabindex="-1"></a>        <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">c</span>(startingE, aE, bE, aU, bU, jointU, P),</span>
-<span id="cb28-246"><a href="#cb28-246" aria-hidden="true" tabindex="-1"></a>                    <span class="at">names_to =</span> <span class="st">"variable"</span>,</span>
-<span id="cb28-247"><a href="#cb28-247" aria-hidden="true" tabindex="-1"></a>                    <span class="at">values_to =</span> <span class="st">"value"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb28-248"><a href="#cb28-248" aria-hidden="true" tabindex="-1"></a>        <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> method,</span>
-<span id="cb28-249"><a href="#cb28-249" aria-hidden="true" tabindex="-1"></a>                    <span class="at">values_from =</span> value,</span>
-<span id="cb28-250"><a href="#cb28-250" aria-hidden="true" tabindex="-1"></a>                    <span class="at">id_cols =</span> <span class="fu">c</span>(scenario, variable))</span>
-<span id="cb28-251"><a href="#cb28-251" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-252"><a href="#cb28-252" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Display wide format</span></span>
-<span id="cb28-253"><a href="#cb28-253" aria-hidden="true" tabindex="-1"></a>    <span class="fu">show</span>(all_results_wide)</span>
-<span id="cb28-254"><a href="#cb28-254" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-255"><a href="#cb28-255" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Plot comparisons for each variable</span></span>
-<span id="cb28-256"><a href="#cb28-256" aria-hidden="true" tabindex="-1"></a>    all_results_long <span class="ot">&lt;-</span> all_results <span class="sc">%&gt;%</span></span>
-<span id="cb28-257"><a href="#cb28-257" aria-hidden="true" tabindex="-1"></a>        <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">c</span>(startingE, aE, bE, aU, bU, jointU, P),</span>
-<span id="cb28-258"><a href="#cb28-258" aria-hidden="true" tabindex="-1"></a>                    <span class="at">names_to =</span> <span class="st">"variable"</span>,</span>
-<span id="cb28-259"><a href="#cb28-259" aria-hidden="true" tabindex="-1"></a>                    <span class="at">values_to =</span> <span class="st">"value"</span>)</span>
-<span id="cb28-260"><a href="#cb28-260" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-261"><a href="#cb28-261" aria-hidden="true" tabindex="-1"></a>    <span class="fu">show</span>(</span>
-<span id="cb28-262"><a href="#cb28-262" aria-hidden="true" tabindex="-1"></a>        <span class="fu">ggplot</span>(all_results_long, <span class="fu">aes</span>(<span class="at">x =</span> scenario, <span class="at">y =</span> value, <span class="at">fill =</span> method)) <span class="sc">+</span></span>
-<span id="cb28-263"><a href="#cb28-263" aria-hidden="true" tabindex="-1"></a>            <span class="fu">geom_col</span>(<span class="at">position =</span> <span class="st">"dodge"</span>) <span class="sc">+</span></span>
-<span id="cb28-264"><a href="#cb28-264" aria-hidden="true" tabindex="-1"></a>            <span class="fu">facet_wrap</span>(<span class="sc">~</span>variable, <span class="at">scales =</span> <span class="st">"free_y"</span>, <span class="at">ncol =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
-<span id="cb28-265"><a href="#cb28-265" aria-hidden="true" tabindex="-1"></a>            <span class="fu">labs</span>(</span>
-<span id="cb28-266"><a href="#cb28-266" aria-hidden="true" tabindex="-1"></a>                <span class="at">title =</span> <span class="st">"All Output Variables Comparison Across Methods and Scenarios"</span>,</span>
-<span id="cb28-267"><a href="#cb28-267" aria-hidden="true" tabindex="-1"></a>                <span class="at">x =</span> <span class="st">"Scenario"</span>,</span>
-<span id="cb28-268"><a href="#cb28-268" aria-hidden="true" tabindex="-1"></a>                <span class="at">y =</span> <span class="st">"Value"</span>,</span>
-<span id="cb28-269"><a href="#cb28-269" aria-hidden="true" tabindex="-1"></a>                <span class="at">fill =</span> <span class="st">"Method"</span></span>
-<span id="cb28-270"><a href="#cb28-270" aria-hidden="true" tabindex="-1"></a>            ) <span class="sc">+</span></span>
-<span id="cb28-271"><a href="#cb28-271" aria-hidden="true" tabindex="-1"></a>            <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb28-272"><a href="#cb28-272" aria-hidden="true" tabindex="-1"></a>            <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span>
-<span id="cb28-273"><a href="#cb28-273" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb28-274"><a href="#cb28-274" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-275"><a href="#cb28-275" aria-hidden="true" tabindex="-1"></a>    <span class="co"># # Calculate differences between methods for each variable</span></span>
-<span id="cb28-276"><a href="#cb28-276" aria-hidden="true" tabindex="-1"></a>    <span class="co"># all_results_differences &lt;- all_results_wide %&gt;%</span></span>
-<span id="cb28-277"><a href="#cb28-277" aria-hidden="true" tabindex="-1"></a>    <span class="co">#     mutate(</span></span>
-<span id="cb28-278"><a href="#cb28-278" aria-hidden="true" tabindex="-1"></a>    <span class="co">#         diff_continuous_discrete = MCMC_continuous - MCMC_discrete,</span></span>
-<span id="cb28-279"><a href="#cb28-279" aria-hidden="true" tabindex="-1"></a>    <span class="co">#         diff_discrete_enumerate = MCMC_discrete - enumerate,</span></span>
-<span id="cb28-280"><a href="#cb28-280" aria-hidden="true" tabindex="-1"></a>    <span class="co">#         diff_continuous_enumerate = MCMC_continuous - enumerate</span></span>
-<span id="cb28-281"><a href="#cb28-281" aria-hidden="true" tabindex="-1"></a>    <span class="co">#     )</span></span>
-<span id="cb28-282"><a href="#cb28-282" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-283"><a href="#cb28-283" aria-hidden="true" tabindex="-1"></a>    <span class="co"># # Summary of differences</span></span>
-<span id="cb28-284"><a href="#cb28-284" aria-hidden="true" tabindex="-1"></a>    <span class="co"># all_results_differences %&gt;%</span></span>
-<span id="cb28-285"><a href="#cb28-285" aria-hidden="true" tabindex="-1"></a>    <span class="co">#     group_by(variable) %&gt;%</span></span>
-<span id="cb28-286"><a href="#cb28-286" aria-hidden="true" tabindex="-1"></a>    <span class="co">#     summarise(</span></span>
-<span id="cb28-287"><a href="#cb28-287" aria-hidden="true" tabindex="-1"></a>    <span class="co">#         mean_abs_diff_continuous_discrete = mean(abs(diff_continuous_discrete)),</span></span>
-<span id="cb28-288"><a href="#cb28-288" aria-hidden="true" tabindex="-1"></a>    <span class="co">#         max_abs_diff_continuous_discrete = max(abs(diff_continuous_discrete)),</span></span>
-<span id="cb28-289"><a href="#cb28-289" aria-hidden="true" tabindex="-1"></a>    <span class="co">#         mean_abs_diff_discrete_enumerate = mean(abs(diff_discrete_enumerate)),</span></span>
-<span id="cb28-290"><a href="#cb28-290" aria-hidden="true" tabindex="-1"></a>    <span class="co">#         max_abs_diff_discrete_enumerate = max(abs(diff_discrete_enumerate)),</span></span>
-<span id="cb28-291"><a href="#cb28-291" aria-hidden="true" tabindex="-1"></a>    <span class="co">#         mean_abs_diff_continuous_enumerate = mean(abs(diff_continuous_enumerate)),</span></span>
-<span id="cb28-292"><a href="#cb28-292" aria-hidden="true" tabindex="-1"></a>    <span class="co">#         max_abs_diff_continuous_enumerate = max(abs(diff_continuous_enumerate))</span></span>
-<span id="cb28-293"><a href="#cb28-293" aria-hidden="true" tabindex="-1"></a>    <span class="co">#     ) %&gt;%</span></span>
-<span id="cb28-294"><a href="#cb28-294" aria-hidden="true" tabindex="-1"></a>    <span class="co">#     show()</span></span>
-<span id="cb28-295"><a href="#cb28-295" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-296"><a href="#cb28-296" aria-hidden="true" tabindex="-1"></a>    <span class="co"># To evaluate how startingE was found, inspect $startingE_table:</span></span>
-<span id="cb28-297"><a href="#cb28-297" aria-hidden="true" tabindex="-1"></a>    startingE_all_results <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
-<span id="cb28-298"><a href="#cb28-298" aria-hidden="true" tabindex="-1"></a>        <span class="at">scenario =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"ffff"</span>,<span class="st">"fffl"</span>,<span class="st">"flfl"</span>,<span class="st">"ffll"</span>,<span class="st">"flll"</span>,<span class="st">"llll"</span>), <span class="dv">3</span>),</span>
-<span id="cb28-299"><a href="#cb28-299" aria-hidden="true" tabindex="-1"></a>        <span class="at">method =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"MCMC_continuous"</span>, <span class="st">"MCMC_discrete"</span>, <span class="st">"enumerate"</span>), <span class="at">each =</span> <span class="dv">6</span>),</span>
-<span id="cb28-300"><a href="#cb28-300" aria-hidden="true" tabindex="-1"></a>        <span class="at">aE =</span> <span class="fu">c</span>(</span>
-<span id="cb28-301"><a href="#cb28-301" aria-hidden="true" tabindex="-1"></a>            <span class="co"># MCMC_continuous</span></span>
-<span id="cb28-302"><a href="#cb28-302" aria-hidden="true" tabindex="-1"></a>            MCMC_continuous_ffff<span class="sc">$</span>startingE_table<span class="sc">$</span>aE, MCMC_continuous_fffl<span class="sc">$</span>startingE_table<span class="sc">$</span>aE, MCMC_continuous_flfl<span class="sc">$</span>startingE_table<span class="sc">$</span>aE,</span>
-<span id="cb28-303"><a href="#cb28-303" aria-hidden="true" tabindex="-1"></a>            MCMC_continuous_ffll<span class="sc">$</span>startingE_table<span class="sc">$</span>aE, MCMC_continuous_flll<span class="sc">$</span>startingE_table<span class="sc">$</span>aE, MCMC_continuous_llll<span class="sc">$</span>startingE_table<span class="sc">$</span>aE,</span>
-<span id="cb28-304"><a href="#cb28-304" aria-hidden="true" tabindex="-1"></a>            <span class="co"># MCMC_discrete</span></span>
-<span id="cb28-305"><a href="#cb28-305" aria-hidden="true" tabindex="-1"></a>            MCMC_discrete_ffff<span class="sc">$</span>startingE_table<span class="sc">$</span>aE, MCMC_discrete_fffl<span class="sc">$</span>startingE_table<span class="sc">$</span>aE, MCMC_discrete_flfl<span class="sc">$</span>startingE_table<span class="sc">$</span>aE,</span>
-<span id="cb28-306"><a href="#cb28-306" aria-hidden="true" tabindex="-1"></a>            MCMC_discrete_ffll<span class="sc">$</span>startingE_table<span class="sc">$</span>aE, MCMC_discrete_flll<span class="sc">$</span>startingE_table<span class="sc">$</span>aE, MCMC_discrete_llll<span class="sc">$</span>startingE_table<span class="sc">$</span>aE,</span>
-<span id="cb28-307"><a href="#cb28-307" aria-hidden="true" tabindex="-1"></a>            <span class="co"># enumerate</span></span>
-<span id="cb28-308"><a href="#cb28-308" aria-hidden="true" tabindex="-1"></a>            enumerate_ffff<span class="sc">$</span>startingE_table<span class="sc">$</span>aE, enumerate_fffl<span class="sc">$</span>startingE_table<span class="sc">$</span>aE, enumerate_flfl<span class="sc">$</span>startingE_table<span class="sc">$</span>aE,</span>
-<span id="cb28-309"><a href="#cb28-309" aria-hidden="true" tabindex="-1"></a>            enumerate_ffll<span class="sc">$</span>startingE_table<span class="sc">$</span>aE, enumerate_flll<span class="sc">$</span>startingE_table<span class="sc">$</span>aE, enumerate_llll<span class="sc">$</span>startingE_table<span class="sc">$</span>aE</span>
-<span id="cb28-310"><a href="#cb28-310" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb28-311"><a href="#cb28-311" aria-hidden="true" tabindex="-1"></a>        <span class="at">bE =</span> <span class="fu">c</span>(</span>
-<span id="cb28-312"><a href="#cb28-312" aria-hidden="true" tabindex="-1"></a>            <span class="co"># MCMC_continuous</span></span>
-<span id="cb28-313"><a href="#cb28-313" aria-hidden="true" tabindex="-1"></a>            MCMC_continuous_ffff<span class="sc">$</span>startingE_table<span class="sc">$</span>bE, MCMC_continuous_fffl<span class="sc">$</span>startingE_table<span class="sc">$</span>bE, MCMC_continuous_flfl<span class="sc">$</span>startingE_table<span class="sc">$</span>bE,</span>
-<span id="cb28-314"><a href="#cb28-314" aria-hidden="true" tabindex="-1"></a>            MCMC_continuous_ffll<span class="sc">$</span>startingE_table<span class="sc">$</span>bE, MCMC_continuous_flll<span class="sc">$</span>startingE_table<span class="sc">$</span>bE, MCMC_continuous_llll<span class="sc">$</span>startingE_table<span class="sc">$</span>bE,</span>
-<span id="cb28-315"><a href="#cb28-315" aria-hidden="true" tabindex="-1"></a>            <span class="co"># MCMC_discrete</span></span>
-<span id="cb28-316"><a href="#cb28-316" aria-hidden="true" tabindex="-1"></a>            MCMC_discrete_ffff<span class="sc">$</span>startingE_table<span class="sc">$</span>bE, MCMC_discrete_fffl<span class="sc">$</span>startingE_table<span class="sc">$</span>bE, MCMC_discrete_flfl<span class="sc">$</span>startingE_table<span class="sc">$</span>bE,</span>
-<span id="cb28-317"><a href="#cb28-317" aria-hidden="true" tabindex="-1"></a>            MCMC_discrete_ffll<span class="sc">$</span>startingE_table<span class="sc">$</span>bE, MCMC_discrete_flll<span class="sc">$</span>startingE_table<span class="sc">$</span>bE, MCMC_discrete_llll<span class="sc">$</span>startingE_table<span class="sc">$</span>bE,</span>
-<span id="cb28-318"><a href="#cb28-318" aria-hidden="true" tabindex="-1"></a>            <span class="co"># enumerate</span></span>
-<span id="cb28-319"><a href="#cb28-319" aria-hidden="true" tabindex="-1"></a>            enumerate_ffff<span class="sc">$</span>startingE_table<span class="sc">$</span>bE, enumerate_fffl<span class="sc">$</span>startingE_table<span class="sc">$</span>bE, enumerate_flfl<span class="sc">$</span>startingE_table<span class="sc">$</span>bE,</span>
-<span id="cb28-320"><a href="#cb28-320" aria-hidden="true" tabindex="-1"></a>            enumerate_ffll<span class="sc">$</span>startingE_table<span class="sc">$</span>bE, enumerate_flll<span class="sc">$</span>startingE_table<span class="sc">$</span>bE, enumerate_llll<span class="sc">$</span>startingE_table<span class="sc">$</span>bE</span>
-<span id="cb28-321"><a href="#cb28-321" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb28-322"><a href="#cb28-322" aria-hidden="true" tabindex="-1"></a>        <span class="at">aU =</span> <span class="fu">c</span>(</span>
-<span id="cb28-323"><a href="#cb28-323" aria-hidden="true" tabindex="-1"></a>            <span class="co"># MCMC_continuous</span></span>
-<span id="cb28-324"><a href="#cb28-324" aria-hidden="true" tabindex="-1"></a>            MCMC_continuous_ffff<span class="sc">$</span>startingE_table<span class="sc">$</span>aU, MCMC_continuous_fffl<span class="sc">$</span>startingE_table<span class="sc">$</span>aU, MCMC_continuous_flfl<span class="sc">$</span>startingE_table<span class="sc">$</span>aU,</span>
-<span id="cb28-325"><a href="#cb28-325" aria-hidden="true" tabindex="-1"></a>            MCMC_continuous_ffll<span class="sc">$</span>startingE_table<span class="sc">$</span>aU, MCMC_continuous_flll<span class="sc">$</span>startingE_table<span class="sc">$</span>aU, MCMC_continuous_llll<span class="sc">$</span>startingE_table<span class="sc">$</span>aU,</span>
-<span id="cb28-326"><a href="#cb28-326" aria-hidden="true" tabindex="-1"></a>            <span class="co"># MCMC_discrete</span></span>
-<span id="cb28-327"><a href="#cb28-327" aria-hidden="true" tabindex="-1"></a>            MCMC_discrete_ffff<span class="sc">$</span>startingE_table<span class="sc">$</span>aU, MCMC_discrete_fffl<span class="sc">$</span>startingE_table<span class="sc">$</span>aU, MCMC_discrete_flfl<span class="sc">$</span>startingE_table<span class="sc">$</span>aU,</span>
-<span id="cb28-328"><a href="#cb28-328" aria-hidden="true" tabindex="-1"></a>            MCMC_discrete_ffll<span class="sc">$</span>startingE_table<span class="sc">$</span>aU, MCMC_discrete_flll<span class="sc">$</span>startingE_table<span class="sc">$</span>aU, MCMC_discrete_llll<span class="sc">$</span>startingE_table<span class="sc">$</span>aU,</span>
-<span id="cb28-329"><a href="#cb28-329" aria-hidden="true" tabindex="-1"></a>            <span class="co"># enumerate</span></span>
-<span id="cb28-330"><a href="#cb28-330" aria-hidden="true" tabindex="-1"></a>            enumerate_ffff<span class="sc">$</span>startingE_table<span class="sc">$</span>aU, enumerate_fffl<span class="sc">$</span>startingE_table<span class="sc">$</span>aU, enumerate_flfl<span class="sc">$</span>startingE_table<span class="sc">$</span>aU,</span>
-<span id="cb28-331"><a href="#cb28-331" aria-hidden="true" tabindex="-1"></a>            enumerate_ffll<span class="sc">$</span>startingE_table<span class="sc">$</span>aU, enumerate_flll<span class="sc">$</span>startingE_table<span class="sc">$</span>aU, enumerate_llll<span class="sc">$</span>startingE_table<span class="sc">$</span>aU</span>
-<span id="cb28-332"><a href="#cb28-332" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb28-333"><a href="#cb28-333" aria-hidden="true" tabindex="-1"></a>        <span class="at">bU =</span> <span class="fu">c</span>(</span>
-<span id="cb28-334"><a href="#cb28-334" aria-hidden="true" tabindex="-1"></a>            <span class="co"># MCMC_continuous</span></span>
-<span id="cb28-335"><a href="#cb28-335" aria-hidden="true" tabindex="-1"></a>            MCMC_continuous_ffff<span class="sc">$</span>startingE_table<span class="sc">$</span>bU, MCMC_continuous_fffl<span class="sc">$</span>startingE_table<span class="sc">$</span>bU, MCMC_continuous_flfl<span class="sc">$</span>startingE_table<span class="sc">$</span>bU,</span>
-<span id="cb28-336"><a href="#cb28-336" aria-hidden="true" tabindex="-1"></a>            MCMC_continuous_ffll<span class="sc">$</span>startingE_table<span class="sc">$</span>bU, MCMC_continuous_flll<span class="sc">$</span>startingE_table<span class="sc">$</span>bU, MCMC_continuous_llll<span class="sc">$</span>startingE_table<span class="sc">$</span>bU,</span>
-<span id="cb28-337"><a href="#cb28-337" aria-hidden="true" tabindex="-1"></a>            <span class="co"># MCMC_discrete</span></span>
-<span id="cb28-338"><a href="#cb28-338" aria-hidden="true" tabindex="-1"></a>            MCMC_discrete_ffff<span class="sc">$</span>startingE_table<span class="sc">$</span>bU, MCMC_discrete_fffl<span class="sc">$</span>startingE_table<span class="sc">$</span>bU, MCMC_discrete_flfl<span class="sc">$</span>startingE_table<span class="sc">$</span>bU,</span>
-<span id="cb28-339"><a href="#cb28-339" aria-hidden="true" tabindex="-1"></a>            MCMC_discrete_ffll<span class="sc">$</span>startingE_table<span class="sc">$</span>bU, MCMC_discrete_flll<span class="sc">$</span>startingE_table<span class="sc">$</span>bU, MCMC_discrete_llll<span class="sc">$</span>startingE_table<span class="sc">$</span>bU,</span>
-<span id="cb28-340"><a href="#cb28-340" aria-hidden="true" tabindex="-1"></a>            <span class="co"># enumerate</span></span>
-<span id="cb28-341"><a href="#cb28-341" aria-hidden="true" tabindex="-1"></a>            enumerate_ffff<span class="sc">$</span>startingE_table<span class="sc">$</span>bU, enumerate_fffl<span class="sc">$</span>startingE_table<span class="sc">$</span>bU, enumerate_flfl<span class="sc">$</span>startingE_table<span class="sc">$</span>bU,</span>
-<span id="cb28-342"><a href="#cb28-342" aria-hidden="true" tabindex="-1"></a>            enumerate_ffll<span class="sc">$</span>startingE_table<span class="sc">$</span>bU, enumerate_flll<span class="sc">$</span>startingE_table<span class="sc">$</span>bU, enumerate_llll<span class="sc">$</span>startingE_table<span class="sc">$</span>bU</span>
-<span id="cb28-343"><a href="#cb28-343" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb28-344"><a href="#cb28-344" aria-hidden="true" tabindex="-1"></a>        <span class="at">jointU =</span> <span class="fu">c</span>(</span>
-<span id="cb28-345"><a href="#cb28-345" aria-hidden="true" tabindex="-1"></a>            <span class="co"># MCMC_continuous</span></span>
-<span id="cb28-346"><a href="#cb28-346" aria-hidden="true" tabindex="-1"></a>            MCMC_continuous_ffff<span class="sc">$</span>startingE_table<span class="sc">$</span>jointU, MCMC_continuous_fffl<span class="sc">$</span>startingE_table<span class="sc">$</span>jointU, MCMC_continuous_flfl<span class="sc">$</span>startingE_table<span class="sc">$</span>jointU,</span>
-<span id="cb28-347"><a href="#cb28-347" aria-hidden="true" tabindex="-1"></a>            MCMC_continuous_ffll<span class="sc">$</span>startingE_table<span class="sc">$</span>jointU, MCMC_continuous_flll<span class="sc">$</span>startingE_table<span class="sc">$</span>jointU, MCMC_continuous_llll<span class="sc">$</span>startingE_table<span class="sc">$</span>jointU,</span>
-<span id="cb28-348"><a href="#cb28-348" aria-hidden="true" tabindex="-1"></a>            <span class="co"># MCMC_discrete</span></span>
-<span id="cb28-349"><a href="#cb28-349" aria-hidden="true" tabindex="-1"></a>            MCMC_discrete_ffff<span class="sc">$</span>startingE_table<span class="sc">$</span>jointU, MCMC_discrete_fffl<span class="sc">$</span>startingE_table<span class="sc">$</span>jointU, MCMC_discrete_flfl<span class="sc">$</span>startingE_table<span class="sc">$</span>jointU,</span>
-<span id="cb28-350"><a href="#cb28-350" aria-hidden="true" tabindex="-1"></a>            MCMC_discrete_ffll<span class="sc">$</span>startingE_table<span class="sc">$</span>jointU, MCMC_discrete_flll<span class="sc">$</span>startingE_table<span class="sc">$</span>jointU, MCMC_discrete_llll<span class="sc">$</span>startingE_table<span class="sc">$</span>jointU,</span>
-<span id="cb28-351"><a href="#cb28-351" aria-hidden="true" tabindex="-1"></a>            <span class="co"># enumerate</span></span>
-<span id="cb28-352"><a href="#cb28-352" aria-hidden="true" tabindex="-1"></a>            enumerate_ffff<span class="sc">$</span>startingE_table<span class="sc">$</span>jointU, enumerate_fffl<span class="sc">$</span>startingE_table<span class="sc">$</span>jointU, enumerate_flfl<span class="sc">$</span>startingE_table<span class="sc">$</span>jointU,</span>
-<span id="cb28-353"><a href="#cb28-353" aria-hidden="true" tabindex="-1"></a>            enumerate_ffll<span class="sc">$</span>startingE_table<span class="sc">$</span>jointU, enumerate_flll<span class="sc">$</span>startingE_table<span class="sc">$</span>jointU, enumerate_llll<span class="sc">$</span>startingE_table<span class="sc">$</span>jointU</span>
-<span id="cb28-354"><a href="#cb28-354" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb28-355"><a href="#cb28-355" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb28-356"><a href="#cb28-356" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-357"><a href="#cb28-357" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Display the full comparison table</span></span>
-<span id="cb28-358"><a href="#cb28-358" aria-hidden="true" tabindex="-1"></a>    <span class="fu">show</span>(startingE_all_results)</span>
-<span id="cb28-359"><a href="#cb28-359" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-360"><a href="#cb28-360" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Pivot to wide format for easier comparison across methods</span></span>
-<span id="cb28-361"><a href="#cb28-361" aria-hidden="true" tabindex="-1"></a>    startingE_all_results_wide <span class="ot">&lt;-</span> startingE_all_results <span class="sc">%&gt;%</span></span>
-<span id="cb28-362"><a href="#cb28-362" aria-hidden="true" tabindex="-1"></a>        <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">c</span>(aE, bE, aU, bU, jointU),</span>
-<span id="cb28-363"><a href="#cb28-363" aria-hidden="true" tabindex="-1"></a>                    <span class="at">names_to =</span> <span class="st">"variable"</span>,</span>
-<span id="cb28-364"><a href="#cb28-364" aria-hidden="true" tabindex="-1"></a>                    <span class="at">values_to =</span> <span class="st">"value"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb28-365"><a href="#cb28-365" aria-hidden="true" tabindex="-1"></a>        <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> method,</span>
-<span id="cb28-366"><a href="#cb28-366" aria-hidden="true" tabindex="-1"></a>                    <span class="at">values_from =</span> value,</span>
-<span id="cb28-367"><a href="#cb28-367" aria-hidden="true" tabindex="-1"></a>                    <span class="at">id_cols =</span> <span class="fu">c</span>(scenario, variable))</span>
-<span id="cb28-368"><a href="#cb28-368" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-369"><a href="#cb28-369" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Display wide format</span></span>
-<span id="cb28-370"><a href="#cb28-370" aria-hidden="true" tabindex="-1"></a>    <span class="fu">show</span>(startingE_all_results_wide)</span>
-<span id="cb28-371"><a href="#cb28-371" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-372"><a href="#cb28-372" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Plot comparisons for each variable</span></span>
-<span id="cb28-373"><a href="#cb28-373" aria-hidden="true" tabindex="-1"></a>    startingE_all_results_long <span class="ot">&lt;-</span> startingE_all_results <span class="sc">%&gt;%</span></span>
-<span id="cb28-374"><a href="#cb28-374" aria-hidden="true" tabindex="-1"></a>        <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">c</span>(aE, bE, aU, bU, jointU),</span>
-<span id="cb28-375"><a href="#cb28-375" aria-hidden="true" tabindex="-1"></a>                    <span class="at">names_to =</span> <span class="st">"variable"</span>,</span>
-<span id="cb28-376"><a href="#cb28-376" aria-hidden="true" tabindex="-1"></a>                    <span class="at">values_to =</span> <span class="st">"value"</span>)</span>
-<span id="cb28-377"><a href="#cb28-377" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-378"><a href="#cb28-378" aria-hidden="true" tabindex="-1"></a>    <span class="fu">show</span>(</span>
-<span id="cb28-379"><a href="#cb28-379" aria-hidden="true" tabindex="-1"></a>        <span class="fu">ggplot</span>(startingE_all_results_long, <span class="fu">aes</span>(<span class="at">x =</span> scenario, <span class="at">y =</span> value, <span class="at">fill =</span> method)) <span class="sc">+</span></span>
-<span id="cb28-380"><a href="#cb28-380" aria-hidden="true" tabindex="-1"></a>            <span class="fu">geom_col</span>(<span class="at">position =</span> <span class="st">"dodge"</span>) <span class="sc">+</span></span>
-<span id="cb28-381"><a href="#cb28-381" aria-hidden="true" tabindex="-1"></a>            <span class="fu">facet_wrap</span>(<span class="sc">~</span>variable, <span class="at">scales =</span> <span class="st">"free_y"</span>, <span class="at">ncol =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
-<span id="cb28-382"><a href="#cb28-382" aria-hidden="true" tabindex="-1"></a>            <span class="fu">labs</span>(</span>
-<span id="cb28-383"><a href="#cb28-383" aria-hidden="true" tabindex="-1"></a>                <span class="at">title =</span> <span class="st">"(starting effort) All Output Variables Comparison Across Methods and Scenarios"</span>,</span>
-<span id="cb28-384"><a href="#cb28-384" aria-hidden="true" tabindex="-1"></a>                <span class="at">x =</span> <span class="st">"Scenario"</span>,</span>
-<span id="cb28-385"><a href="#cb28-385" aria-hidden="true" tabindex="-1"></a>                <span class="at">y =</span> <span class="st">"Value"</span>,</span>
-<span id="cb28-386"><a href="#cb28-386" aria-hidden="true" tabindex="-1"></a>                <span class="at">fill =</span> <span class="st">"Method"</span></span>
-<span id="cb28-387"><a href="#cb28-387" aria-hidden="true" tabindex="-1"></a>            ) <span class="sc">+</span></span>
-<span id="cb28-388"><a href="#cb28-388" aria-hidden="true" tabindex="-1"></a>            <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb28-389"><a href="#cb28-389" aria-hidden="true" tabindex="-1"></a>            <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span>
-<span id="cb28-390"><a href="#cb28-390" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb28-391"><a href="#cb28-391" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">compare_results</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">compare_results</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "Now compare visually"
 # A tibble: 6 × 4
@@ -1287,163 +910,163 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="strength-prior-110-1" class="level3">
 <h3 class="anchored" data-anchor-id="strength-prior-110-1">strength prior (1,10)</h3>
-</section>
-<section id="mcmc-with-discrete-prior-110-1" class="level3">
-<h3 class="anchored" data-anchor-id="mcmc-with-discrete-prior-110-1">mcmc with discrete prior (1,10)</h3>
+<section id="mcmc-with-discrete-prior-110-1" class="level4">
+<h4 class="anchored" data-anchor-id="mcmc-with-discrete-prior-110-1">mcmc with discrete prior (1,10)</h4>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>using webppl version: main v0.9.15-27823b2 /Users/jacobzimmerman/ucsd/fyp/memo-sandbox/.pixi/envs/default/lib/R/library/rwebppl/js/webppl</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>MCMC_discrete_ffff <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"MCMC"</span>,</span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
-<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"(1,10)"</span>,</span>
-<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> FAIL,</span>
-<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> FAIL, <span class="at">b_r2result =</span> FAIL</span>
-<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>MCMC_discrete_ffff <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"MCMC"</span>,</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"(1,10)"</span>,</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> FAIL,</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> FAIL, <span class="at">b_r2result =</span> FAIL</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>MCMC_discrete_fffl <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"MCMC"</span>,</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"(1,10)"</span>,</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> FAIL,</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> FAIL, <span class="at">b_r2result =</span> LIFT</span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>MCMC_discrete_fffl <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>MCMC_discrete_flfl <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
 <span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"MCMC"</span>,</span>
 <span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
 <span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
 <span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"(1,10)"</span>,</span>
 <span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> FAIL,</span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> LIFT,</span>
 <span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> FAIL, <span class="at">b_r2result =</span> LIFT</span>
 <span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>MCMC_discrete_flfl <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>MCMC_discrete_ffll <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
 <span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"MCMC"</span>,</span>
 <span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
 <span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
 <span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"(1,10)"</span>,</span>
 <span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> LIFT,</span>
-<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> FAIL, <span class="at">b_r2result =</span> LIFT</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> FAIL,</span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> LIFT, <span class="at">b_r2result =</span> LIFT</span>
 <span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>MCMC_discrete_ffll <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>MCMC_discrete_flll <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
 <span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"MCMC"</span>,</span>
 <span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
 <span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
 <span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"(1,10)"</span>,</span>
 <span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> FAIL,</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> LIFT,</span>
 <span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> LIFT, <span class="at">b_r2result =</span> LIFT</span>
 <span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>MCMC_discrete_flll <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>MCMC_discrete_llll <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
 <span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"MCMC"</span>,</span>
 <span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
 <span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
 <span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"(1,10)"</span>,</span>
 <span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> LIFT,</span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> LIFT, <span class="at">b_r1result =</span> LIFT,</span>
 <span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> LIFT, <span class="at">b_r2result =</span> LIFT</span>
 <span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+</section>
+<section id="enumerate-with-discrete-prior-110-1" class="level4">
+<h4 class="anchored" data-anchor-id="enumerate-with-discrete-prior-110-1">enumerate with discrete prior (1,10)</h4>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>MCMC_discrete_llll <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"MCMC"</span>,</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>enumerate_ffff <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"enumerate"</span>,</span>
 <span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
 <span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
 <span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"(1,10)"</span>,</span>
 <span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> LIFT, <span class="at">b_r1result =</span> LIFT,</span>
-<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> LIFT, <span class="at">b_r2result =</span> LIFT</span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> FAIL,</span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> FAIL, <span class="at">b_r2result =</span> FAIL</span>
 <span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<section id="enumerate-with-discrete-prior-110-1" class="level4">
-<h4 class="anchored" data-anchor-id="enumerate-with-discrete-prior-110-1">enumerate with discrete prior (1,10)</h4>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>enumerate_ffff <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>enumerate_fffl <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
 <span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"enumerate"</span>,</span>
 <span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
 <span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
 <span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"(1,10)"</span>,</span>
 <span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> FAIL,</span>
-<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> FAIL, <span class="at">b_r2result =</span> FAIL</span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> FAIL, <span class="at">b_r2result =</span> LIFT</span>
 <span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>enumerate_fffl <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>enumerate_flfl <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
 <span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"enumerate"</span>,</span>
 <span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
 <span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
 <span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"(1,10)"</span>,</span>
 <span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> FAIL,</span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> LIFT,</span>
 <span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> FAIL, <span class="at">b_r2result =</span> LIFT</span>
 <span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>enumerate_flfl <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>enumerate_ffll <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
 <span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"enumerate"</span>,</span>
 <span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
 <span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
 <span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"(1,10)"</span>,</span>
 <span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> LIFT,</span>
-<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> FAIL, <span class="at">b_r2result =</span> LIFT</span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> FAIL,</span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> LIFT, <span class="at">b_r2result =</span> LIFT</span>
 <span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>enumerate_ffll <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>enumerate_flll <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
 <span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"enumerate"</span>,</span>
 <span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
 <span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
 <span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"(1,10)"</span>,</span>
 <span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> FAIL,</span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> LIFT,</span>
 <span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> LIFT, <span class="at">b_r2result =</span> LIFT</span>
 <span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>enumerate_flll <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>enumerate_llll <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
 <span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"enumerate"</span>,</span>
 <span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
 <span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
 <span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"(1,10)"</span>,</span>
 <span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> LIFT,</span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> LIFT, <span class="at">b_r1result =</span> LIFT,</span>
 <span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> LIFT, <span class="at">b_r2result =</span> LIFT</span>
 <span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>enumerate_llll <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"enumerate"</span>,</span>
-<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
-<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"(1,10)"</span>,</span>
-<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> LIFT, <span class="at">b_r1result =</span> LIFT,</span>
-<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> LIFT, <span class="at">b_r2result =</span> LIFT</span>
-<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="summarize-1" class="level4">
 <h4 class="anchored" data-anchor-id="summarize-1">summarize</h4>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">compare_results</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">compare_results</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "Now compare visually"
 # A tibble: 6 × 4

@@ -1,8 +1,11 @@
 project:
   type: website
-  execute-dir: project
   output-dir: docs/
   render:
     - "*.qmd"
   resources:
     - "webppl vs memo/*-comic.png"
+
+format:
+  html:
+    toc: true

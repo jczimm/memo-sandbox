@@ -387,8 +387,8 @@ Walking step by step and validate that the values (posteriors and equilibria acr
 - 2. webppl mcmc discrete (below)
 - 3. webppl enumerate (below)
     - TODO (in-progress) determine if need to use (1,10) (or another variant) instead of [1,10] for strength prior
-- 4. TODO memo enumerate, with same parameters as webppl enumerate (xiang2023-exp1-round3-memo.qmd)
-- 5. moonshot: memo enumerate, but the equilibrium-finding process uses memo frames (still accelerated by JAX, but now in the language of memo)
+- 4. TODO finish memo enumerate, with same parameters as webppl enumerate (xiang2023-exp1-round3-memo.qmd); and log all the stats (see `stats`)
+- 5. moonshot: memo enumerate, but the equilibrium-finding process uses memo frames in order to model agent's uncertainty about each other (still accelerated by JAX, but now in the language of memo, and considering the uncertainty)
 
 
 TODO: recreate compensatory effort and solitary effort models in memo; simple, no need to validate incrementally like doing for joint effort model

@@ -4,6 +4,8 @@ format: html
 
 Code adapted from https://github.com/jczimm/competence_effort/blob/main/Code/main_text/exp1_simulation.R
 
+NOTE 10/20/25: next time I run the cached cells, I'll need to remove the "webppl vs memo/" directory prefix, and add a code block that sets the working directory appropriately for interactive execution
+
 ## Setup
 
 ```{python}
@@ -24,10 +26,10 @@ efforts = np.array([0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5,
                     0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0])
 
 # Discretized strength space (replacing continuous uniform(1,10))
-# # (1,10) with digits=1
-# strength_values = np.linspace(1.1, 9.9, 89) # TODO: use Decimal or something to avoid floating point error; or smth like jax.config.update('jax_enable_x64', True)
-# [1,10] with digits=1
-strength_values = np.linspace(1., 10., 91)
+# (1,10) with digits=1
+strength_values = np.linspace(1.1, 9.9, 89)
+# # [1,10] with digits=1
+# strength_values = np.linspace(1., 10., 91)
 ```
 
 ## Helper Functions (JAX-compatible)
@@ -91,7 +93,7 @@ The original WebPPL code infers agent strengths from observed outcomes in rounds
 ```{python}
 # Helper function for the joint condition (needed because & operator not supported in memo)
 @jax.jit
-def both_equal(cond1, cond2):
+def both_true(cond1, cond2):
     """Returns True if both conditions are True (for use in joint probability queries)"""
     return cond1 & cond2
 
@@ -114,12 +116,13 @@ def infer_strengths[query_sa: strength_values, query_sb: strength_values](
     # Prior: Agent B has some strength uniformly distributed in [1, 10]
     agent_b: given(sb in strength_values, wpp=1)
 
-    # Participant witnesses the outcomes and conditions on them
+    # The participant models that the agents have some strength
     participant: thinks[
         agent_a: given(sa in strength_values, wpp=1),
         agent_b: given(sb in strength_values, wpp=1)
     ]
 
+    # Participant witnesses the outcomes and conditions on them
     # Condition on round 1 outcomes (low reward)
     participant: observes_that [outcome(agent_a.sa, {low_reward}) == r1_outcome_a]
     participant: observes_that [outcome(agent_b.sb, {low_reward}) == r1_outcome_b]
@@ -128,13 +131,12 @@ def infer_strengths[query_sa: strength_values, query_sb: strength_values](
     participant: observes_that [outcome(agent_a.sa, {high_reward}) == r2_outcome_a]
     participant: observes_that [outcome(agent_b.sb, {high_reward}) == r2_outcome_b]
 
-    # Push query variables into participant frame
+    # Push query variables into participant frame 
+    # and return participant's estimate of the posterior probability for the agents having these given (query) strengths
     participant: knows(query_sa)
     participant: knows(query_sb)
-
-    # Return joint posterior probability
-    # Use helper function for bitwise-and since & operator not supported in memo DSL
-    return participant[Pr[both_equal(agent_a.sa == query_sa, agent_b.sb == query_sb)]]
+    return participant[Pr[both_true(agent_a.sa == query_sa, agent_b.sb == query_sb)]]
+    # (Using helper function for bitwise-and since & operator not supported in memo DSL)
 
 # Example: F,F;F,F scenario (both agents fail in both rounds)
 # This would be computationally expensive with many strength values
@@ -184,7 +186,7 @@ marginal_b = np.sum(posterior_2d, axis=0)
 posterior_support = posterior_2d > 1e-10
 support_indices = np.where(posterior_support)
 if len(support_indices[0]) > 0:
-    print(f"\nActual posterior support:")
+    print(f"Non-negligible posterior support:")
     print(f"  strength_a in [{strength_values[np.min(support_indices[0])]:.2f}, {strength_values[np.max(support_indices[0])]:.2f}]")
     print(f"  strength_b in [{strength_values[np.min(support_indices[1])]:.2f}, {strength_values[np.max(support_indices[1])]:.2f}]")
 else:
@@ -232,6 +234,7 @@ def best_response_a(strength_a, strength_b, effort_b):
     """
     # If strength_a and strength_b are distributions, we'd need to take expectations
     # For now, assume they are point estimates
+    # TODO: I think if they are arrays right now, they're silently being operated on item-wise. is this sufficient, or do we need to take expectation? 
     utilities = jax.vmap(
         lambda ea: joint_utility_single_strength(strength_a, strength_b, ea, effort_b)[0]
     )(efforts)
@@ -395,7 +398,7 @@ if abs(joint_check - stats['joint_utility']) > 1e-5:
     print(f"WARNING: Joint utility mismatch! {stats['joint_utility']:.6f} != {joint_check:.6f}")
 ```
 
-## Visualization
+### Visualization
 
 ```{python}
 # Visualize posterior over agent strengths
@@ -435,13 +438,13 @@ The original WebPPL code mixes two types of reasoning:
 - **Game-theoretic optimization** (round 3): Find Nash equilibrium efforts
 
 In the memo conversion:
-- **Bayesian part**: Use `@memo` with `given()`, `observes_that[]`, and `thinks[]`
-- **Decision-theoretic part**: Use pure JAX functions (no probabilistic reasoning, just optimization)
+- **Bayesian inference**: Use `@memo` with `given()`, `observes_that[]`, and `thinks[]`
+- **Game-theoretic optimization**: Use pure JAX functions (no probabilistic reasoning, just optimization)
 
 ### 2. **Key Conversion Decisions**
 
 **Mutable arrays (x2a, x2b)**:
-- WebPPL: Pushes MCMC/enumeration samples to arrays, uses them later
+- WebPPL: Pushes strength posterior samples to arrays, uses them later
 - memo: Query the posterior distribution directly (more principled)
 
 **Nested agent reasoning**:
@@ -456,22 +459,21 @@ In the memo conversion:
 
 The original uses either:
 - MCMC with 10,000 samples (slow but handles continuous distributions)
-- Enumeration with discrete values (exact but expensive)
+- Enumeration with discrete values (exact but potentially more expensive)
 
 ### 4. **What Could Be Improved**
 
-**Potential optimizations**:
+**Potential optimizations (if using pure game-theoretic optimization)**:
 - Use coarser grid for exploration, then refine around high-probability regions
 - Vectorize the equilibrium finding across strength pairs (currently sequential)
 - Use automatic differentiation to find equilibrium (gradient-based instead of grid search)
 
-**More principled memo approach**:
+**Further extension with memo**:
 Currently, the game-theoretic reasoning is outside of `@memo`. One could potentially:
 - Model agents' beliefs about each other's strengths using nested `thinks[]`
 - Model agents' choices as `chooses(e in efforts, wpp=utility(e))`
 - But this might be overkill and harder to reason about
-
-The hybrid approach (memo for inference, JAX for optimization) is clean and efficient.
+- However, this does incorporate uncertainty about the other agent into the model, which might add richness
 
 ## Comparison with Original WebPPL Output
 
@@ -490,32 +492,18 @@ These should match (up to numerical precision and discretization choices).
 
 To verify that the WebPPL and memo implementations produce the same results:
 
-1. **Run the WebPPL version:**
-   ```r
-   # In R, using the xiang2023-exp1-round3.qmd file
-   effort_space_joint <- "var efforts = [0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1]"
-   mdl <- paste0(effort_space_joint, mdl1, "false", mdl2, "false", mdl3, "false", mdl4, "false", mdl5)
-   a <- webppl(mdl)
-   ```
-   Look for the debug output sections:
-   - `=== HELPER FUNCTION TESTS ===`
-   - `=== BAYESIAN INFERENCE STATISTICS ===`
-   - `=== EQUILIBRIUM FINDING ===`
-   - `=== FINAL RESULTS ===`
-
-2. **Run the memo version:**
-   Execute the Python code blocks in this file and compare the output from the same sections.
+Compare outcome probability, strength posteriors, and joint utility results for r3 outcome and for starting effort.
 
 3. **Expected matches:**
    - Helper functions (lift, optE, outcome) should return identical values for test inputs
    - Bayesian inference statistics should show similar:
      - Posterior means (agent strengths)
-     - High-probability regions
+     - Non-neglible-probability regions
    - Equilibrium finding should show similar:
      - Convergence depth (may vary slightly due to discretization)
-     - Equilibrium efforts (should be close, within 0.05)
-   - Final outcome probability should match within 1-2% (accounting for discretization differences)
+     - Equilibrium efforts
+   - Final outcome probability should be close
 
 4. **Known differences:**
-   - WebPPL pushes samples to arrays; memo queries the full posterior distribution
+   - See above
    - Small numerical differences due to different underlying computation engines

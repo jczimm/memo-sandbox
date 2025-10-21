@@ -106,14 +106,39 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </head>
 
-<body class="fullcontent quarto-light">
+<body class="quarto-light">
 
 <div id="quarto-search-results"></div>
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#setup" id="toc-setup" class="nav-link active" data-scroll-target="#setup">Setup</a></li>
+  <li><a href="#bayesian-inference-over-agent-strengths" id="toc-bayesian-inference-over-agent-strengths" class="nav-link" data-scroll-target="#bayesian-inference-over-agent-strengths">Bayesian Inference Over Agent Strengths</a></li>
+  <li><a href="#game-theoretic-joint-effort-model" id="toc-game-theoretic-joint-effort-model" class="nav-link" data-scroll-target="#game-theoretic-joint-effort-model">Game-Theoretic Joint Effort Model</a></li>
+  <li><a href="#running-the-model-for-ffff-scenario" id="toc-running-the-model-for-ffff-scenario" class="nav-link" data-scroll-target="#running-the-model-for-ffff-scenario">Running the Model for F,F;F,F Scenario</a>
+  <ul class="collapse">
+  <li><a href="#visualization" id="toc-visualization" class="nav-link" data-scroll-target="#visualization">Visualization</a></li>
+  </ul></li>
+  <li><a href="#notes-on-conversion-strategy" id="toc-notes-on-conversion-strategy" class="nav-link" data-scroll-target="#notes-on-conversion-strategy">Notes on Conversion Strategy</a>
+  <ul class="collapse">
+  <li><a href="#probabilistic-inference-vs.-decision-theory" id="toc-probabilistic-inference-vs.-decision-theory" class="nav-link" data-scroll-target="#probabilistic-inference-vs.-decision-theory">1. <strong>Probabilistic Inference vs.&nbsp;Decision Theory</strong></a></li>
+  <li><a href="#key-conversion-decisions" id="toc-key-conversion-decisions" class="nav-link" data-scroll-target="#key-conversion-decisions">2. <strong>Key Conversion Decisions</strong></a></li>
+  <li><a href="#computational-considerations" id="toc-computational-considerations" class="nav-link" data-scroll-target="#computational-considerations">3. <strong>Computational Considerations</strong></a></li>
+  <li><a href="#what-could-be-improved" id="toc-what-could-be-improved" class="nav-link" data-scroll-target="#what-could-be-improved">4. <strong>What Could Be Improved</strong></a></li>
+  </ul></li>
+  <li><a href="#comparison-with-original-webppl-output" id="toc-comparison-with-original-webppl-output" class="nav-link" data-scroll-target="#comparison-with-original-webppl-output">Comparison with Original WebPPL Output</a>
+  <ul class="collapse">
+  <li><a href="#how-to-compare-outputs" id="toc-how-to-compare-outputs" class="nav-link" data-scroll-target="#how-to-compare-outputs">How to Compare Outputs</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
@@ -137,9 +162,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <p>Code adapted from https://github.com/jczimm/competence_effort/blob/main/Code/main_text/exp1_simulation.R</p>
+<p>NOTE 10/20/25: next time I run the cached cells, I’ll need to remove the “webppl vs memo/” directory prefix, and add a code block that sets the working directory appropriately for interactive execution</p>
 <section id="setup" class="level2">
 <h2 class="anchored" data-anchor-id="setup">Setup</h2>
-<div id="23360b1f" class="cell" data-execution_count="1">
+<div id="6a6acaea" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jax</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jax.numpy <span class="im">as</span> np</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> memo <span class="im">import</span> memo</span>
@@ -157,10 +183,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>                    <span class="fl">0.55</span>, <span class="fl">0.6</span>, <span class="fl">0.65</span>, <span class="fl">0.7</span>, <span class="fl">0.75</span>, <span class="fl">0.8</span>, <span class="fl">0.85</span>, <span class="fl">0.9</span>, <span class="fl">0.95</span>, <span class="fl">1.0</span>])</span>
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Discretized strength space (replacing continuous uniform(1,10))</span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Using 89 discrete values from 1 to 10, excluding 1 and 10</span></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>strength_values <span class="op">=</span> np.linspace(<span class="fl">1.1</span>, <span class="fl">9.9</span>, <span class="dv">89</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co"># (1,10) with digits=1</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>strength_values <span class="op">=</span> np.linspace(<span class="fl">1.1</span>, <span class="fl">9.9</span>, <span class="dv">89</span>)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co"># # [1,10] with digits=1</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co"># strength_values = np.linspace(1., 10., 91)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="a5e1d0fb" class="cell" data-execution_count="2">
+<div id="73a9c257" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="at">@jax.jit</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> lift(strength, effort):</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Single agent lift: can they lift the box?"""</span></span>
@@ -223,10 +251,10 @@ outcome(strength=5.0, reward=20): 1.0</code></pre>
 <section id="bayesian-inference-over-agent-strengths" class="level2">
 <h2 class="anchored" data-anchor-id="bayesian-inference-over-agent-strengths">Bayesian Inference Over Agent Strengths</h2>
 <p>The original WebPPL code infers agent strengths from observed outcomes in rounds 1 and 2.</p>
-<div id="b7d666d0" class="cell" data-execution_count="3">
+<div id="e717855c" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Helper function for the joint condition (needed because &amp; operator not supported in memo)</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="at">@jax.jit</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> both_equal(cond1, cond2):</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> both_true(cond1, cond2):</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Returns True if both conditions are True (for use in joint probability queries)"""</span></span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> cond1 <span class="op">&amp;</span> cond2</span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
@@ -249,27 +277,27 @@ outcome(strength=5.0, reward=20): 1.0</code></pre>
 <span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Prior: Agent B has some strength uniformly distributed in [1, 10]</span></span>
 <span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    agent_b: given(sb <span class="kw">in</span> strength_values, wpp<span class="op">=</span><span class="dv">1</span>)</span>
 <span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Participant witnesses the outcomes and conditions on them</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># The participant models that the agents have some strength</span></span>
 <span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    participant: thinks[</span>
 <span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>        agent_a: given(sa <span class="kw">in</span> strength_values, wpp<span class="op">=</span><span class="dv">1</span>),</span>
 <span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>        agent_b: given(sb <span class="kw">in</span> strength_values, wpp<span class="op">=</span><span class="dv">1</span>)</span>
 <span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    ]</span>
 <span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Condition on round 1 outcomes (low reward)</span></span>
-<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    participant: observes_that [outcome(agent_a.sa, {low_reward}) <span class="op">==</span> r1_outcome_a]</span>
-<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>    participant: observes_that [outcome(agent_b.sb, {low_reward}) <span class="op">==</span> r1_outcome_b]</span>
-<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Condition on round 2 outcomes (high reward)</span></span>
-<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>    participant: observes_that [outcome(agent_a.sa, {high_reward}) <span class="op">==</span> r2_outcome_a]</span>
-<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>    participant: observes_that [outcome(agent_b.sb, {high_reward}) <span class="op">==</span> r2_outcome_b]</span>
-<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Push query variables into participant frame</span></span>
-<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>    participant: knows(query_sa)</span>
-<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>    participant: knows(query_sb)</span>
-<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Return joint posterior probability</span></span>
-<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Use helper function for bitwise-and since &amp; operator not supported in memo DSL</span></span>
-<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> participant[Pr[both_equal(agent_a.sa <span class="op">==</span> query_sa, agent_b.sb <span class="op">==</span> query_sb)]]</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Participant witnesses the outcomes and conditions on them</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Condition on round 1 outcomes (low reward)</span></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>    participant: observes_that [outcome(agent_a.sa, {low_reward}) <span class="op">==</span> r1_outcome_a]</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>    participant: observes_that [outcome(agent_b.sb, {low_reward}) <span class="op">==</span> r1_outcome_b]</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Condition on round 2 outcomes (high reward)</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>    participant: observes_that [outcome(agent_a.sa, {high_reward}) <span class="op">==</span> r2_outcome_a]</span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>    participant: observes_that [outcome(agent_b.sb, {high_reward}) <span class="op">==</span> r2_outcome_b]</span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Push query variables into participant frame </span></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>    <span class="co"># and return participant's estimate of the posterior probability for the agents having these given (query) strengths</span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>    participant: knows(query_sa)</span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>    participant: knows(query_sb)</span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> participant[Pr[both_true(agent_a.sa <span class="op">==</span> query_sa, agent_b.sb <span class="op">==</span> query_sb)]]</span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>    <span class="co"># (Using helper function for bitwise-and since &amp; operator not supported in memo DSL)</span></span>
 <span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a><span class="co"># Example: F,F;F,F scenario (both agents fail in both rounds)</span></span>
 <span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a><span class="co"># This would be computationally expensive with many strength values</span></span>
@@ -319,7 +347,7 @@ outcome(strength=5.0, reward=20): 1.0</code></pre>
 <span id="cb4-93"><a href="#cb4-93" aria-hidden="true" tabindex="-1"></a>posterior_support <span class="op">=</span> posterior_2d <span class="op">&gt;</span> <span class="fl">1e-10</span></span>
 <span id="cb4-94"><a href="#cb4-94" aria-hidden="true" tabindex="-1"></a>support_indices <span class="op">=</span> np.where(posterior_support)</span>
 <span id="cb4-95"><a href="#cb4-95" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">len</span>(support_indices[<span class="dv">0</span>]) <span class="op">&gt;</span> <span class="dv">0</span>:</span>
-<span id="cb4-96"><a href="#cb4-96" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Actual posterior support:"</span>)</span>
+<span id="cb4-96"><a href="#cb4-96" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Non-negligible posterior support:"</span>)</span>
 <span id="cb4-97"><a href="#cb4-97" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  strength_a in [</span><span class="sc">{</span>strength_values[np.<span class="bu">min</span>(support_indices[<span class="dv">0</span>])]<span class="sc">:.2f}</span><span class="ss">, </span><span class="sc">{</span>strength_values[np.<span class="bu">max</span>(support_indices[<span class="dv">0</span>])]<span class="sc">:.2f}</span><span class="ss">]"</span>)</span>
 <span id="cb4-98"><a href="#cb4-98" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  strength_b in [</span><span class="sc">{</span>strength_values[np.<span class="bu">min</span>(support_indices[<span class="dv">1</span>])]<span class="sc">:.2f}</span><span class="ss">, </span><span class="sc">{</span>strength_values[np.<span class="bu">max</span>(support_indices[<span class="dv">1</span>])]<span class="sc">:.2f}</span><span class="ss">]"</span>)</span>
 <span id="cb4-99"><a href="#cb4-99" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
@@ -329,8 +357,7 @@ outcome(strength=5.0, reward=20): 1.0</code></pre>
 === BAYESIAN INFERENCE STATISTICS ===
 Posterior shape: (89, 89)
 Total probability mass: 0.999996
-
-Actual posterior support:
+Non-negligible posterior support:
   strength_a in [1.10, 4.90]
   strength_b in [1.10, 4.90]</code></pre>
 </div>
@@ -341,7 +368,7 @@ Actual posterior support:
 <p>This is the most complex part. The original WebPPL code models: 1. Two agents with uncertain strengths (posterior distributions from rounds 1-2) 2. Agents reason about each other’s efforts in round 3 (joint task) 3. Iterative best-response until Nash equilibrium 4. Optimization over initial effort to maximize joint utility</p>
 <p><strong>Key insight</strong>: The game-theoretic reasoning operates on <em>expected utilities</em> over the posterior distribution of strengths. This is not purely probabilistic reasoning (like the inference above), but rather decision-theoretic optimization under uncertainty.</p>
 <p><strong>Proposed approach</strong>: - Keep the Bayesian inference in <code>@memo</code> (already done above) - Implement the game-theoretic equilibrium finding in pure JAX (deterministic optimization) - Combine them: compute equilibrium for each strength pair, weighted by posterior</p>
-<div id="251aa48a" class="cell" data-execution_count="4">
+<div id="08673dd6" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="at">@jax.jit</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> joint_utility_single_strength(strength_a, strength_b, effort_a, effort_b):</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
@@ -367,123 +394,124 @@ Actual posterior support:
 <span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
 <span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>    <span class="co"># If strength_a and strength_b are distributions, we'd need to take expectations</span></span>
 <span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>    <span class="co"># For now, assume they are point estimates</span></span>
-<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    utilities <span class="op">=</span> jax.vmap(</span>
-<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>        <span class="kw">lambda</span> ea: joint_utility_single_strength(strength_a, strength_b, ea, effort_b)[<span class="dv">0</span>]</span>
-<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    )(efforts)</span>
-<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> efforts[np.argmax(utilities)]</span>
-<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a><span class="at">@jax.jit</span></span>
-<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> best_response_b(strength_a, strength_b, effort_a):</span>
-<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
-<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a><span class="co">    Find agent B's best response to agent A's effort.</span></span>
-<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>    utilities <span class="op">=</span> jax.vmap(</span>
-<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>        <span class="kw">lambda</span> eb: joint_utility_single_strength(strength_a, strength_b, effort_a, eb)[<span class="dv">1</span>]</span>
-<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>    )(efforts)</span>
-<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> efforts[np.argmax(utilities)]</span>
-<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> find_equilibrium(strength_a, strength_b, init_effort, max_depth<span class="op">=</span><span class="dv">10</span>, verbose<span class="op">=</span><span class="va">False</span>):</span>
-<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
-<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a><span class="co">    Find Nash equilibrium through iterated best responses.</span></span>
-<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a><span class="co">    Starting from init_effort for agent B, iterate:</span></span>
-<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a><span class="co">    - A responds to B</span></span>
-<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a><span class="co">    - B responds to A</span></span>
-<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a><span class="co">    Until convergence (or max_depth reached)</span></span>
-<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a><span class="co">    Note: depth starts at 1 to match WebPPL convention (not 0-indexed)</span></span>
-<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>    effort_b <span class="op">=</span> init_effort</span>
-<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Start depth at 1 to match WebPPL convention</span></span>
-<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> depth <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, max_depth <span class="op">+</span> <span class="dv">1</span>):</span>
-<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a>        effort_a <span class="op">=</span> best_response_a(strength_a, strength_b, effort_b)</span>
-<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a>        effort_b_new <span class="op">=</span> best_response_b(strength_a, strength_b, effort_a)</span>
-<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Check convergence</span></span>
-<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> np.<span class="bu">abs</span>(effort_b_new <span class="op">-</span> effort_b) <span class="op">&lt;</span> <span class="fl">0.06</span>:</span>
-<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> verbose:</span>
-<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a>                <span class="bu">print</span>(<span class="ss">f"  Converged at depth </span><span class="sc">{</span>depth<span class="sc">}</span><span class="ss">: effort_a=</span><span class="sc">{</span>effort_a<span class="sc">:.4f}</span><span class="ss">, effort_b=</span><span class="sc">{</span>effort_b_new<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
-<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> effort_a, effort_b_new, depth</span>
-<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a>        effort_b <span class="op">=</span> effort_b_new</span>
-<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Warning: Equilibrium did not converge in </span><span class="sc">{</span>max_depth<span class="sc">}</span><span class="ss"> iterations"</span>)</span>
-<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> effort_a, effort_b, max_depth</span>
-<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a><span class="co"># To find the optimal initial effort, we'd search over init_effort values</span></span>
-<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> find_optimal_init_effort(posterior_sa_sb):</span>
-<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
-<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a><span class="co">    Find initial effort that maximizes expected joint utility.</span></span>
-<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a><span class="co">    This matches the WebPPL startingEffort() function which optimizes jointU.</span></span>
-<span id="cb6-78"><a href="#cb6-78" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a>    joint_utilities <span class="op">=</span> []</span>
-<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> init_effort <span class="kw">in</span> efforts:</span>
-<span id="cb6-81"><a href="#cb6-81" aria-hidden="true" tabindex="-1"></a>        stats <span class="op">=</span> compute_expected_statistics(posterior_sa_sb, init_effort)</span>
-<span id="cb6-82"><a href="#cb6-82" aria-hidden="true" tabindex="-1"></a>        joint_utilities.append(stats[<span class="st">'joint_utility'</span>])  <span class="co"># Optimize joint utility (matches WebPPL)</span></span>
-<span id="cb6-83"><a href="#cb6-83" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb6-84"><a href="#cb6-84" aria-hidden="true" tabindex="-1"></a>    joint_utilities <span class="op">=</span> np.array(joint_utilities)</span>
-<span id="cb6-85"><a href="#cb6-85" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> efforts[np.argmax(joint_utilities)]</span>
-<span id="cb6-86"><a href="#cb6-86" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-87"><a href="#cb6-87" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> compute_expected_statistics(posterior_sa_sb, init_effort):</span>
-<span id="cb6-88"><a href="#cb6-88" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
-<span id="cb6-89"><a href="#cb6-89" aria-hidden="true" tabindex="-1"></a><span class="co">    Compute expected utilities and efforts over posterior distribution of strengths.</span></span>
-<span id="cb6-90"><a href="#cb6-90" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-91"><a href="#cb6-91" aria-hidden="true" tabindex="-1"></a><span class="co">    This matches the WebPPL jointUtility() function output, computing expectations over</span></span>
-<span id="cb6-92"><a href="#cb6-92" aria-hidden="true" tabindex="-1"></a><span class="co">    the posterior distribution of agent strengths.</span></span>
-<span id="cb6-93"><a href="#cb6-93" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-94"><a href="#cb6-94" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
-<span id="cb6-95"><a href="#cb6-95" aria-hidden="true" tabindex="-1"></a><span class="co">        posterior_sa_sb: 2D array of posterior probabilities P(sa, sb | observations)</span></span>
-<span id="cb6-96"><a href="#cb6-96" aria-hidden="true" tabindex="-1"></a><span class="co">                        Shape: (len(strength_values), len(strength_values))</span></span>
-<span id="cb6-97"><a href="#cb6-97" aria-hidden="true" tabindex="-1"></a><span class="co">        init_effort: Initial effort for agent B to start equilibrium search</span></span>
-<span id="cb6-98"><a href="#cb6-98" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-99"><a href="#cb6-99" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
-<span id="cb6-100"><a href="#cb6-100" aria-hidden="true" tabindex="-1"></a><span class="co">        dict with keys: joint_utility, agent_a_utility, agent_b_utility,</span></span>
-<span id="cb6-101"><a href="#cb6-101" aria-hidden="true" tabindex="-1"></a><span class="co">                       agent_a_effort, agent_b_effort, outcome_prob</span></span>
-<span id="cb6-102"><a href="#cb6-102" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb6-103"><a href="#cb6-103" aria-hidden="true" tabindex="-1"></a>    expected_joint_utility <span class="op">=</span> <span class="fl">0.0</span></span>
-<span id="cb6-104"><a href="#cb6-104" aria-hidden="true" tabindex="-1"></a>    expected_agent_a_utility <span class="op">=</span> <span class="fl">0.0</span></span>
-<span id="cb6-105"><a href="#cb6-105" aria-hidden="true" tabindex="-1"></a>    expected_agent_b_utility <span class="op">=</span> <span class="fl">0.0</span></span>
-<span id="cb6-106"><a href="#cb6-106" aria-hidden="true" tabindex="-1"></a>    expected_agent_a_effort <span class="op">=</span> <span class="fl">0.0</span></span>
-<span id="cb6-107"><a href="#cb6-107" aria-hidden="true" tabindex="-1"></a>    expected_agent_b_effort <span class="op">=</span> <span class="fl">0.0</span></span>
-<span id="cb6-108"><a href="#cb6-108" aria-hidden="true" tabindex="-1"></a>    expected_outcome <span class="op">=</span> <span class="fl">0.0</span></span>
-<span id="cb6-109"><a href="#cb6-109" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-110"><a href="#cb6-110" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Iterate over all strength combinations</span></span>
-<span id="cb6-111"><a href="#cb6-111" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i, sa <span class="kw">in</span> <span class="bu">enumerate</span>(strength_values):</span>
-<span id="cb6-112"><a href="#cb6-112" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> j, sb <span class="kw">in</span> <span class="bu">enumerate</span>(strength_values):</span>
-<span id="cb6-113"><a href="#cb6-113" aria-hidden="true" tabindex="-1"></a>            prob_sa_sb <span class="op">=</span> posterior_sa_sb[i, j]</span>
-<span id="cb6-114"><a href="#cb6-114" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-115"><a href="#cb6-115" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> prob_sa_sb <span class="op">&gt;</span> <span class="fl">1e-10</span>:  <span class="co"># Only compute for non-negligible probabilities</span></span>
-<span id="cb6-116"><a href="#cb6-116" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Find equilibrium efforts for this strength pair</span></span>
-<span id="cb6-117"><a href="#cb6-117" aria-hidden="true" tabindex="-1"></a>                effort_a, effort_b, _ <span class="op">=</span> find_equilibrium(sa, sb, init_effort)</span>
-<span id="cb6-118"><a href="#cb6-118" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-119"><a href="#cb6-119" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Compute utilities and outcome at equilibrium</span></span>
-<span id="cb6-120"><a href="#cb6-120" aria-hidden="true" tabindex="-1"></a>                utility_a, utility_b, success_prob <span class="op">=</span> joint_utility_single_strength(sa, sb, effort_a, effort_b)</span>
-<span id="cb6-121"><a href="#cb6-121" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-122"><a href="#cb6-122" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Weight by posterior probability and accumulate</span></span>
-<span id="cb6-123"><a href="#cb6-123" aria-hidden="true" tabindex="-1"></a>                expected_agent_a_utility <span class="op">+=</span> prob_sa_sb <span class="op">*</span> utility_a</span>
-<span id="cb6-124"><a href="#cb6-124" aria-hidden="true" tabindex="-1"></a>                expected_agent_b_utility <span class="op">+=</span> prob_sa_sb <span class="op">*</span> utility_b</span>
-<span id="cb6-125"><a href="#cb6-125" aria-hidden="true" tabindex="-1"></a>                expected_joint_utility <span class="op">+=</span> prob_sa_sb <span class="op">*</span> (utility_a <span class="op">+</span> utility_b)</span>
-<span id="cb6-126"><a href="#cb6-126" aria-hidden="true" tabindex="-1"></a>                expected_agent_a_effort <span class="op">+=</span> prob_sa_sb <span class="op">*</span> effort_a</span>
-<span id="cb6-127"><a href="#cb6-127" aria-hidden="true" tabindex="-1"></a>                expected_agent_b_effort <span class="op">+=</span> prob_sa_sb <span class="op">*</span> effort_b</span>
-<span id="cb6-128"><a href="#cb6-128" aria-hidden="true" tabindex="-1"></a>                expected_outcome <span class="op">+=</span> prob_sa_sb <span class="op">*</span> success_prob</span>
-<span id="cb6-129"><a href="#cb6-129" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-130"><a href="#cb6-130" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {</span>
-<span id="cb6-131"><a href="#cb6-131" aria-hidden="true" tabindex="-1"></a>        <span class="st">'joint_utility'</span>: expected_joint_utility,</span>
-<span id="cb6-132"><a href="#cb6-132" aria-hidden="true" tabindex="-1"></a>        <span class="st">'agent_a_utility'</span>: expected_agent_a_utility,</span>
-<span id="cb6-133"><a href="#cb6-133" aria-hidden="true" tabindex="-1"></a>        <span class="st">'agent_b_utility'</span>: expected_agent_b_utility,</span>
-<span id="cb6-134"><a href="#cb6-134" aria-hidden="true" tabindex="-1"></a>        <span class="st">'agent_a_effort'</span>: expected_agent_a_effort,</span>
-<span id="cb6-135"><a href="#cb6-135" aria-hidden="true" tabindex="-1"></a>        <span class="st">'agent_b_effort'</span>: expected_agent_b_effort,</span>
-<span id="cb6-136"><a href="#cb6-136" aria-hidden="true" tabindex="-1"></a>        <span class="st">'outcome_prob'</span>: expected_outcome</span>
-<span id="cb6-137"><a href="#cb6-137" aria-hidden="true" tabindex="-1"></a>    }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># </span><span class="al">TODO</span><span class="co">: I think if they are arrays right now, they're silently being operated on item-wise. is this sufficient, or do we need to take expectation? </span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    utilities <span class="op">=</span> jax.vmap(</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>        <span class="kw">lambda</span> ea: joint_utility_single_strength(strength_a, strength_b, ea, effort_b)[<span class="dv">0</span>]</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    )(efforts)</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> efforts[np.argmax(utilities)]</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a><span class="at">@jax.jit</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> best_response_b(strength_a, strength_b, effort_a):</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a><span class="co">    Find agent B's best response to agent A's effort.</span></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>    utilities <span class="op">=</span> jax.vmap(</span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>        <span class="kw">lambda</span> eb: joint_utility_single_strength(strength_a, strength_b, effort_a, eb)[<span class="dv">1</span>]</span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>    )(efforts)</span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> efforts[np.argmax(utilities)]</span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> find_equilibrium(strength_a, strength_b, init_effort, max_depth<span class="op">=</span><span class="dv">10</span>, verbose<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a><span class="co">    Find Nash equilibrium through iterated best responses.</span></span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a><span class="co">    Starting from init_effort for agent B, iterate:</span></span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a><span class="co">    - A responds to B</span></span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a><span class="co">    - B responds to A</span></span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a><span class="co">    Until convergence (or max_depth reached)</span></span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a><span class="co">    Note: depth starts at 1 to match WebPPL convention (not 0-indexed)</span></span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>    effort_b <span class="op">=</span> init_effort</span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Start depth at 1 to match WebPPL convention</span></span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> depth <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, max_depth <span class="op">+</span> <span class="dv">1</span>):</span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a>        effort_a <span class="op">=</span> best_response_a(strength_a, strength_b, effort_b)</span>
+<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a>        effort_b_new <span class="op">=</span> best_response_b(strength_a, strength_b, effort_a)</span>
+<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Check convergence</span></span>
+<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> np.<span class="bu">abs</span>(effort_b_new <span class="op">-</span> effort_b) <span class="op">&lt;</span> <span class="fl">0.06</span>:</span>
+<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> verbose:</span>
+<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a>                <span class="bu">print</span>(<span class="ss">f"  Converged at depth </span><span class="sc">{</span>depth<span class="sc">}</span><span class="ss">: effort_a=</span><span class="sc">{</span>effort_a<span class="sc">:.4f}</span><span class="ss">, effort_b=</span><span class="sc">{</span>effort_b_new<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> effort_a, effort_b_new, depth</span>
+<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a>        effort_b <span class="op">=</span> effort_b_new</span>
+<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Warning: Equilibrium did not converge in </span><span class="sc">{</span>max_depth<span class="sc">}</span><span class="ss"> iterations"</span>)</span>
+<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> effort_a, effort_b, max_depth</span>
+<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a><span class="co"># To find the optimal initial effort, we'd search over init_effort values</span></span>
+<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> find_optimal_init_effort(posterior_sa_sb):</span>
+<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a><span class="co">    Find initial effort that maximizes expected joint utility.</span></span>
+<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-78"><a href="#cb6-78" aria-hidden="true" tabindex="-1"></a><span class="co">    This matches the WebPPL startingEffort() function which optimizes jointU.</span></span>
+<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a>    joint_utilities <span class="op">=</span> []</span>
+<span id="cb6-81"><a href="#cb6-81" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> init_effort <span class="kw">in</span> efforts:</span>
+<span id="cb6-82"><a href="#cb6-82" aria-hidden="true" tabindex="-1"></a>        stats <span class="op">=</span> compute_expected_statistics(posterior_sa_sb, init_effort)</span>
+<span id="cb6-83"><a href="#cb6-83" aria-hidden="true" tabindex="-1"></a>        joint_utilities.append(stats[<span class="st">'joint_utility'</span>])  <span class="co"># Optimize joint utility (matches WebPPL)</span></span>
+<span id="cb6-84"><a href="#cb6-84" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-85"><a href="#cb6-85" aria-hidden="true" tabindex="-1"></a>    joint_utilities <span class="op">=</span> np.array(joint_utilities)</span>
+<span id="cb6-86"><a href="#cb6-86" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> efforts[np.argmax(joint_utilities)]</span>
+<span id="cb6-87"><a href="#cb6-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-88"><a href="#cb6-88" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> compute_expected_statistics(posterior_sa_sb, init_effort):</span>
+<span id="cb6-89"><a href="#cb6-89" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb6-90"><a href="#cb6-90" aria-hidden="true" tabindex="-1"></a><span class="co">    Compute expected utilities and efforts over posterior distribution of strengths.</span></span>
+<span id="cb6-91"><a href="#cb6-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-92"><a href="#cb6-92" aria-hidden="true" tabindex="-1"></a><span class="co">    This matches the WebPPL jointUtility() function output, computing expectations over</span></span>
+<span id="cb6-93"><a href="#cb6-93" aria-hidden="true" tabindex="-1"></a><span class="co">    the posterior distribution of agent strengths.</span></span>
+<span id="cb6-94"><a href="#cb6-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-95"><a href="#cb6-95" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb6-96"><a href="#cb6-96" aria-hidden="true" tabindex="-1"></a><span class="co">        posterior_sa_sb: 2D array of posterior probabilities P(sa, sb | observations)</span></span>
+<span id="cb6-97"><a href="#cb6-97" aria-hidden="true" tabindex="-1"></a><span class="co">                        Shape: (len(strength_values), len(strength_values))</span></span>
+<span id="cb6-98"><a href="#cb6-98" aria-hidden="true" tabindex="-1"></a><span class="co">        init_effort: Initial effort for agent B to start equilibrium search</span></span>
+<span id="cb6-99"><a href="#cb6-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-100"><a href="#cb6-100" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb6-101"><a href="#cb6-101" aria-hidden="true" tabindex="-1"></a><span class="co">        dict with keys: joint_utility, agent_a_utility, agent_b_utility,</span></span>
+<span id="cb6-102"><a href="#cb6-102" aria-hidden="true" tabindex="-1"></a><span class="co">                       agent_a_effort, agent_b_effort, outcome_prob</span></span>
+<span id="cb6-103"><a href="#cb6-103" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb6-104"><a href="#cb6-104" aria-hidden="true" tabindex="-1"></a>    expected_joint_utility <span class="op">=</span> <span class="fl">0.0</span></span>
+<span id="cb6-105"><a href="#cb6-105" aria-hidden="true" tabindex="-1"></a>    expected_agent_a_utility <span class="op">=</span> <span class="fl">0.0</span></span>
+<span id="cb6-106"><a href="#cb6-106" aria-hidden="true" tabindex="-1"></a>    expected_agent_b_utility <span class="op">=</span> <span class="fl">0.0</span></span>
+<span id="cb6-107"><a href="#cb6-107" aria-hidden="true" tabindex="-1"></a>    expected_agent_a_effort <span class="op">=</span> <span class="fl">0.0</span></span>
+<span id="cb6-108"><a href="#cb6-108" aria-hidden="true" tabindex="-1"></a>    expected_agent_b_effort <span class="op">=</span> <span class="fl">0.0</span></span>
+<span id="cb6-109"><a href="#cb6-109" aria-hidden="true" tabindex="-1"></a>    expected_outcome <span class="op">=</span> <span class="fl">0.0</span></span>
+<span id="cb6-110"><a href="#cb6-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-111"><a href="#cb6-111" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Iterate over all strength combinations</span></span>
+<span id="cb6-112"><a href="#cb6-112" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i, sa <span class="kw">in</span> <span class="bu">enumerate</span>(strength_values):</span>
+<span id="cb6-113"><a href="#cb6-113" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> j, sb <span class="kw">in</span> <span class="bu">enumerate</span>(strength_values):</span>
+<span id="cb6-114"><a href="#cb6-114" aria-hidden="true" tabindex="-1"></a>            prob_sa_sb <span class="op">=</span> posterior_sa_sb[i, j]</span>
+<span id="cb6-115"><a href="#cb6-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-116"><a href="#cb6-116" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> prob_sa_sb <span class="op">&gt;</span> <span class="fl">1e-10</span>:  <span class="co"># Only compute for non-negligible probabilities</span></span>
+<span id="cb6-117"><a href="#cb6-117" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Find equilibrium efforts for this strength pair</span></span>
+<span id="cb6-118"><a href="#cb6-118" aria-hidden="true" tabindex="-1"></a>                effort_a, effort_b, _ <span class="op">=</span> find_equilibrium(sa, sb, init_effort)</span>
+<span id="cb6-119"><a href="#cb6-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-120"><a href="#cb6-120" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Compute utilities and outcome at equilibrium</span></span>
+<span id="cb6-121"><a href="#cb6-121" aria-hidden="true" tabindex="-1"></a>                utility_a, utility_b, success_prob <span class="op">=</span> joint_utility_single_strength(sa, sb, effort_a, effort_b)</span>
+<span id="cb6-122"><a href="#cb6-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-123"><a href="#cb6-123" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Weight by posterior probability and accumulate</span></span>
+<span id="cb6-124"><a href="#cb6-124" aria-hidden="true" tabindex="-1"></a>                expected_agent_a_utility <span class="op">+=</span> prob_sa_sb <span class="op">*</span> utility_a</span>
+<span id="cb6-125"><a href="#cb6-125" aria-hidden="true" tabindex="-1"></a>                expected_agent_b_utility <span class="op">+=</span> prob_sa_sb <span class="op">*</span> utility_b</span>
+<span id="cb6-126"><a href="#cb6-126" aria-hidden="true" tabindex="-1"></a>                expected_joint_utility <span class="op">+=</span> prob_sa_sb <span class="op">*</span> (utility_a <span class="op">+</span> utility_b)</span>
+<span id="cb6-127"><a href="#cb6-127" aria-hidden="true" tabindex="-1"></a>                expected_agent_a_effort <span class="op">+=</span> prob_sa_sb <span class="op">*</span> effort_a</span>
+<span id="cb6-128"><a href="#cb6-128" aria-hidden="true" tabindex="-1"></a>                expected_agent_b_effort <span class="op">+=</span> prob_sa_sb <span class="op">*</span> effort_b</span>
+<span id="cb6-129"><a href="#cb6-129" aria-hidden="true" tabindex="-1"></a>                expected_outcome <span class="op">+=</span> prob_sa_sb <span class="op">*</span> success_prob</span>
+<span id="cb6-130"><a href="#cb6-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-131"><a href="#cb6-131" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {</span>
+<span id="cb6-132"><a href="#cb6-132" aria-hidden="true" tabindex="-1"></a>        <span class="st">'joint_utility'</span>: expected_joint_utility,</span>
+<span id="cb6-133"><a href="#cb6-133" aria-hidden="true" tabindex="-1"></a>        <span class="st">'agent_a_utility'</span>: expected_agent_a_utility,</span>
+<span id="cb6-134"><a href="#cb6-134" aria-hidden="true" tabindex="-1"></a>        <span class="st">'agent_b_utility'</span>: expected_agent_b_utility,</span>
+<span id="cb6-135"><a href="#cb6-135" aria-hidden="true" tabindex="-1"></a>        <span class="st">'agent_a_effort'</span>: expected_agent_a_effort,</span>
+<span id="cb6-136"><a href="#cb6-136" aria-hidden="true" tabindex="-1"></a>        <span class="st">'agent_b_effort'</span>: expected_agent_b_effort,</span>
+<span id="cb6-137"><a href="#cb6-137" aria-hidden="true" tabindex="-1"></a>        <span class="st">'outcome_prob'</span>: expected_outcome</span>
+<span id="cb6-138"><a href="#cb6-138" aria-hidden="true" tabindex="-1"></a>    }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="running-the-model-for-ffff-scenario" class="level2">
 <h2 class="anchored" data-anchor-id="running-the-model-for-ffff-scenario">Running the Model for F,F;F,F Scenario</h2>
-<div id="6ae19155" class="cell" data-execution_count="5">
+<div id="cd319fa7" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Scenario: Both agents fail in both rounds (F,F;F,F)</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># This means weak agents who cannot lift the box individually even with high reward</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -556,10 +584,9 @@ Expected outcome probability: 0.669291
 (Compare to original WebPPL output)</code></pre>
 </div>
 </div>
-</section>
-<section id="visualization" class="level2">
-<h2 class="anchored" data-anchor-id="visualization">Visualization</h2>
-<div id="0a9f69ee" class="cell" data-execution_count="6">
+<section id="visualization" class="level3">
+<h3 class="anchored" data-anchor-id="visualization">Visualization</h3>
+<div id="a73b1741" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize posterior over agent strengths</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">15</span>, <span class="dv">6</span>))</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -593,29 +620,29 @@ Expected outcome probability: 0.669291
 </div>
 </div>
 </section>
+</section>
 <section id="notes-on-conversion-strategy" class="level2">
 <h2 class="anchored" data-anchor-id="notes-on-conversion-strategy">Notes on Conversion Strategy</h2>
 <p>The conversion from WebPPL to memo revealed important distinctions:</p>
 <section id="probabilistic-inference-vs.-decision-theory" class="level3">
 <h3 class="anchored" data-anchor-id="probabilistic-inference-vs.-decision-theory">1. <strong>Probabilistic Inference vs.&nbsp;Decision Theory</strong></h3>
 <p>The original WebPPL code mixes two types of reasoning: - <strong>Bayesian inference</strong> (rounds 1-2): Infer agent strengths from observed outcomes - <strong>Game-theoretic optimization</strong> (round 3): Find Nash equilibrium efforts</p>
-<p>In the memo conversion: - <strong>Bayesian part</strong>: Use <code>@memo</code> with <code>given()</code>, <code>observes_that[]</code>, and <code>thinks[]</code> - <strong>Decision-theoretic part</strong>: Use pure JAX functions (no probabilistic reasoning, just optimization)</p>
+<p>In the memo conversion: - <strong>Bayesian inference</strong>: Use <code>@memo</code> with <code>given()</code>, <code>observes_that[]</code>, and <code>thinks[]</code> - <strong>Game-theoretic optimization</strong>: Use pure JAX functions (no probabilistic reasoning, just optimization)</p>
 </section>
 <section id="key-conversion-decisions" class="level3">
 <h3 class="anchored" data-anchor-id="key-conversion-decisions">2. <strong>Key Conversion Decisions</strong></h3>
-<p><strong>Mutable arrays (x2a, x2b)</strong>: - WebPPL: Pushes MCMC/enumeration samples to arrays, uses them later - memo: Query the posterior distribution directly (more principled)</p>
+<p><strong>Mutable arrays (x2a, x2b)</strong>: - WebPPL: Pushes strength posterior samples to arrays, uses them later - memo: Query the posterior distribution directly (more principled)</p>
 <p><strong>Nested agent reasoning</strong>: - WebPPL: Nested JavaScript functions with recursive best-response - memo/JAX: Iterative best-response in pure JAX (not probabilistic, so no <code>thinks[]</code> needed here)</p>
 <p><strong>Expected utilities</strong>: - WebPPL: Implicitly handles through sampling or enumeration - memo/JAX: Explicit loop over posterior, computing equilibrium for each strength pair</p>
 </section>
 <section id="computational-considerations" class="level3">
 <h3 class="anchored" data-anchor-id="computational-considerations">3. <strong>Computational Considerations</strong></h3>
-<p>The original uses either: - MCMC with 10,000 samples (slow but handles continuous distributions) - Enumeration with discrete values (exact but expensive)</p>
+<p>The original uses either: - MCMC with 10,000 samples (slow but handles continuous distributions) - Enumeration with discrete values (exact but potentially more expensive)</p>
 </section>
 <section id="what-could-be-improved" class="level3">
 <h3 class="anchored" data-anchor-id="what-could-be-improved">4. <strong>What Could Be Improved</strong></h3>
-<p><strong>Potential optimizations</strong>: - Use coarser grid for exploration, then refine around high-probability regions - Vectorize the equilibrium finding across strength pairs (currently sequential) - Use automatic differentiation to find equilibrium (gradient-based instead of grid search)</p>
-<p><strong>More principled memo approach</strong>: Currently, the game-theoretic reasoning is outside of <code>@memo</code>. One could potentially: - Model agents’ beliefs about each other’s strengths using nested <code>thinks[]</code> - Model agents’ choices as <code>chooses(e in efforts, wpp=utility(e))</code> - But this might be overkill and harder to reason about</p>
-<p>The hybrid approach (memo for inference, JAX for optimization) is clean and efficient.</p>
+<p><strong>Potential optimizations (if using pure game-theoretic optimization)</strong>: - Use coarser grid for exploration, then refine around high-probability regions - Vectorize the equilibrium finding across strength pairs (currently sequential) - Use automatic differentiation to find equilibrium (gradient-based instead of grid search)</p>
+<p><strong>Further extension with memo</strong>: Currently, the game-theoretic reasoning is outside of <code>@memo</code>. One could potentially: - Model agents’ beliefs about each other’s strengths using nested <code>thinks[]</code> - Model agents’ choices as <code>chooses(e in efforts, wpp=utility(e))</code> - But this might be overkill and harder to reason about - However, this does incorporate uncertainty about the other agent into the model, which might add richness</p>
 </section>
 </section>
 <section id="comparison-with-original-webppl-output" class="level2">
@@ -627,38 +654,26 @@ Expected outcome probability: 0.669291
 <section id="how-to-compare-outputs" class="level3">
 <h3 class="anchored" data-anchor-id="how-to-compare-outputs">How to Compare Outputs</h3>
 <p>To verify that the WebPPL and memo implementations produce the same results:</p>
-<ol type="1">
-<li><p><strong>Run the WebPPL version:</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># In R, using the xiang2023-exp1-round3.qmd file</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>effort_space_joint <span class="ot">&lt;-</span> <span class="st">"var efforts = [0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1]"</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>mdl <span class="ot">&lt;-</span> <span class="fu">paste0</span>(effort_space_joint, mdl1, <span class="st">"false"</span>, mdl2, <span class="st">"false"</span>, mdl3, <span class="st">"false"</span>, mdl4, <span class="st">"false"</span>, mdl5)</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">webppl</span>(mdl)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Look for the debug output sections:</p>
-<ul>
-<li><code>=== HELPER FUNCTION TESTS ===</code></li>
-<li><code>=== BAYESIAN INFERENCE STATISTICS ===</code></li>
-<li><code>=== EQUILIBRIUM FINDING ===</code></li>
-<li><code>=== FINAL RESULTS ===</code></li>
-</ul></li>
-<li><p><strong>Run the memo version:</strong> Execute the Python code blocks in this file and compare the output from the same sections.</p></li>
-<li><p><strong>Expected matches:</strong></p>
+<p>Compare outcome probability, strength posteriors, and joint utility results for r3 outcome and for starting effort.</p>
+<ol start="3" type="1">
+<li><strong>Expected matches:</strong>
 <ul>
 <li>Helper functions (lift, optE, outcome) should return identical values for test inputs</li>
 <li>Bayesian inference statistics should show similar:
 <ul>
 <li>Posterior means (agent strengths)</li>
-<li>High-probability regions</li>
+<li>Non-neglible-probability regions</li>
 </ul></li>
 <li>Equilibrium finding should show similar:
 <ul>
 <li>Convergence depth (may vary slightly due to discretization)</li>
-<li>Equilibrium efforts (should be close, within 0.05)</li>
+<li>Equilibrium efforts</li>
 </ul></li>
-<li>Final outcome probability should match within 1-2% (accounting for discretization differences)</li>
+<li>Final outcome probability should be close</li>
 </ul></li>
-<li><p><strong>Known differences:</strong></p>
+<li><strong>Known differences:</strong>
 <ul>
-<li>WebPPL pushes samples to arrays; memo queries the full posterior distribution</li>
+<li>See above</li>
 <li>Small numerical differences due to different underlying computation engines</li>
 </ul></li>
 </ol>
