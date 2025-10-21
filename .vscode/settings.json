@@ -1,4 +1,6 @@
 {
     "r.rpath.mac": "${workspaceFolder}/.pixi/envs/default/bin/R",
-    "r.rterm.mac": "${workspaceFolder}/.pixi/envs/default/bin/R"
+    "r.rterm.mac": "${workspaceFolder}/.pixi/envs/default/bin/R",
+    "terminal.integrated.scrollback": 10000,
+    "powershell.integratedConsole.forceClearScrollbackBuffer": true
 }

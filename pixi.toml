@@ -7,7 +7,9 @@ version = "0.1.0"
 
 [tasks]
 preview = "quarto preview"
-render = "rm -rf .quarto && quarto render"
+render = "quarto render"
+rerender = "quarto render --cache-refresh"
+force_rerender = "rm -rf .quarto && quarto render"
 
 [pypi-dependencies]
 memo-lang = "~=1.2.4"
@@ -25,3 +27,4 @@ r-reticulate = ">=1.43.0,<2"
 r-quarto = ">=1.5.1,<2"
 jupyterlab = ">=4.4.9,<5"
 r-httpgd = ">=2.0.4,<3"
+r-languageserver = ">=0.3.16,<0.4"

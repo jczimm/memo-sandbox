@@ -1,0 +1,521 @@
+---
+format: html
+---
+
+Code adapted from https://github.com/jczimm/competence_effort/blob/main/Code/main_text/exp1_simulation.R
+
+## Setup
+
+```{python}
+import jax
+import jax.numpy as np
+from memo import memo
+from matplotlib import pyplot as plt
+
+# Model parameters (from original WebPPL code)
+alpha = 13.5  # effort cost coefficient
+beta = 24.5   # inequality aversion coefficient
+weight_box = 5  # weight of the box
+low_reward = 10
+high_reward = 20
+
+# Discretized spaces (for computational tractability)
+efforts = np.array([0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5,
+                    0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0])
+
+# Discretized strength space (replacing continuous uniform(1,10))
+# # (1,10) with digits=1
+# strength_values = np.linspace(1.1, 9.9, 89) # TODO: use Decimal or something to avoid floating point error; or smth like jax.config.update('jax_enable_x64', True)
+# [1,10] with digits=1
+strength_values = np.linspace(1., 10., 91)
+```
+
+## Helper Functions (JAX-compatible)
+
+```{python}
+@jax.jit
+def lift(strength, effort):
+    """Single agent lift: can they lift the box?"""
+    return (effort * strength >= weight_box).astype(float)
+
+@jax.jit
+def lift2(strength1, strength2, effort1, effort2):
+    """Two-agent joint lift: can they lift the box together?"""
+    return (effort1 * strength1 + effort2 * strength2 >= weight_box).astype(float)
+
+@jax.jit
+def gini(effort1, effort2):
+    """Gini coefficient for inequality aversion"""
+    return np.where(
+        effort1 == effort2,
+        0.0,
+        np.abs(effort1 - effort2) / 4 / (effort1 + effort2)
+    )
+
+@jax.jit
+def argmax_utility(strength, reward, effort_space=efforts):
+    """Find effort that maximizes utility for single agent"""
+    utilities = reward * lift(strength, effort_space) - alpha * effort_space
+    return effort_space[np.argmax(utilities)]
+
+@jax.jit
+def outcome(strength, reward):
+    """Predicted outcome (success probability) for single agent at optimal effort"""
+    opt_effort = argmax_utility(strength, reward)
+    return lift(strength, opt_effort)
+
+# DEBUG: Test helper functions with sample values
+print("=== HELPER FUNCTION TESTS ===")
+test_strength = 5.0
+test_effort = 1.0
+test_lift_result = lift(test_strength, test_effort)
+print(f"lift(strength=5.0, effort=1.0): {test_lift_result}")
+
+test_optE_low = argmax_utility(test_strength, low_reward)
+print(f"optE(strength=5.0, reward=10): {test_optE_low}")
+
+test_optE_high = argmax_utility(test_strength, high_reward)
+print(f"optE(strength=5.0, reward=20): {test_optE_high}")
+
+test_outcome_low = outcome(test_strength, low_reward)
+print(f"outcome(strength=5.0, reward=10): {test_outcome_low}")
+
+test_outcome_high = outcome(test_strength, high_reward)
+print(f"outcome(strength=5.0, reward=20): {test_outcome_high}")
+```
+
+## Bayesian Inference Over Agent Strengths
+
+The original WebPPL code infers agent strengths from observed outcomes in rounds 1 and 2.
+
+```{python}
+# Helper function for the joint condition (needed because & operator not supported in memo)
+@jax.jit
+def both_equal(cond1, cond2):
+    """Returns True if both conditions are True (for use in joint probability queries)"""
+    return cond1 & cond2
+
+@memo(save_comic="memo-comic-xiang-strength-inference")
+def infer_strengths[query_sa: strength_values, query_sb: strength_values](
+    r1_outcome_a, r1_outcome_b, r2_outcome_a, r2_outcome_b
+):
+    """
+    Infer posterior distribution over agent strengths given observed outcomes.
+
+    Observations:
+    - Round 1 (low reward = 10): A and B each attempt individual lifts
+    - Round 2 (high reward = 20): A and B each attempt individual lifts
+
+    Returns: Pr[strength_a == query_sa AND strength_b == query_sb | observations]
+    """
+    # Prior: Agent A has some strength uniformly distributed in [1, 10]
+    agent_a: given(sa in strength_values, wpp=1)
+
+    # Prior: Agent B has some strength uniformly distributed in [1, 10]
+    agent_b: given(sb in strength_values, wpp=1)
+
+    # Participant witnesses the outcomes and conditions on them
+    participant: thinks[
+        agent_a: given(sa in strength_values, wpp=1),
+        agent_b: given(sb in strength_values, wpp=1)
+    ]
+
+    # Condition on round 1 outcomes (low reward)
+    participant: observes_that [outcome(agent_a.sa, {low_reward}) == r1_outcome_a]
+    participant: observes_that [outcome(agent_b.sb, {low_reward}) == r1_outcome_b]
+
+    # Condition on round 2 outcomes (high reward)
+    participant: observes_that [outcome(agent_a.sa, {high_reward}) == r2_outcome_a]
+    participant: observes_that [outcome(agent_b.sb, {high_reward}) == r2_outcome_b]
+
+    # Push query variables into participant frame
+    participant: knows(query_sa)
+    participant: knows(query_sb)
+
+    # Return joint posterior probability
+    # Use helper function for bitwise-and since & operator not supported in memo DSL
+    return participant[Pr[both_equal(agent_a.sa == query_sa, agent_b.sb == query_sb)]]
+
+# Example: F,F;F,F scenario (both agents fail in both rounds)
+# This would be computationally expensive with many strength values
+# For testing, could use a coarser grid
+posterior_strengths_ffff = infer_strengths(0.0, 0.0, 0.0, 0.0)
+
+# DEBUG: Bayesian inference statistics
+print("\n=== BAYESIAN INFERENCE STATISTICS ===")
+posterior_2d = posterior_strengths_ffff.reshape(len(strength_values), len(strength_values))
+print(f"Posterior shape: {posterior_2d.shape}")
+print(f"Total probability mass: {np.sum(posterior_2d):.6f}")
+
+# Compute marginals
+marginal_a = np.sum(posterior_2d, axis=1)
+marginal_b = np.sum(posterior_2d, axis=0)
+
+# # Compute statistics
+# mean_sa = np.sum(marginal_a * strength_values)
+# mean_sb = np.sum(marginal_b * strength_values)
+# print(f"Agent A strength - mean: {mean_sa:.4f}, min: {strength_values[0]:.4f}, max: {strength_values[-1]:.4f}")
+# print(f"Agent B strength - mean: {mean_sb:.4f}, min: {strength_values[0]:.4f}, max: {strength_values[-1]:.4f}")
+
+# # Find high-probability regions
+# high_prob_threshold = np.max(posterior_2d) * 0.1
+# high_prob_indices = np.where(posterior_2d > high_prob_threshold)
+# print(f"High probability region (top 10%): strength_a in [{strength_values[np.min(high_prob_indices[0])]:.2f}, {strength_values[np.max(high_prob_indices[0])]:.2f}]")
+# print(f"                                     strength_b in [{strength_values[np.min(high_prob_indices[1])]:.2f}, {strength_values[np.max(high_prob_indices[1])]:.2f}]")
+
+# # For F,F;F,F scenario, agents fail at BOTH low_reward=10 and high_reward=20
+# # This means they cannot lift box even with high incentive
+# # Let's check what strengths are actually consistent with failing both rounds
+# print("\n=== FIXME #1: Investigating strength bounds ===")
+# print("For F,F;F,F: agents fail at reward=10 AND reward=20")
+# print(f"Box weight: {weight_box}")
+# print(f"Alpha (effort cost): {alpha}")
+
+# # Check a few sample strengths to see if they would fail
+# test_strengths = [3.0, 4.0, 4.5, 4.9, 5.0, 5.5, 6.0, 7.0]
+# for s in test_strengths:
+#     outcome_low = outcome(s, low_reward)
+#     outcome_high = outcome(s, high_reward)
+#     opt_e_low = argmax_utility(s, low_reward)
+#     opt_e_high = argmax_utility(s, high_reward)
+#     print(f"  strength={s:.1f}: outcome(R=10)={outcome_low:.0f} (effort={opt_e_low:.2f}), outcome(R=20)={outcome_high:.0f} (effort={opt_e_high:.2f})")
+
+# Find the actual support of the posterior (non-zero probability mass)
+posterior_support = posterior_2d > 1e-10
+support_indices = np.where(posterior_support)
+if len(support_indices[0]) > 0:
+    print(f"\nActual posterior support:")
+    print(f"  strength_a in [{strength_values[np.min(support_indices[0])]:.2f}, {strength_values[np.max(support_indices[0])]:.2f}]")
+    print(f"  strength_b in [{strength_values[np.min(support_indices[1])]:.2f}, {strength_values[np.max(support_indices[1])]:.2f}]")
+else:
+    print("\nWARNING: Posterior has no support! Inference may have failed.")
+```
+
+## Game-Theoretic Joint Effort Model
+
+This is the most complex part. The original WebPPL code models:
+1. Two agents with uncertain strengths (posterior distributions from rounds 1-2)
+2. Agents reason about each other's efforts in round 3 (joint task)
+3. Iterative best-response until Nash equilibrium
+4. Optimization over initial effort to maximize joint utility
+
+**Key insight**: The game-theoretic reasoning operates on *expected utilities* over the posterior distribution of strengths. This is not purely probabilistic reasoning (like the inference above), but rather decision-theoretic optimization under uncertainty.
+
+**Proposed approach**:
+- Keep the Bayesian inference in `@memo` (already done above)
+- Implement the game-theoretic equilibrium finding in pure JAX (deterministic optimization)
+- Combine them: compute equilibrium for each strength pair, weighted by posterior
+
+```{python}
+@jax.jit
+def joint_utility_single_strength(strength_a, strength_b, effort_a, effort_b):
+    """
+    Compute utilities for both agents given fixed strengths and efforts.
+
+    Returns: (utility_a, utility_b, success_prob)
+    """
+    reward = high_reward  # Round 3 uses high reward
+    success = lift2(strength_a, strength_b, effort_a, effort_b)
+    gini_coef = gini(effort_a, effort_b)
+
+    utility_a = reward * success - alpha * effort_a - beta * gini_coef
+    utility_b = reward * success - alpha * effort_b - beta * gini_coef
+
+    return utility_a, utility_b, success
+
+@jax.jit
+def best_response_a(strength_a, strength_b, effort_b):
+    """
+    Find agent A's best response to agent B's effort.
+
+    Agent A optimizes: max_{e_a} E[utility_a(e_a, e_b) | s_a, s_b]
+    """
+    # If strength_a and strength_b are distributions, we'd need to take expectations
+    # For now, assume they are point estimates
+    utilities = jax.vmap(
+        lambda ea: joint_utility_single_strength(strength_a, strength_b, ea, effort_b)[0]
+    )(efforts)
+
+    return efforts[np.argmax(utilities)]
+
+@jax.jit
+def best_response_b(strength_a, strength_b, effort_a):
+    """
+    Find agent B's best response to agent A's effort.
+    """
+    utilities = jax.vmap(
+        lambda eb: joint_utility_single_strength(strength_a, strength_b, effort_a, eb)[1]
+    )(efforts)
+
+    return efforts[np.argmax(utilities)]
+
+def find_equilibrium(strength_a, strength_b, init_effort, max_depth=10, verbose=False):
+    """
+    Find Nash equilibrium through iterated best responses.
+
+    Starting from init_effort for agent B, iterate:
+    - A responds to B
+    - B responds to A
+    Until convergence (or max_depth reached)
+
+    Note: depth starts at 1 to match WebPPL convention (not 0-indexed)
+    """
+    effort_b = init_effort
+
+    # Start depth at 1 to match WebPPL convention
+    for depth in range(1, max_depth + 1):
+        effort_a = best_response_a(strength_a, strength_b, effort_b)
+        effort_b_new = best_response_b(strength_a, strength_b, effort_a)
+
+        # Check convergence
+        if np.abs(effort_b_new - effort_b) < 0.06:
+            if verbose:
+                print(f"  Converged at depth {depth}: effort_a={effort_a:.4f}, effort_b={effort_b_new:.4f}")
+            return effort_a, effort_b_new, depth
+
+        effort_b = effort_b_new
+
+    print(f"Warning: Equilibrium did not converge in {max_depth} iterations")
+    return effort_a, effort_b, max_depth
+
+# To find the optimal initial effort, we'd search over init_effort values
+def find_optimal_init_effort(posterior_sa_sb):
+    """
+    Find initial effort that maximizes expected joint utility.
+
+    This matches the WebPPL startingEffort() function which optimizes jointU.
+    """
+    joint_utilities = []
+    for init_effort in efforts:
+        stats = compute_expected_statistics(posterior_sa_sb, init_effort)
+        joint_utilities.append(stats['joint_utility'])  # Optimize joint utility (matches WebPPL)
+    
+    joint_utilities = np.array(joint_utilities)
+    return efforts[np.argmax(joint_utilities)]
+
+def compute_expected_statistics(posterior_sa_sb, init_effort):
+    """
+    Compute expected utilities and efforts over posterior distribution of strengths.
+
+    This matches the WebPPL jointUtility() function output, computing expectations over
+    the posterior distribution of agent strengths.
+
+    Args:
+        posterior_sa_sb: 2D array of posterior probabilities P(sa, sb | observations)
+                        Shape: (len(strength_values), len(strength_values))
+        init_effort: Initial effort for agent B to start equilibrium search
+
+    Returns:
+        dict with keys: joint_utility, agent_a_utility, agent_b_utility,
+                       agent_a_effort, agent_b_effort, outcome_prob
+    """
+    expected_joint_utility = 0.0
+    expected_agent_a_utility = 0.0
+    expected_agent_b_utility = 0.0
+    expected_agent_a_effort = 0.0
+    expected_agent_b_effort = 0.0
+    expected_outcome = 0.0
+
+    # Iterate over all strength combinations
+    for i, sa in enumerate(strength_values):
+        for j, sb in enumerate(strength_values):
+            prob_sa_sb = posterior_sa_sb[i, j]
+
+            if prob_sa_sb > 1e-10:  # Only compute for non-negligible probabilities
+                # Find equilibrium efforts for this strength pair
+                effort_a, effort_b, _ = find_equilibrium(sa, sb, init_effort)
+
+                # Compute utilities and outcome at equilibrium
+                utility_a, utility_b, success_prob = joint_utility_single_strength(sa, sb, effort_a, effort_b)
+
+                # Weight by posterior probability and accumulate
+                expected_agent_a_utility += prob_sa_sb * utility_a
+                expected_agent_b_utility += prob_sa_sb * utility_b
+                expected_joint_utility += prob_sa_sb * (utility_a + utility_b)
+                expected_agent_a_effort += prob_sa_sb * effort_a
+                expected_agent_b_effort += prob_sa_sb * effort_b
+                expected_outcome += prob_sa_sb * success_prob
+
+    return {
+        'joint_utility': expected_joint_utility,
+        'agent_a_utility': expected_agent_a_utility,
+        'agent_b_utility': expected_agent_b_utility,
+        'agent_a_effort': expected_agent_a_effort,
+        'agent_b_effort': expected_agent_b_effort,
+        'outcome_prob': expected_outcome
+    }
+```
+
+## Running the Model for F,F;F,F Scenario
+
+```{python}
+# Scenario: Both agents fail in both rounds (F,F;F,F)
+# This means weak agents who cannot lift the box individually even with high reward
+
+# Get posterior over strengths
+print("\nComputing posterior over agent strengths...")
+posterior_ffff = posterior_strengths_ffff.reshape(len(strength_values), len(strength_values))
+
+# Test equilibrium finding with a sample strength pair
+print("\n=== EQUILIBRIUM FINDING (init_effort=0.0, sample strength pair) ===")
+# Use the modal strength values as a test case
+modal_idx_a = np.argmax(np.sum(posterior_ffff, axis=1))
+modal_idx_b = np.argmax(np.sum(posterior_ffff, axis=0))
+sample_sa = strength_values[modal_idx_a]
+sample_sb = strength_values[modal_idx_b]
+print(f"Testing with strength_a={sample_sa:.2f}, strength_b={sample_sb:.2f}")
+effort_a_test, effort_b_test, depth_test = find_equilibrium(sample_sa, sample_sb, 0.0, verbose=True)
+print(f"Convergence depth: {depth_test}")
+print(f"Agent A equilibrium effort: {effort_a_test:.4f}")
+print(f"Agent B equilibrium effort: {effort_b_test:.4f}")
+
+# Find optimal initial effort (by searching over effort space)
+print("\n=== FINDING OPTIMAL INITIAL EFFORT ===")
+# For now, just use a default initial effort
+optimal_init_effort = find_optimal_init_effort(posterior_ffff)
+print(f"Using initial effort: {optimal_init_effort}")
+
+# Compute expected statistics at equilibrium (utilities, efforts, outcome)
+print("\nComputing expected statistics at equilibrium...")
+stats = compute_expected_statistics(posterior_ffff, optimal_init_effort)
+
+print("\n=== FINAL RESULTS ===")
+print(f"Optimal starting effort: {optimal_init_effort}")
+print(f"Joint utility at optimum: {stats['joint_utility']:.6f}")
+print(f"Agent A utility: {stats['agent_a_utility']:.6f}")
+print(f"Agent B utility: {stats['agent_b_utility']:.6f}")
+print(f"Agent A equilibrium effort: {stats['agent_a_effort']:.6f}")
+print(f"Agent B equilibrium effort: {stats['agent_b_effort']:.6f}")
+print(f"Expected outcome probability: {stats['outcome_prob']:.6f}")
+print(f"\n(Compare to original WebPPL output)")
+
+# Sanity check: joint utility should equal sum of individual utilities
+joint_check = stats['agent_a_utility'] + stats['agent_b_utility']
+if abs(joint_check - stats['joint_utility']) > 1e-5:
+    print(f"WARNING: Joint utility mismatch! {stats['joint_utility']:.6f} != {joint_check:.6f}")
+```
+
+## Visualization
+
+```{python}
+# Visualize posterior over agent strengths
+fig, axes = plt.subplots(1, 2, figsize=(15, 6))
+
+# Posterior heatmap
+im = axes[0].imshow(posterior_ffff, origin='lower', extent=[1, 10, 1, 10], aspect='auto')
+axes[0].set_xlabel('Agent B Strength')
+axes[0].set_ylabel('Agent A Strength')
+axes[0].set_title('Posterior P(strength_A, strength_B | F,F;F,F)')
+plt.colorbar(im, ax=axes[0], label='Probability')
+
+# Marginal distributions
+marginal_a = np.sum(posterior_ffff, axis=1)
+marginal_b = np.sum(posterior_ffff, axis=0)
+
+axes[1].plot(strength_values, marginal_a, label='Agent A', linewidth=2)
+axes[1].plot(strength_values, marginal_b, label='Agent B', linewidth=2, linestyle='--')
+axes[1].set_xlabel('Strength')
+axes[1].set_ylabel('Probability')
+axes[1].set_title('Marginal Distributions')
+axes[1].legend()
+axes[1].grid(alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+```
+
+## Notes on Conversion Strategy
+
+The conversion from WebPPL to memo revealed important distinctions:
+
+### 1. **Probabilistic Inference vs. Decision Theory**
+
+The original WebPPL code mixes two types of reasoning:
+- **Bayesian inference** (rounds 1-2): Infer agent strengths from observed outcomes
+- **Game-theoretic optimization** (round 3): Find Nash equilibrium efforts
+
+In the memo conversion:
+- **Bayesian part**: Use `@memo` with `given()`, `observes_that[]`, and `thinks[]`
+- **Decision-theoretic part**: Use pure JAX functions (no probabilistic reasoning, just optimization)
+
+### 2. **Key Conversion Decisions**
+
+**Mutable arrays (x2a, x2b)**:
+- WebPPL: Pushes MCMC/enumeration samples to arrays, uses them later
+- memo: Query the posterior distribution directly (more principled)
+
+**Nested agent reasoning**:
+- WebPPL: Nested JavaScript functions with recursive best-response
+- memo/JAX: Iterative best-response in pure JAX (not probabilistic, so no `thinks[]` needed here)
+
+**Expected utilities**:
+- WebPPL: Implicitly handles through sampling or enumeration
+- memo/JAX: Explicit loop over posterior, computing equilibrium for each strength pair
+
+### 3. **Computational Considerations**
+
+The original uses either:
+- MCMC with 10,000 samples (slow but handles continuous distributions)
+- Enumeration with discrete values (exact but expensive)
+
+### 4. **What Could Be Improved**
+
+**Potential optimizations**:
+- Use coarser grid for exploration, then refine around high-probability regions
+- Vectorize the equilibrium finding across strength pairs (currently sequential)
+- Use automatic differentiation to find equilibrium (gradient-based instead of grid search)
+
+**More principled memo approach**:
+Currently, the game-theoretic reasoning is outside of `@memo`. One could potentially:
+- Model agents' beliefs about each other's strengths using nested `thinks[]`
+- Model agents' choices as `chooses(e in efforts, wpp=utility(e))`
+- But this might be overkill and harder to reason about
+
+The hybrid approach (memo for inference, JAX for optimization) is clean and efficient.
+
+## Comparison with Original WebPPL Output
+
+The original R/WebPPL code computes a dataframe `joint` with columns:
+- `model`, `agent`, `scenario`, `effort`, `strength`, `outcome`, `prob`, `round`, `reward`
+
+For the F,F;F,F scenario, the key output is:
+- `joint$prob[joint$round==3 & joint$scenario=='F,F;F,F']` = predicted success probability in round 3
+
+Our memo implementation computes:
+- `expected_outcome_ffff` = expected probability of success in round 3
+
+These should match (up to numerical precision and discretization choices).
+
+### How to Compare Outputs
+
+To verify that the WebPPL and memo implementations produce the same results:
+
+1. **Run the WebPPL version:**
+   ```r
+   # In R, using the xiang2023-exp1-round3.qmd file
+   effort_space_joint <- "var efforts = [0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1]"
+   mdl <- paste0(effort_space_joint, mdl1, "false", mdl2, "false", mdl3, "false", mdl4, "false", mdl5)
+   a <- webppl(mdl)
+   ```
+   Look for the debug output sections:
+   - `=== HELPER FUNCTION TESTS ===`
+   - `=== BAYESIAN INFERENCE STATISTICS ===`
+   - `=== EQUILIBRIUM FINDING ===`
+   - `=== FINAL RESULTS ===`
+
+2. **Run the memo version:**
+   Execute the Python code blocks in this file and compare the output from the same sections.
+
+3. **Expected matches:**
+   - Helper functions (lift, optE, outcome) should return identical values for test inputs
+   - Bayesian inference statistics should show similar:
+     - Posterior means (agent strengths)
+     - High-probability regions
+   - Equilibrium finding should show similar:
+     - Convergence depth (may vary slightly due to discretization)
+     - Equilibrium efforts (should be close, within 0.05)
+   - Final outcome probability should match within 1-2% (accounting for discretization differences)
+
+4. **Known differences:**
+   - WebPPL pushes samples to arrays; memo queries the full posterior distribution
+   - Small numerical differences due to different underlying computation engines

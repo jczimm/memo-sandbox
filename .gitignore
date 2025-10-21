@@ -15,4 +15,5 @@
 
 .Rhistory
 
-webppl\ vs\ memo/*_files
+/webppl\ vs\ memo/*_files/
+/webppl\ vs\ memo/*_cache/
