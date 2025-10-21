@@ -114,7 +114,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
+        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="99">
     <h2 id="toc-title">On this page</h2>
    
   <ul>
@@ -124,7 +124,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#paper-results" id="toc-paper-results" class="nav-link" data-scroll-target="#paper-results">paper results</a></li>
   <li><a href="#strength-prior-110" id="toc-strength-prior-110" class="nav-link" data-scroll-target="#strength-prior-110">strength prior [1,10]</a></li>
-  <li><a href="#mcmc-with-discrete-prior-110" id="toc-mcmc-with-discrete-prior-110" class="nav-link" data-scroll-target="#mcmc-with-discrete-prior-110">mcmc with discrete prior [1,10]</a></li>
   <li><a href="#strength-prior-110-1" id="toc-strength-prior-110-1" class="nav-link" data-scroll-target="#strength-prior-110-1">strength prior (1,10)</a></li>
   </ul></li>
   </ul>
@@ -529,7 +528,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>TODO (in-progress) determine if need to use (1,10) (or another variant) instead of [1,10] for strength prior</li>
 </ul></li>
 <li><ol start="4" type="1">
-<li>TODO finish memo enumerate, with same parameters as webppl enumerate (xiang2023-exp1-round3-memo.qmd); and log all the stats (see <code>stats</code>)</li>
+<li>TODO finish memo enumerate, with same parameters as webppl enumerate (xiang2023-exp1-round3-memo.qmd); and log all the stats (see <code>stats</code>) – and investigate discrepancies. e.g.&nbsp;why is Joint utility at optimum so high? why are the agents’ utilities different from each other?</li>
 </ol></li>
 <li><ol start="5" type="1">
 <li>moonshot: memo enumerate, but the equilibrium-finding process uses memo frames in order to model agent’s uncertainty about each other (still accelerated by JAX, but now in the language of memo, and considering the uncertainty)</li>
@@ -625,9 +624,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-</section>
-<section id="mcmc-with-discrete-prior-110" class="level3">
-<h3 class="anchored" data-anchor-id="mcmc-with-discrete-prior-110">mcmc with discrete prior [1,10]</h3>
+<section id="mcmc-with-discrete-prior-110" class="level4">
+<h4 class="anchored" data-anchor-id="mcmc-with-discrete-prior-110">mcmc with discrete prior [1,10]</h4>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>MCMC_discrete_ffff <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
@@ -700,6 +698,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> LIFT, <span class="at">b_r2result =</span> LIFT</span>
 <span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+</section>
 <section id="enumerate-with-discrete-prior-110" class="level4">
 <h4 class="anchored" data-anchor-id="enumerate-with-discrete-prior-110">enumerate with discrete prior [1,10]</h4>
 <div class="cell">

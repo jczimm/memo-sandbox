@@ -114,7 +114,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
+        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="99">
     <h2 id="toc-title">On this page</h2>
    
   <ul>
@@ -127,15 +127,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </ul></li>
   <li><a href="#notes-on-conversion-strategy" id="toc-notes-on-conversion-strategy" class="nav-link" data-scroll-target="#notes-on-conversion-strategy">Notes on Conversion Strategy</a>
   <ul class="collapse">
-  <li><a href="#probabilistic-inference-vs.-decision-theory" id="toc-probabilistic-inference-vs.-decision-theory" class="nav-link" data-scroll-target="#probabilistic-inference-vs.-decision-theory">1. <strong>Probabilistic Inference vs.&nbsp;Decision Theory</strong></a></li>
-  <li><a href="#key-conversion-decisions" id="toc-key-conversion-decisions" class="nav-link" data-scroll-target="#key-conversion-decisions">2. <strong>Key Conversion Decisions</strong></a></li>
-  <li><a href="#computational-considerations" id="toc-computational-considerations" class="nav-link" data-scroll-target="#computational-considerations">3. <strong>Computational Considerations</strong></a></li>
-  <li><a href="#what-could-be-improved" id="toc-what-could-be-improved" class="nav-link" data-scroll-target="#what-could-be-improved">4. <strong>What Could Be Improved</strong></a></li>
+  <li><a href="#probabilistic-inference-vs.-decision-theory" id="toc-probabilistic-inference-vs.-decision-theory" class="nav-link" data-scroll-target="#probabilistic-inference-vs.-decision-theory">1. Probabilistic Inference vs.&nbsp;Decision Theory</a></li>
+  <li><a href="#key-conversion-decisions" id="toc-key-conversion-decisions" class="nav-link" data-scroll-target="#key-conversion-decisions">2. Key Conversion Decisions</a></li>
+  <li><a href="#computational-considerations" id="toc-computational-considerations" class="nav-link" data-scroll-target="#computational-considerations">3. Computational Considerations</a></li>
+  <li><a href="#what-could-be-improved" id="toc-what-could-be-improved" class="nav-link" data-scroll-target="#what-could-be-improved">4. What Could Be Improved</a></li>
   </ul></li>
-  <li><a href="#comparison-with-original-webppl-output" id="toc-comparison-with-original-webppl-output" class="nav-link" data-scroll-target="#comparison-with-original-webppl-output">Comparison with Original WebPPL Output</a>
-  <ul class="collapse">
   <li><a href="#how-to-compare-outputs" id="toc-how-to-compare-outputs" class="nav-link" data-scroll-target="#how-to-compare-outputs">How to Compare Outputs</a></li>
-  </ul></li>
   </ul>
 </nav>
     </div>
@@ -165,7 +162,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>NOTE 10/20/25: next time I run the cached cells, I’ll need to remove the “webppl vs memo/” directory prefix, and add a code block that sets the working directory appropriately for interactive execution</p>
 <section id="setup" class="level2">
 <h2 class="anchored" data-anchor-id="setup">Setup</h2>
-<div id="6a6acaea" class="cell" data-execution_count="1">
+<div id="b94f3252" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jax</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jax.numpy <span class="im">as</span> np</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> memo <span class="im">import</span> memo</span>
@@ -188,7 +185,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co"># # [1,10] with digits=1</span></span>
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co"># strength_values = np.linspace(1., 10., 91)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="73a9c257" class="cell" data-execution_count="2">
+<div id="bb6b569f" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="at">@jax.jit</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> lift(strength, effort):</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Single agent lift: can they lift the box?"""</span></span>
@@ -251,7 +248,7 @@ outcome(strength=5.0, reward=20): 1.0</code></pre>
 <section id="bayesian-inference-over-agent-strengths" class="level2">
 <h2 class="anchored" data-anchor-id="bayesian-inference-over-agent-strengths">Bayesian Inference Over Agent Strengths</h2>
 <p>The original WebPPL code infers agent strengths from observed outcomes in rounds 1 and 2.</p>
-<div id="e717855c" class="cell" data-execution_count="3">
+<div id="955bd1dd" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Helper function for the joint condition (needed because &amp; operator not supported in memo)</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="at">@jax.jit</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> both_true(cond1, cond2):</span>
@@ -368,7 +365,7 @@ Non-negligible posterior support:
 <p>This is the most complex part. The original WebPPL code models: 1. Two agents with uncertain strengths (posterior distributions from rounds 1-2) 2. Agents reason about each other’s efforts in round 3 (joint task) 3. Iterative best-response until Nash equilibrium 4. Optimization over initial effort to maximize joint utility</p>
 <p><strong>Key insight</strong>: The game-theoretic reasoning operates on <em>expected utilities</em> over the posterior distribution of strengths. This is not purely probabilistic reasoning (like the inference above), but rather decision-theoretic optimization under uncertainty.</p>
 <p><strong>Proposed approach</strong>: - Keep the Bayesian inference in <code>@memo</code> (already done above) - Implement the game-theoretic equilibrium finding in pure JAX (deterministic optimization) - Combine them: compute equilibrium for each strength pair, weighted by posterior</p>
-<div id="08673dd6" class="cell" data-execution_count="4">
+<div id="8781ccca" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="at">@jax.jit</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> joint_utility_single_strength(strength_a, strength_b, effort_a, effort_b):</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
@@ -511,7 +508,7 @@ Non-negligible posterior support:
 </section>
 <section id="running-the-model-for-ffff-scenario" class="level2">
 <h2 class="anchored" data-anchor-id="running-the-model-for-ffff-scenario">Running the Model for F,F;F,F Scenario</h2>
-<div id="cd319fa7" class="cell" data-execution_count="5">
+<div id="96f3dfe7" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Scenario: Both agents fail in both rounds (F,F;F,F)</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># This means weak agents who cannot lift the box individually even with high reward</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -586,7 +583,7 @@ Expected outcome probability: 0.669291
 </div>
 <section id="visualization" class="level3">
 <h3 class="anchored" data-anchor-id="visualization">Visualization</h3>
-<div id="a73b1741" class="cell" data-execution_count="6">
+<div id="4925ca55" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize posterior over agent strengths</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">15</span>, <span class="dv">6</span>))</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -625,37 +622,32 @@ Expected outcome probability: 0.669291
 <h2 class="anchored" data-anchor-id="notes-on-conversion-strategy">Notes on Conversion Strategy</h2>
 <p>The conversion from WebPPL to memo revealed important distinctions:</p>
 <section id="probabilistic-inference-vs.-decision-theory" class="level3">
-<h3 class="anchored" data-anchor-id="probabilistic-inference-vs.-decision-theory">1. <strong>Probabilistic Inference vs.&nbsp;Decision Theory</strong></h3>
+<h3 class="anchored" data-anchor-id="probabilistic-inference-vs.-decision-theory">1. Probabilistic Inference vs.&nbsp;Decision Theory</h3>
 <p>The original WebPPL code mixes two types of reasoning: - <strong>Bayesian inference</strong> (rounds 1-2): Infer agent strengths from observed outcomes - <strong>Game-theoretic optimization</strong> (round 3): Find Nash equilibrium efforts</p>
 <p>In the memo conversion: - <strong>Bayesian inference</strong>: Use <code>@memo</code> with <code>given()</code>, <code>observes_that[]</code>, and <code>thinks[]</code> - <strong>Game-theoretic optimization</strong>: Use pure JAX functions (no probabilistic reasoning, just optimization)</p>
 </section>
 <section id="key-conversion-decisions" class="level3">
-<h3 class="anchored" data-anchor-id="key-conversion-decisions">2. <strong>Key Conversion Decisions</strong></h3>
+<h3 class="anchored" data-anchor-id="key-conversion-decisions">2. Key Conversion Decisions</h3>
 <p><strong>Mutable arrays (x2a, x2b)</strong>: - WebPPL: Pushes strength posterior samples to arrays, uses them later - memo: Query the posterior distribution directly (more principled)</p>
 <p><strong>Nested agent reasoning</strong>: - WebPPL: Nested JavaScript functions with recursive best-response - memo/JAX: Iterative best-response in pure JAX (not probabilistic, so no <code>thinks[]</code> needed here)</p>
 <p><strong>Expected utilities</strong>: - WebPPL: Implicitly handles through sampling or enumeration - memo/JAX: Explicit loop over posterior, computing equilibrium for each strength pair</p>
 </section>
 <section id="computational-considerations" class="level3">
-<h3 class="anchored" data-anchor-id="computational-considerations">3. <strong>Computational Considerations</strong></h3>
+<h3 class="anchored" data-anchor-id="computational-considerations">3. Computational Considerations</h3>
 <p>The original uses either: - MCMC with 10,000 samples (slow but handles continuous distributions) - Enumeration with discrete values (exact but potentially more expensive)</p>
 </section>
 <section id="what-could-be-improved" class="level3">
-<h3 class="anchored" data-anchor-id="what-could-be-improved">4. <strong>What Could Be Improved</strong></h3>
+<h3 class="anchored" data-anchor-id="what-could-be-improved">4. What Could Be Improved</h3>
 <p><strong>Potential optimizations (if using pure game-theoretic optimization)</strong>: - Use coarser grid for exploration, then refine around high-probability regions - Vectorize the equilibrium finding across strength pairs (currently sequential) - Use automatic differentiation to find equilibrium (gradient-based instead of grid search)</p>
 <p><strong>Further extension with memo</strong>: Currently, the game-theoretic reasoning is outside of <code>@memo</code>. One could potentially: - Model agents’ beliefs about each other’s strengths using nested <code>thinks[]</code> - Model agents’ choices as <code>chooses(e in efforts, wpp=utility(e))</code> - But this might be overkill and harder to reason about - However, this does incorporate uncertainty about the other agent into the model, which might add richness</p>
 </section>
 </section>
-<section id="comparison-with-original-webppl-output" class="level2">
-<h2 class="anchored" data-anchor-id="comparison-with-original-webppl-output">Comparison with Original WebPPL Output</h2>
-<p>The original R/WebPPL code computes a dataframe <code>joint</code> with columns: - <code>model</code>, <code>agent</code>, <code>scenario</code>, <code>effort</code>, <code>strength</code>, <code>outcome</code>, <code>prob</code>, <code>round</code>, <code>reward</code></p>
-<p>For the F,F;F,F scenario, the key output is: - <code>joint$prob[joint$round==3 &amp; joint$scenario=='F,F;F,F']</code> = predicted success probability in round 3</p>
-<p>Our memo implementation computes: - <code>expected_outcome_ffff</code> = expected probability of success in round 3</p>
-<p>These should match (up to numerical precision and discretization choices).</p>
-<section id="how-to-compare-outputs" class="level3">
-<h3 class="anchored" data-anchor-id="how-to-compare-outputs">How to Compare Outputs</h3>
+<section id="how-to-compare-outputs" class="level2">
+<h2 class="anchored" data-anchor-id="how-to-compare-outputs">How to Compare Outputs</h2>
 <p>To verify that the WebPPL and memo implementations produce the same results:</p>
-<p>Compare outcome probability, strength posteriors, and joint utility results for r3 outcome and for starting effort.</p>
-<ol start="3" type="1">
+<p>These should match (up to numerical precision and discretization choices).</p>
+<p>Compare outcome probability (here, <code>expected_outcome_ffff</code>), strength posteriors, and joint utility results for r3 outcome and for starting effort.</p>
+<ol type="1">
 <li><strong>Expected matches:</strong>
 <ul>
 <li>Helper functions (lift, optE, outcome) should return identical values for test inputs</li>
@@ -679,7 +671,6 @@ Expected outcome probability: 0.669291
 </ol>
 
 
-</section>
 </section>
 
 </main> <!-- /main -->

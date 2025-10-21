@@ -9,3 +9,4 @@ project:
 format:
   html:
     toc: true
+    toc-expand: true
