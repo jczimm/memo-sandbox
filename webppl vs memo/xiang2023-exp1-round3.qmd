@@ -388,7 +388,11 @@ Walking step by step and validate that the values (posteriors and equilibria acr
 - 3. webppl enumerate (below)
     - TODO (in-progress) determine if need to use (1,10) (or another variant) instead of [1,10] for strength prior
 - 4. TODO finish memo enumerate, with same parameters as webppl enumerate (xiang2023-exp1-round3-memo.qmd); and log all the stats (see `stats`) -- and investigate discrepancies. e.g. why is Joint utility at optimum so high? why are the agents' utilities different from each other?
-- 5. moonshot: memo enumerate, but the equilibrium-finding process uses memo frames in order to model agent's uncertainty about each other (still accelerated by JAX, but now in the language of memo, and considering the uncertainty)
+
+- TODO modify joint effort model to implement solitary effort and compensatory effort models
+
+
+- moonshot: memo enumerate, but the equilibrium-finding process uses memo frames in order to model agent's uncertainty about each other (still accelerated by JAX, but now in the language of memo, and considering the uncertainty)
 
 
 TODO: recreate compensatory effort and solitary effort models in memo; simple, no need to validate incrementally like doing for joint effort model
@@ -1268,4 +1272,4 @@ enumerate_llll <- rwebppl::webppl(program_file = "webppl vs memo/xiang2023-exp1-
 compare_results()
 ```
 
-Okay not sure why startingE can be 1 sometimes (excluding 1 and 10 does not fix this for MCMC_discrete). Inspecting using startingE_table
+TODO Okay not sure why result is kinda unreliable; maybe need to ensure that the different methods' results aren't getting mixed up during caching. ALSO, not sure why P jumps to 1 so fast after F,F;F,F! **maybe I need to fully regenerate the results each time I change anything, since Quarto's caching might not be sufficient**
