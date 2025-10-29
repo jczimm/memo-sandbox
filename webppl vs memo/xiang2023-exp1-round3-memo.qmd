@@ -21,15 +21,20 @@ weight_box = 5  # weight of the box
 low_reward = 10
 high_reward = 20
 
-# Discretized spaces (for computational tractability)
-efforts = np.array([0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5,
-                    0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0])
+# # Discretized spaces (for computational tractability)
+# efforts = np.array([0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5,
+#                     0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0])
 
-# Discretized strength space (replacing continuous uniform(1,10))
-# (1,10) with digits=1
-strength_values = np.linspace(1.1, 9.9, 89)
-# # [1,10] with digits=1
-# strength_values = np.linspace(1., 10., 91)
+# # Discretized strength space (replacing continuous uniform(1,10))
+# # # (1,10) with digits=1
+# # strength_values = np.linspace(1.1, 9.9, 89)
+# # [1,10] with step size of .05
+# strength_values = np.linspace(1., 10., 181)
+
+# TEMP
+# Dummy inputs for debugging
+efforts = np.linspace(0., 1., 5)
+strength_values = np.linspace(1., 10., 10)
 ```
 
 ## Helper Functions (JAX-compatible)
@@ -49,7 +54,7 @@ def lift2(strength1, strength2, effort1, effort2):
 def gini(effort1, effort2):
     """Gini coefficient for inequality aversion"""
     return np.where(
-        effort1 == effort2,
+        np.abs(effort1 - effort2) < 1e-8, # instead of effort1 == effort2
         0.0,
         np.abs(effort1 - effort2) / 4 / (effort1 + effort2)
     )
@@ -69,9 +74,9 @@ def outcome(strength, reward):
 # DEBUG: Test helper functions with sample values
 print("=== HELPER FUNCTION TESTS ===")
 test_strength = 5.0
-test_effort = 1.0
+test_effort = .5
 test_lift_result = lift(test_strength, test_effort)
-print(f"lift(strength=5.0, effort=1.0): {test_lift_result}")
+print(f"lift(strength=5.0, effort=.5): {test_lift_result}")
 
 test_optE_low = argmax_utility(test_strength, low_reward)
 print(f"optE(strength=5.0, reward=10): {test_optE_low}")
@@ -141,12 +146,13 @@ def infer_strengths[query_sa: strength_values, query_sb: strength_values](
 # Example: F,F;F,F scenario (both agents fail in both rounds)
 # This would be computationally expensive with many strength values
 # For testing, could use a coarser grid
-posterior_strengths_ffff = infer_strengths(0.0, 0.0, 0.0, 0.0)
+posterior_strengths = infer_strengths(0.0, 0.0, 1.0, 1.0)
 
 # DEBUG: Bayesian inference statistics
 print("\n=== BAYESIAN INFERENCE STATISTICS ===")
-posterior_2d = posterior_strengths_ffff.reshape(len(strength_values), len(strength_values))
+posterior_2d = posterior_strengths.reshape(len(strength_values), len(strength_values))
 print(f"Posterior shape: {posterior_2d.shape}")
+print(f"Number of non-negligible posterior samples (compare to WebPPL): {np.sum(posterior_strengths > 1e-10)}")
 print(f"Total probability mass: {np.sum(posterior_2d):.6f}")
 
 # Compute marginals
@@ -187,8 +193,8 @@ posterior_support = posterior_2d > 1e-10
 support_indices = np.where(posterior_support)
 if len(support_indices[0]) > 0:
     print(f"Non-negligible posterior support:")
-    print(f"  strength_a in [{strength_values[np.min(support_indices[0])]:.2f}, {strength_values[np.max(support_indices[0])]:.2f}]")
-    print(f"  strength_b in [{strength_values[np.min(support_indices[1])]:.2f}, {strength_values[np.max(support_indices[1])]:.2f}]")
+    print(f"  strength_a in [{strength_values[np.min(support_indices[0])]:.2f}, {strength_values[np.max(support_indices[0])]:.2f}], with mean {np.sum(marginal_a * strength_values):.2f}")
+    print(f"  strength_b in [{strength_values[np.min(support_indices[1])]:.2f}, {strength_values[np.max(support_indices[1])]:.2f}], with mean {np.sum(marginal_b * strength_values):.2f}")
 else:
     print("\nWARNING: Posterior has no support! Inference may have failed.")
 ```
@@ -216,8 +222,41 @@ def joint_utility_single_strength(strength_a, strength_b, effort_a, effort_b):
 
     Returns: (utility_a, utility_b, success_prob)
     """
+    # Ensure that strength_a and strength_b are floats, not arrays
+    if isinstance(strength_a, list) or isinstance(strength_b, list):
+        raise ValueError("strength_a and strength_b must be single float values")
+
     reward = high_reward  # Round 3 uses high reward
     success = lift2(strength_a, strength_b, effort_a, effort_b)
+    gini_coef = gini(effort_a, effort_b)
+
+    utility_a = reward * success - alpha * effort_a - beta * gini_coef
+    utility_b = reward * success - alpha * effort_b - beta * gini_coef
+
+    return utility_a, utility_b, success
+
+@jax.jit
+def joint_utility_multiple_strength(strength_a, strength_b, effort_a, effort_b):
+    """
+    Compute utilities for both agents given multiple fixed strengths and efforts.
+
+    Returns: (utility_a, utility_b, success_prob)
+    """
+    # Ensure that strength_a and strength_b are arrays, not floats
+    if not isinstance(strength_a, list) or not isinstance(strength_b, list):
+        raise ValueError("strength_a and strength_b must be arrays of float values")
+
+    reward = high_reward  # Round 3 uses high reward
+
+    # translation of listMean(map2(function(i,j){return lift2(i,j,box,effort,effort2)}, strength,strength2))
+    # note that map2 maps over the input arrays *concurrently*
+    print(strength_a)
+    print(strength_b)
+    success = np.mean(
+        jax.pmap(
+            lambda sa, sb: lift2(sa, sb, effort_a, effort_b)
+        )(strength_a, strength_b)
+    )
     gini_coef = gini(effort_a, effort_b)
 
     utility_a = reward * success - alpha * effort_a - beta * gini_coef
@@ -232,12 +271,16 @@ def best_response_a(strength_a, strength_b, effort_b):
 
     Agent A optimizes: max_{e_a} E[utility_a(e_a, e_b) | s_a, s_b]
     """
-    # If strength_a and strength_b are distributions, we'd need to take expectations
-    # For now, assume they are point estimates
-    # TODO: I think if they are arrays right now, they're silently being operated on item-wise. is this sufficient, or do we need to take expectation? 
-    utilities = jax.vmap(
-        lambda ea: joint_utility_single_strength(strength_a, strength_b, ea, effort_b)[0]
-    )(efforts)
+    if isinstance(strength_a, list) or isinstance(strength_b, list):
+        # Multiple strength values
+        utilities = jax.vmap(
+            lambda ea: joint_utility_multiple_strength(strength_a, strength_b, ea, effort_b)[0]
+        )(efforts)
+    else:
+        # Single strength values
+        utilities = jax.vmap(
+            lambda ea: joint_utility_single_strength(strength_a, strength_b, ea, effort_b)[0]
+        )(efforts)
 
     return efforts[np.argmax(utilities)]
 
@@ -246,9 +289,16 @@ def best_response_b(strength_a, strength_b, effort_a):
     """
     Find agent B's best response to agent A's effort.
     """
-    utilities = jax.vmap(
-        lambda eb: joint_utility_single_strength(strength_a, strength_b, effort_a, eb)[1]
-    )(efforts)
+    if isinstance(strength_a, list) or isinstance(strength_b, list):
+        # Multiple strength values
+        utilities = jax.vmap(
+            lambda eb: joint_utility_multiple_strength(strength_a, strength_b, effort_a, eb)[1]
+        )(efforts)
+    else:
+        # Single strength values
+        utilities = jax.vmap(
+            lambda eb: joint_utility_single_strength(strength_a, strength_b, effort_a, eb)[1]
+        )(efforts)
 
     return efforts[np.argmax(utilities)]
 
@@ -282,7 +332,7 @@ def find_equilibrium(strength_a, strength_b, init_effort, max_depth=10, verbose=
     return effort_a, effort_b, max_depth
 
 # To find the optimal initial effort, we'd search over init_effort values
-def find_optimal_init_effort(posterior_sa_sb):
+def starting_effort(posterior_sa_sb):
     """
     Find initial effort that maximizes expected joint utility.
 
@@ -290,13 +340,13 @@ def find_optimal_init_effort(posterior_sa_sb):
     """
     joint_utilities = []
     for init_effort in efforts:
-        stats = compute_expected_statistics(posterior_sa_sb, init_effort)
+        stats = expected_joint_utility(init_effort, posterior_sa_sb)
         joint_utilities.append(stats['joint_utility'])  # Optimize joint utility (matches WebPPL)
     
     joint_utilities = np.array(joint_utilities)
     return efforts[np.argmax(joint_utilities)]
 
-def compute_expected_statistics(posterior_sa_sb, init_effort):
+def expected_joint_utility(init_effort, posterior_sa_sb):
     """
     Compute expected utilities and efforts over posterior distribution of strengths.
 
@@ -312,6 +362,7 @@ def compute_expected_statistics(posterior_sa_sb, init_effort):
         dict with keys: joint_utility, agent_a_utility, agent_b_utility,
                        agent_a_effort, agent_b_effort, outcome_prob
     """
+    # TODO: this is assuming posterior_sa_sb is point probabilities, but it should accept posterior samples like the webppl version does!
     expected_joint_utility = 0.0
     expected_agent_a_utility = 0.0
     expected_agent_b_utility = 0.0
@@ -326,7 +377,9 @@ def compute_expected_statistics(posterior_sa_sb, init_effort):
 
             if prob_sa_sb > 1e-10:  # Only compute for non-negligible probabilities
                 # Find equilibrium efforts for this strength pair
-                effort_a, effort_b, _ = find_equilibrium(sa, sb, init_effort)
+                effort_a, effort_b, _ = find_equilibrium(sa, sb, init_effort, verbose=True)
+
+                print(f"Strengths (A={sa:.2f}, B={sb:.2f}): Efforts (A={effort_a:.4f}, B={effort_b:.4f})")
 
                 # Compute utilities and outcome at equilibrium
                 utility_a, utility_b, success_prob = joint_utility_single_strength(sa, sb, effort_a, effort_b)
@@ -339,8 +392,14 @@ def compute_expected_statistics(posterior_sa_sb, init_effort):
                 expected_agent_b_effort += prob_sa_sb * effort_b
                 expected_outcome += prob_sa_sb * success_prob
 
+    # Test equilibrium finding with a sample strength pair
+    if (init_effort == 0.0):
+        print("\n=== EQUILIBRIUM FINDING (init_effort=0.0, sample strength pair) ===")
+        print(f"Agent A equilibrium effort: {expected_agent_a_effort:.4f}")
+        print(f"Agent B equilibrium effort: {expected_agent_b_effort:.4f}")
+
     return {
-        'joint_utility': expected_joint_utility,
+        'joint_utility': joint_utility,
         'agent_a_utility': expected_agent_a_utility,
         'agent_b_utility': expected_agent_b_utility,
         'agent_a_effort': expected_agent_a_effort,
@@ -357,30 +416,26 @@ def compute_expected_statistics(posterior_sa_sb, init_effort):
 
 # Get posterior over strengths
 print("\nComputing posterior over agent strengths...")
-posterior_ffff = posterior_strengths_ffff.reshape(len(strength_values), len(strength_values))
-
-# Test equilibrium finding with a sample strength pair
-print("\n=== EQUILIBRIUM FINDING (init_effort=0.0, sample strength pair) ===")
-# Use the modal strength values as a test case
-modal_idx_a = np.argmax(np.sum(posterior_ffff, axis=1))
-modal_idx_b = np.argmax(np.sum(posterior_ffff, axis=0))
-sample_sa = strength_values[modal_idx_a]
-sample_sb = strength_values[modal_idx_b]
-print(f"Testing with strength_a={sample_sa:.2f}, strength_b={sample_sb:.2f}")
-effort_a_test, effort_b_test, depth_test = find_equilibrium(sample_sa, sample_sb, 0.0, verbose=True)
-print(f"Convergence depth: {depth_test}")
-print(f"Agent A equilibrium effort: {effort_a_test:.4f}")
-print(f"Agent B equilibrium effort: {effort_b_test:.4f}")
+posterior = posterior_strengths.reshape(len(strength_values), len(strength_values))
 
 # Find optimal initial effort (by searching over effort space)
 print("\n=== FINDING OPTIMAL INITIAL EFFORT ===")
-# For now, just use a default initial effort
-optimal_init_effort = find_optimal_init_effort(posterior_ffff)
+
+# convert from point probabilities to samples; there should be samples proportional to the posterior probabilities
+posterior_samples = []
+for i, sa in enumerate(strength_values):
+    for j, sb in enumerate(strength_values):
+        prob = posterior[i, j]
+        if prob > 1e-10:
+            num_samples = int(prob * 1000)  # Scale up for sample count (in theory, the minimum number of samples needed could be computed)
+            posterior_samples.extend([(sa, sb)] * num_samples)
+
+optimal_init_effort = starting_effort(posterior_samples)
 print(f"Using initial effort: {optimal_init_effort}")
 
 # Compute expected statistics at equilibrium (utilities, efforts, outcome)
 print("\nComputing expected statistics at equilibrium...")
-stats = compute_expected_statistics(posterior_ffff, optimal_init_effort)
+stats = expected_joint_utility(optimal_init_effort, posterior)
 
 print("\n=== FINAL RESULTS ===")
 print(f"Optimal starting effort: {optimal_init_effort}")
@@ -401,19 +456,20 @@ if abs(joint_check - stats['joint_utility']) > 1e-5:
 ### Visualization
 
 ```{python}
+#| eval: false
 # Visualize posterior over agent strengths
 fig, axes = plt.subplots(1, 2, figsize=(15, 6))
 
 # Posterior heatmap
-im = axes[0].imshow(posterior_ffff, origin='lower', extent=[1, 10, 1, 10], aspect='auto')
+im = axes[0].imshow(posterior, origin='lower', extent=[1, 10, 1, 10], aspect='auto')
 axes[0].set_xlabel('Agent B Strength')
 axes[0].set_ylabel('Agent A Strength')
 axes[0].set_title('Posterior P(strength_A, strength_B | F,F;F,F)')
 plt.colorbar(im, ax=axes[0], label='Probability')
 
 # Marginal distributions
-marginal_a = np.sum(posterior_ffff, axis=1)
-marginal_b = np.sum(posterior_ffff, axis=0)
+marginal_a = np.sum(posterior, axis=1)
+marginal_b = np.sum(posterior, axis=0)
 
 axes[1].plot(strength_values, marginal_a, label='Agent A', linewidth=2)
 axes[1].plot(strength_values, marginal_b, label='Agent B', linewidth=2, linestyle='--')
@@ -425,6 +481,134 @@ axes[1].grid(alpha=0.3)
 
 plt.tight_layout()
 plt.show()
+```
+
+```{python}
+# Visualize outcome variables like did for webppl
+
+# compare_results <- function(...) {
+#   # Accepts data frames as inputs
+#   results_list <- list(...)
+#   if (length(results_list) == 0) {
+#     stop("At least one set of results must be provided")
+#   }
+
+#   # Build summaries
+#   results_combined <- bind_rows(results_list, .id="method")
+#   P_results_summary <- results_combined |> select(method, scenario, P)
+#   posteriors_summary <- results_combined |> select(method, scenario, aStrength_posterior, bStrength_posterior)
+
+#   message("Now compare visually")
+
+#   show(P_results_summary)
+
+#   # Make posteriors_summary longer for plotting (cols: method, agent, scenario, strength)
+#   posteriors_long <- posteriors_summary |>
+#     pivot_longer(cols = c(aStrength_posterior, bStrength_posterior),
+#                   names_to = "agent",
+#                   values_to = "strength") |>
+#     mutate(agent = ifelse(agent == "aStrength_posterior", "a", "b")) |>
+#     unnest_longer(strength)
+
+#   # Plot density of posteriors for each scenario
+#   show(
+#     ggplot(posteriors_long, aes(x = strength, color = method, linetype = agent)) +
+#       geom_density() +
+#       facet_wrap(~scenario, scales = "free_y") +
+#       labs(
+#         title = "Strength Posteriors Across Scenarios",
+#         x = "Strength",
+#         y = "Density",
+#         color = "Method",
+#         linetype = "Agent"
+#       ) +
+#       theme_minimal() +
+#       theme(legend.position = "bottom")
+#   )
+
+#   message("Now separately for each method (or method and agent) and so that we can ensure that there are no missing posteriors")
+
+#   show(
+#     ggplot(posteriors_long, aes(x = strength, color = method, linetype = agent)) +
+#       geom_density() +
+#       facet_grid(method~scenario, scales = "free_y") +
+#       labs(
+#         title = "Strength Posteriors Across Scenarios",
+#         x = "Strength",
+#         y = "Density",
+#         color = "Method",
+#         linetype = "Agent"
+#       ) +
+#       theme_minimal() +
+#       theme(legend.position = "bottom")
+#   )
+
+#   show(
+#     ggplot(posteriors_long, aes(x = strength, color = method, linetype = agent)) +
+#       geom_density() +
+#       facet_grid(method~scenario+agent, scales = "free_y") +
+#       labs(
+#         title = "Strength Posteriors Across Scenarios",
+#         x = "Strength",
+#         y = "Density",
+#         color = "Method",
+#         linetype = "Agent"
+#       ) +
+#       theme_minimal() +
+#       theme(legend.position = "bottom")
+#   )
+
+#   message("Compare all output values across methods")
+
+#   show(results_combined |> select(-aStrength_posterior, -bStrength_posterior, -startingE_table))
+
+#   message("Extract all final_table values into a comprehensive summary")
+
+#   # Plot comparisons for the rest of the variables
+#   results_combined_vars_long <- results_combined |>
+#     select(-where(is.list)) |>
+#     pivot_longer(-c(method, scenario), values_to="value", names_to="variable")
+  
+#   show(
+#     ggplot(results_combined_vars_long, aes(x = scenario, y = value, fill = method)) +
+#       geom_col(position = "dodge") +
+#       facet_wrap(~variable, scales = "free_y", ncol = 2) +
+#       labs(
+#         title = "Output Variables Comparison Across Methods and Scenarios",
+#         x = "Scenario",
+#         y = "Value",
+#         fill = "Method"
+#       ) +
+#       theme_minimal() +
+#       theme(axis.text.x = element_text(angle = 45, hjust = 1))
+#   )
+
+#   message("Look at startingE details")
+#   results_combined_startingE_vars <- results_combined |>
+#     select(method, scenario, startingE, startingE_table) |>
+#     unnest_wider(startingE_table)
+#   show(results_combined_startingE_vars)
+
+#   results_combined_startingE_vars_long <- results_combined |>
+#     select(method, scenario, startingE_table) |>
+#     unnest_longer(startingE_table, indices_to = "variable", values_to = "value") |>
+#     unnest_longer(value)
+  
+#   show(
+#     ggplot(results_combined_startingE_vars_long, aes(x = scenario, y = value, fill = method)) +
+#       geom_col(position = "dodge") +
+#       facet_wrap(~variable, scales = "free_y", ncol = 2) +
+#       labs(
+#         title = "startingE_table Variables Comparison Across Methods and Scenarios",
+#         x = "Scenario",
+#         y = "Value",
+#         fill = "Method"
+#       ) +
+#       theme_minimal() +
+#       theme(axis.text.x = element_text(angle = 45, hjust = 1))
+#   )
+# }
+
 ```
 
 ## Notes on Conversion Strategy
@@ -481,7 +665,7 @@ To verify that the WebPPL and memo implementations produce the same results:
 
 These should match (up to numerical precision and discretization choices).
 
-Compare outcome probability (here, `expected_outcome_ffff`), strength posteriors, and joint utility results for r3 outcome and for starting effort.
+Compare outcome probability (here, `expected_outcome`), strength posteriors, and joint utility results for r3 outcome and for starting effort.
 
 1. **Expected matches:**
    - Helper functions (lift, optE, outcome) should return identical values for test inputs

@@ -718,3 +718,18 @@ compare_results(
 )
 ```
 
+
+
+
+
+### testing
+
+TEMP
+
+```{r}
+run_scenario(
+  'ffll', 'enumerate', discrete = T,
+  strengthPriorPrecision = 1,
+  strengthPriorVersion = "[1,10]"
+)
+```
