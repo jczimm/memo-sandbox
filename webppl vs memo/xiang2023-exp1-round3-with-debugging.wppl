@@ -56,31 +56,29 @@ var test_outcome_high = outcome(test_strength, 'box', highR)
 display("outcome(strength=5.0, reward=20): " + test_outcome_high)
 
 // (a, b)
-var randomBetweenExclExcl = function(a, b, digits) {
-  // https://www.desmos.com/calculator/yjczmoif70
-  var maxInteger = Math.pow(10, digits+1) - Math.pow(10, digits) - 1
-  return a + (b-a) * (randomInteger(maxInteger)+1)/(maxInteger+1)
+var randomBetweenExclExcl = function(a, b, stepSize) {
+  // stepSize: the size of each discrete step (e.g., 0.1, 0.05, 0.01)
+  // Returns a value from (a, b) with the given step size
+  var numSteps = Math.floor((b - a) / stepSize) - 1  // exclude both endpoints
+  return a + stepSize * (randomInteger(numSteps) + 1)
 }
 
 // (a,b]
-var randomBetweenExclIncl = function(a, b, digits) {
-  // https://www.desmos.com/calculator/yjczmoif70
-  var maxInteger = Math.pow(10, digits+1) - Math.pow(10, digits) - 1
-  return a + (b-a) * (randomInteger(maxInteger+1)+1)/(maxInteger+1+1)
+var randomBetweenExclIncl = function(a, b, stepSize) {
+  var numSteps = Math.floor((b - a) / stepSize)  // exclude left, include right
+  return a + stepSize * (randomInteger(numSteps) + 1)
 }
 
 // [a,b)
-var randomBetweenInclExcl = function(a, b, digits) {
-  // https://www.desmos.com/calculator/yjczmoif70
-  var maxInteger = Math.pow(10, digits+1) - Math.pow(10, digits) - 1
-  return a + (b-a) * (randomInteger(maxInteger+1))/(maxInteger+1)
+var randomBetweenInclExcl = function(a, b, stepSize) {
+  var numSteps = Math.floor((b - a) / stepSize)  // include left, exclude right
+  return a + stepSize * randomInteger(numSteps)
 }
 
 // [a,b]
-var randomBetweenInclIncl = function(a, b, digits) {
-  // https://www.desmos.com/calculator/yjczmoif70
-  var maxInteger = Math.pow(10, digits+1) - Math.pow(10, digits) - 1
-  return a + (b-a) * (randomInteger(maxInteger+1+1))/(maxInteger+1)
+var randomBetweenInclIncl = function(a, b, stepSize) {
+  var numSteps = Math.round((b - a) / stepSize)  // include both endpoints
+  return a + stepSize * randomInteger(numSteps + 1)
 }
 
 var params = params_df[0]
@@ -242,18 +240,24 @@ var jointUtility = function(init_effort,a_strength,b_strength){
 // convert to a @jax.jit
 // find the intial effort that maximizes the joint utility
 var startingEffort = function(a_strength,b_strength) {
+  var tables = [];
   var result_starting_effort = argMax(
     function(init_effort) {
       var tbl = jointUtility(init_effort,a_strength,b_strength)
+      tables.push([init_effort, tbl])
       return tbl.jointU
     },
     efforts);
 
-  return jointUtility(result_starting_effort,a_strength,b_strength);
+  return {
+    effort: result_starting_effort,
+    result_table: _.find(tables, function(t) { return t[0] === result_starting_effort; })[1]
+  }
 };
 
-var startingE_table = startingEffort(x2a,x2b)
-var startingE = startingE_table.jointU
+var startingE_results = startingEffort(x2a,x2b)
+var startingE_table = startingE_results.result_table
+var startingE = startingE_results.effort
 
 // DEBUG: Final results
 display("=== FINAL RESULTS ===")

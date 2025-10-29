@@ -183,14 +183,39 @@ output
 "
 
 # F,F;F,F
-mdl <- paste0(effort_space_joint, mdl1, "false", mdl2, "false", mdl3, "false", mdl4, "false", mdl5)
-a <- webppl(mdl)
-joint$prob[joint$round==3 & joint$scenario=='F,F;F,F'] <- a$P*100
+# mdl <- paste0(effort_space_joint, mdl1, "false", mdl2, "false", mdl3, "false", mdl4, "false", mdl5)
+# a <- rwebppl::webppl(mdl)
+# joint$prob[joint$round==3 & joint$scenario=='F,F;F,F'] <- a$P*100
+# joint
+```
+
+```{r}
+#| label: original_mcmc
+#| cache: true
+#| eval: false
+original_ffff <- paste0(effort_space_joint, mdl1, "false", mdl2, "false", mdl3, "false", mdl4, "false", mdl5) |> rwebppl::webppl()
+original_fffl <- paste0(effort_space_joint, mdl1, "false", mdl2, "false", mdl3, "false", mdl4, "true", mdl5) |> rwebppl::webppl()
+original_flfl <- paste0(effort_space_joint, mdl1, "false", mdl2, "true", mdl3, "false", mdl4, "true", mdl5) |> rwebppl::webppl()
+original_ffll <- paste0(effort_space_joint, mdl1, "false", mdl2, "false", mdl3, "true", mdl4, "true", mdl5) |> rwebppl::webppl()
+original_flll <- paste0(effort_space_joint, mdl1, "false", mdl2, "true", mdl3, "true", mdl4, "true", mdl5) |> rwebppl::webppl()
+original_llll <- paste0(effort_space_joint, mdl1, "true", mdl2, "true", mdl3, "true", mdl4, "true", mdl5) |> rwebppl::webppl()
 ```
 
 ```{r}
 #| eval: false
-joint
+# plot
+bind_rows(
+  tibble(scenario='F,F;F,F', P=original_ffff$P),
+  tibble(scenario='F,F;F,L', P=original_fffl$P),
+  tibble(scenario='F,L;F,L', P=original_flfl$P),
+  tibble(scenario='F,F;L,L', P=original_ffll$P),
+  tibble(scenario='F,L;L,L', P=original_flll$P),
+  tibble(scenario='L,L;L,L', P=original_llll$P)
+) |>
+  ggplot(aes(x=scenario, y=P*100)) +
+  geom_col() +
+  labs(title='Round 3 Success Probability by Scenario (MCMC, ORIGINAL CODE)', y='Probability (%)', x='Scenario') +
+  theme_minimal()
 ```
 
 ## 2 - enumeration
@@ -386,23 +411,229 @@ Walking step by step and validate that the values (posteriors and equilibria acr
 - 1. webppl mcmc (below)
 - 2. webppl mcmc discrete (below)
 - 3. webppl enumerate (below)
-    - TODO (in-progress) determine if need to use (1,10) (or another variant) instead of [1,10] for strength prior
-- 4. TODO finish memo enumerate, with same parameters as webppl enumerate (xiang2023-exp1-round3-memo.qmd); and log all the stats (see `stats`) -- and investigate discrepancies. e.g. why is Joint utility at optimum so high? why are the agents' utilities different from each other?
+    - [x] determine if need to use (1,10) (or another variant) instead of [1,10] for strength prior. I think we should be able to use [1,10] unless we see mismatch with original method
+      - [c] not sure why P jumps to 1 so fast after F,F;F,F!
+        - [x] figure out how the mcmc mode of my current debugging webppl version diverged from the original mcmc version (reproduced at top)
+      - _If want more reliable MCMC results: for MCMC versions, use 10 iterations to recreate paper's method of avging across 10 model runs_
+      - **~~seems like we'll need to avoid one of the extremes to prevent startingE from being chosen as 1!~~
+        - OR we can see if increasing precision fixes things - Claude thinks that **small error in strength estimates (due to discretization) could be amplified by the equilibrium-finding process**, so we need greater precision.
+          - NOTE: if we use memo frames instead of game-theoretic nested optimization, then maybe this isn't a problem anymore
+          - -> deciding that [1,10] is sufficient since it's not actually the source of discrepancy; the source is discretization itself... see explanation from Claude below. **choosing to skip now to memo, where I can have very high precision more easily, to see if that matches the original (continuous) MCMC model's startingE_table and final_table**
 
-- TODO modify joint effort model to implement solitary effort and compensatory effort models
+> 1. Posterior Mean Mismatch
+>     - Continuous (MCMC): Posterior mean might be 2.347
+>     - Discrete (0.1 steps): Posterior can only represent 2.3 or 2.4, so mean ≈ 2.35
+>     - Small error in mean strength propagates forward
+> 2. Critical Thresholds
+>     - Joint lifting condition: effort_a × strength_a + effort_b × strength_b ≥ 5
+>     - Near threshold boundaries (e.g., strength 2.5-7), small discretization errors  flip lift outcomes from success→fail or vice versa
+>     - This creates discontinuous jumps in expected utility
+> 3. Cascade Through Equilibrium Finding
+>     - jointUtility averages lift2() over all posterior samples: listMean(map2(lift2, strength_a, strength_b))
+>     - Discrete approximation of this average differs from continuous
+>     - The nested best-response iteration (lines 163-210) magnifies this error
+>     - Different expected lift probabilities → different optimal efforts → different  equilibria
+> 4. Amplification
+>     - Small error in posterior mean (0.05 units)
+>     - → Different lift probabilities (5-10% difference)
+>     - → Different equilibrium efforts (0.1-0.2 difference)
+>     - → Large divergence in final joint utility and outcome probability
+>
+> Why it matters most in mid-range (2.5-7): This is where the lift threshold creates maximum sensitivity—agents transition from "can only jointly lift" to "can lift solo," making the utility function most nonlinear.
 
+- 4. TODO finish memo enumerate, with same parameters as webppl enumerate (xiang2023-exp1-round3-memo.qmd), but higher precision; and log all the stats (see `stats`) -- and investigate discrepancies. e.g. why is Joint utility at optimum so high? why are the agents' utilities different from each other? (**compare final P, aU, bU, aE, bE between original version and the memo version**)
+
+- 5. TODO modify memo joint effort model to implement solitary effort and compensatory effort models, and check that the P results match up with the P results from the paper (simple, no need to validate incrementally)
 
 - moonshot: memo enumerate, but the equilibrium-finding process uses memo frames in order to model agent's uncertainty about each other (still accelerated by JAX, but now in the language of memo, and considering the uncertainty)
-
-
-TODO: recreate compensatory effort and solitary effort models in memo; simple, no need to validate incrementally like doing for joint effort model
-
 
 ```{r}
 library(tidyverse)
 
-FAIL = FALSE
-LIFT = TRUE
+FAIL <- FALSE
+LIFT <- TRUE
+
+# Define the 6 scenarios
+scenarios <- tribble(
+  ~name,      ~a_r1result, ~b_r1result, ~a_r2result, ~b_r2result,
+  "ffff",     FAIL,        FAIL,        FAIL,        FAIL,
+  "fffl",     FAIL,        FAIL,        FAIL,        LIFT,
+  "flfl",     FAIL,        LIFT,        FAIL,        LIFT,
+  "ffll",     FAIL,        FAIL,        LIFT,        LIFT,
+  "flll",     FAIL,        LIFT,        LIFT,        LIFT,
+  "llll",     LIFT,        LIFT,        LIFT,        LIFT
+)
+
+# Helper function to run a single scenario
+run_scenario <- function(scenario_name, method, discrete = FALSE,
+                        strengthPriorPrecision = NULL,
+                        strengthPriorVersion = NULL) {
+  scenario <- scenarios %>% filter(name == scenario_name)
+
+  params <- data.frame(
+    method = method,
+    discrete = discrete,
+    a_r1result = scenario$a_r1result,
+    b_r1result = scenario$b_r1result,
+    a_r2result = scenario$a_r2result,
+    b_r2result = scenario$b_r2result
+  )
+
+  if (!is.null(strengthPriorPrecision)) {
+    params$strengthPriorPrecision <- strengthPriorPrecision
+  }
+  if (!is.null(strengthPriorVersion)) {
+    params$strengthPriorVersion <- strengthPriorVersion
+  }
+
+  suppressWarnings(rwebppl::kill_webppl())
+  if (interactive()) {
+    message(sprintf("Running %s for scenario %s", method, scenario_name))
+  }
+  rwebppl::webppl(
+    program_file = "webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl",
+    data = params,
+    data_var = "params_df",
+    random_seed = 1
+  )
+}
+
+# Helper function to run all scenarios for a given method configuration
+run_all_scenarios <- function(...) {
+  results <- list()
+  for (scenario_name in scenarios$name) {
+    results[[scenario_name]] <- run_scenario(scenario_name, ...)
+  }
+  results_tidy <- results |>
+    enframe() |>
+    unnest_wider(value) |>
+    unnest_wider(final_table) |>
+    rename(scenario = name)
+  results_tidy
+}
+
+compare_results <- function(...) {
+  # Accepts data frames as inputs
+  results_list <- list(...)
+  if (length(results_list) == 0) {
+    stop("At least one set of results must be provided")
+  }
+
+  # Build summaries
+  results_combined <- bind_rows(results_list, .id="method")
+  P_results_summary <- results_combined |> select(method, scenario, P)
+  posteriors_summary <- results_combined |> select(method, scenario, aStrength_posterior, bStrength_posterior)
+
+  message("Now compare visually")
+
+  show(P_results_summary)
+
+  # Make posteriors_summary longer for plotting (cols: method, agent, scenario, strength)
+  posteriors_long <- posteriors_summary |>
+    pivot_longer(cols = c(aStrength_posterior, bStrength_posterior),
+                  names_to = "agent",
+                  values_to = "strength") |>
+    mutate(agent = ifelse(agent == "aStrength_posterior", "a", "b")) |>
+    unnest_longer(strength)
+
+  # Plot density of posteriors for each scenario
+  show(
+    ggplot(posteriors_long, aes(x = strength, color = method, linetype = agent)) +
+      geom_density() +
+      facet_wrap(~scenario, scales = "free_y") +
+      labs(
+        title = "Strength Posteriors Across Scenarios",
+        x = "Strength",
+        y = "Density",
+        color = "Method",
+        linetype = "Agent"
+      ) +
+      theme_minimal() +
+      theme(legend.position = "bottom")
+  )
+
+  message("Now separately for each method (or method and agent) and so that we can ensure that there are no missing posteriors")
+
+  show(
+    ggplot(posteriors_long, aes(x = strength, color = method, linetype = agent)) +
+      geom_density() +
+      facet_grid(method~scenario, scales = "free_y") +
+      labs(
+        title = "Strength Posteriors Across Scenarios",
+        x = "Strength",
+        y = "Density",
+        color = "Method",
+        linetype = "Agent"
+      ) +
+      theme_minimal() +
+      theme(legend.position = "bottom")
+  )
+
+  show(
+    ggplot(posteriors_long, aes(x = strength, color = method, linetype = agent)) +
+      geom_density() +
+      facet_grid(method~scenario+agent, scales = "free_y") +
+      labs(
+        title = "Strength Posteriors Across Scenarios",
+        x = "Strength",
+        y = "Density",
+        color = "Method",
+        linetype = "Agent"
+      ) +
+      theme_minimal() +
+      theme(legend.position = "bottom")
+  )
+
+  message("Compare all output values across methods")
+
+  show(results_combined |> select(-aStrength_posterior, -bStrength_posterior, -startingE_table))
+
+  message("Extract all final_table values into a comprehensive summary")
+
+  # Plot comparisons for the rest of the variables
+  results_combined_vars_long <- results_combined |>
+    select(-where(is.list)) |>
+    pivot_longer(-c(method, scenario), values_to="value", names_to="variable")
+  
+  show(
+    ggplot(results_combined_vars_long, aes(x = scenario, y = value, fill = method)) +
+      geom_col(position = "dodge") +
+      facet_wrap(~variable, scales = "free_y", ncol = 2) +
+      labs(
+        title = "Output Variables Comparison Across Methods and Scenarios",
+        x = "Scenario",
+        y = "Value",
+        fill = "Method"
+      ) +
+      theme_minimal() +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  )
+
+  message("Look at startingE details")
+  results_combined_startingE_vars <- results_combined |>
+    select(method, scenario, startingE, startingE_table) |>
+    unnest_wider(startingE_table)
+  show(results_combined_startingE_vars)
+
+  results_combined_startingE_vars_long <- results_combined |>
+    select(method, scenario, startingE_table) |>
+    unnest_longer(startingE_table, indices_to = "variable", values_to = "value") |>
+    unnest_longer(value)
+  
+  show(
+    ggplot(results_combined_startingE_vars_long, aes(x = scenario, y = value, fill = method)) +
+      geom_col(position = "dodge") +
+      facet_wrap(~variable, scales = "free_y", ncol = 2) +
+      labs(
+        title = "startingE_table Variables Comparison Across Methods and Scenarios",
+        x = "Scenario",
+        y = "Value",
+        fill = "Method"
+      ) +
+      theme_minimal() +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  )
+}
 ```
 
 ### paper results
@@ -414,670 +645,43 @@ See paper
 #### mcmc with continuous prior [1,10] (like paper)
 
 ```{r}
-#| label: mcmc_cont_1
+#| label: mcmc_cont_all
 #| cache: true
-suppressWarnings(rwebppl::kill_webppl())
-MCMC_continuous_ffff <- rwebppl::webppl(program_file = "webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl", data=data.frame(
-    method = "MCMC",
-    discrete = FALSE,
-
-    a_r1result = FAIL, b_r1result = FAIL,
-    a_r2result = FAIL, b_r2result = FAIL
-), data_var="params_df", random_seed=1)
-```
-
-```{r}
-#| label: mcmc_cont_2
-#| cache: true
-suppressWarnings(rwebppl::kill_webppl())
-MCMC_continuous_fffl <- rwebppl::webppl(program_file = "webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl", data=data.frame(
-    method = "MCMC",
-    discrete = FALSE,
-
-    a_r1result = FAIL, b_r1result = FAIL,
-    a_r2result = FAIL, b_r2result = LIFT
-), data_var="params_df", random_seed=1)
-```
-
-```{r}
-#| label: mcmc_cont_3
-#| cache: true
-suppressWarnings(rwebppl::kill_webppl())
-MCMC_continuous_flfl <- rwebppl::webppl(program_file = "webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl", data=data.frame(
-    method = "MCMC",
-    discrete = FALSE,
-
-    a_r1result = FAIL, b_r1result = LIFT,
-    a_r2result = FAIL, b_r2result = LIFT
-), data_var="params_df", random_seed=1)
-```
-
-```{r}
-#| label: mcmc_cont_4
-#| cache: true
-suppressWarnings(rwebppl::kill_webppl())
-MCMC_continuous_ffll <- rwebppl::webppl(program_file = "webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl", data=data.frame(
-    method = "MCMC",
-    discrete = FALSE,
-
-    a_r1result = FAIL, b_r1result = FAIL,
-    a_r2result = LIFT, b_r2result = LIFT
-), data_var="params_df", random_seed=1)
-```
-
-```{r}
-#| label: mcmc_cont_5
-#| cache: true
-suppressWarnings(rwebppl::kill_webppl())
-MCMC_continuous_flll <- rwebppl::webppl(program_file = "webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl", data=data.frame(
-    method = "MCMC",
-    discrete = FALSE,
-
-    a_r1result = FAIL, b_r1result = LIFT,
-    a_r2result = LIFT, b_r2result = LIFT
-), data_var="params_df", random_seed=1)
-```
-
-```{r}
-#| label: mcmc_cont_6
-#| cache: true
-suppressWarnings(rwebppl::kill_webppl())
-MCMC_continuous_llll <- rwebppl::webppl(program_file = "webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl", data=data.frame(
-    method = "MCMC",
-    discrete = FALSE,
-
-    a_r1result = LIFT, b_r1result = LIFT,
-    a_r2result = LIFT, b_r2result = LIFT
-), data_var="params_df", random_seed=1)
+MCMC_continuous_results_all <- run_all_scenarios(
+  "MCMC", discrete = FALSE
+)
 ```
 
 #### mcmc with discrete prior [1,10]
 
 ```{r}
-#| label: mcmc_disc_1
+#| label: mcmc_disc_all
 #| cache: true
-suppressWarnings(rwebppl::kill_webppl())
-MCMC_discrete_ffff <- rwebppl::webppl(program_file = "webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl", data=data.frame(
-    method = "MCMC",
-    discrete = TRUE,
-    strengthPriorPrecision = 1,
-    strengthPriorVersion = "[1,10]",
-
-    a_r1result = FAIL, b_r1result = FAIL,
-    a_r2result = FAIL, b_r2result = FAIL
-), data_var="params_df", random_seed=1)
-```
-
-```{r}
-#| label: mcmc_disc_2
-#| cache: true
-suppressWarnings(rwebppl::kill_webppl())
-MCMC_discrete_fffl <- rwebppl::webppl(program_file = "webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl", data=data.frame(
-    method = "MCMC",
-    discrete = TRUE,
-    strengthPriorPrecision = 1,
-    strengthPriorVersion = "[1,10]",
-
-    a_r1result = FAIL, b_r1result = FAIL,
-    a_r2result = FAIL, b_r2result = LIFT
-), data_var="params_df", random_seed=1)
-```
-
-```{r}
-#| label: mcmc_disc_3
-#| cache: true
-suppressWarnings(rwebppl::kill_webppl())
-MCMC_discrete_flfl <- rwebppl::webppl(program_file = "webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl", data=data.frame(
-    method = "MCMC",
-    discrete = TRUE,
-    strengthPriorPrecision = 1,
-    strengthPriorVersion = "[1,10]",
-
-    a_r1result = FAIL, b_r1result = LIFT,
-    a_r2result = FAIL, b_r2result = LIFT
-), data_var="params_df", random_seed=1)
-```
-
-```{r}
-#| label: mcmc_disc_4
-#| cache: true
-suppressWarnings(rwebppl::kill_webppl())
-MCMC_discrete_ffll <- rwebppl::webppl(program_file = "webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl", data=data.frame(
-    method = "MCMC",
-    discrete = TRUE,
-    strengthPriorPrecision = 1,
-    strengthPriorVersion = "[1,10]",
-
-    a_r1result = FAIL, b_r1result = FAIL,
-    a_r2result = LIFT, b_r2result = LIFT
-), data_var="params_df", random_seed=1)
-```
-
-```{r}
-#| label: mcmc_disc_5
-#| cache: true
-suppressWarnings(rwebppl::kill_webppl())
-MCMC_discrete_flll <- rwebppl::webppl(program_file = "webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl", data=data.frame(
-    method = "MCMC",
-    discrete = TRUE,
-    strengthPriorPrecision = 1,
-    strengthPriorVersion = "[1,10]",
-
-    a_r1result = FAIL, b_r1result = LIFT,
-    a_r2result = LIFT, b_r2result = LIFT
-), data_var="params_df", random_seed=1)
-```
-
-```{r}
-#| label: mcmc_disc_6
-#| cache: true
-suppressWarnings(rwebppl::kill_webppl())
-MCMC_discrete_llll <- rwebppl::webppl(program_file = "webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl", data=data.frame(
-    method = "MCMC",
-    discrete = TRUE,
-    strengthPriorPrecision = 1,
-    strengthPriorVersion = "[1,10]",
-
-    a_r1result = LIFT, b_r1result = LIFT,
-    a_r2result = LIFT, b_r2result = LIFT
-), data_var="params_df", random_seed=1)
+MCMC_discrete_results_all <- run_all_scenarios(
+  "MCMC", discrete = TRUE,
+  strengthPriorPrecision = .05, strengthPriorVersion = "[1,10]"
+)
 ```
 
 #### enumerate with discrete prior [1,10]
 
 ```{r}
-#| label: enumerate_1
+#| label: enumerate_all
 #| cache: true
-suppressWarnings(rwebppl::kill_webppl())
-enumerate_ffff <- rwebppl::webppl(program_file = "webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl", data=data.frame(
-    method = "enumerate",
-    discrete = TRUE,
-    strengthPriorPrecision = 1,
-    strengthPriorVersion = "[1,10]",
-
-    a_r1result = FAIL, b_r1result = FAIL,
-    a_r2result = FAIL, b_r2result = FAIL
-), data_var="params_df", random_seed=1)
-```
-
-```{r}
-#| label: enumerate_2
-#| cache: true
-suppressWarnings(rwebppl::kill_webppl())
-enumerate_fffl <- rwebppl::webppl(program_file = "webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl", data=data.frame(
-    method = "enumerate",
-    discrete = TRUE,
-    strengthPriorPrecision = 1,
-    strengthPriorVersion = "[1,10]",
-
-    a_r1result = FAIL, b_r1result = FAIL,
-    a_r2result = FAIL, b_r2result = LIFT
-), data_var="params_df", random_seed=1)
-```
-
-```{r}
-#| label: enumerate_3
-#| cache: true
-suppressWarnings(rwebppl::kill_webppl())
-enumerate_flfl <- rwebppl::webppl(program_file = "webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl", data=data.frame(
-    method = "enumerate",
-    discrete = TRUE,
-    strengthPriorPrecision = 1,
-    strengthPriorVersion = "[1,10]",
-
-    a_r1result = FAIL, b_r1result = LIFT,
-    a_r2result = FAIL, b_r2result = LIFT
-), data_var="params_df", random_seed=1)
-```
-
-```{r}
-#| label: enumerate_4
-#| cache: true
-suppressWarnings(rwebppl::kill_webppl())
-enumerate_ffll <- rwebppl::webppl(program_file = "webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl", data=data.frame(
-    method = "enumerate",
-    discrete = TRUE,
-    strengthPriorPrecision = 1,
-    strengthPriorVersion = "[1,10]",
-
-    a_r1result = FAIL, b_r1result = FAIL,
-    a_r2result = LIFT, b_r2result = LIFT
-), data_var="params_df", random_seed=1)
-```
-
-```{r}
-#| label: enumerate_5
-#| cache: true
-suppressWarnings(rwebppl::kill_webppl())
-enumerate_flll <- rwebppl::webppl(program_file = "webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl", data=data.frame(
-    method = "enumerate",
-    discrete = TRUE,
-    strengthPriorPrecision = 1,
-    strengthPriorVersion = "[1,10]",
-
-    a_r1result = FAIL, b_r1result = LIFT,
-    a_r2result = LIFT, b_r2result = LIFT
-), data_var="params_df", random_seed=1)
-```
-
-```{r}
-#| label: enumerate_6
-#| cache: true
-suppressWarnings(rwebppl::kill_webppl())
-enumerate_llll <- rwebppl::webppl(program_file = "webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl", data=data.frame(
-    method = "enumerate",
-    discrete = TRUE,
-    strengthPriorPrecision = 1,
-    strengthPriorVersion = "[1,10]",
-
-    a_r1result = LIFT, b_r1result = LIFT,
-    a_r2result = LIFT, b_r2result = LIFT
-), data_var="params_df", random_seed=1)
+enumerate_results_all <- run_all_scenarios(
+  "enumerate", discrete = TRUE,
+  strengthPriorPrecision = .05, strengthPriorVersion = "[1,10]"
+)
 ```
 
 #### summarize
 
 ```{r}
-#| echo: false
-compare_results <- function() {
-    P_results_summary <- tibble(
-        scenario = c("F,F;F,F","F,F;F,L","F,L;F,L","F,F;L,L","F,L;L,L","L,L;L,L"),
-        MCMC_continuous = c(
-            MCMC_continuous_ffff$P,
-            MCMC_continuous_fffl$P,
-            MCMC_continuous_flfl$P,
-            MCMC_continuous_ffll$P,
-            MCMC_continuous_flll$P,
-            MCMC_continuous_llll$P
-        ),
-        MCMC_discrete = c(
-            MCMC_discrete_ffff$P,
-            MCMC_discrete_fffl$P,
-            MCMC_discrete_flfl$P,
-            MCMC_discrete_ffll$P,
-            MCMC_discrete_flll$P,
-            MCMC_discrete_llll$P
-        ),
-        enumerate = c(
-            enumerate_ffff$P,
-            enumerate_fffl$P,
-            enumerate_flfl$P,
-            enumerate_ffll$P,
-            enumerate_flll$P,
-            enumerate_llll$P
-        )
-    )
-
-    # from $aStrength_posterior and $bStrength_posterior
-    posteriors_summary <- list(
-        MCMC_continuous = list(
-            a = list(
-                ffff = MCMC_continuous_ffff$aStrength_posterior,
-                fffl = MCMC_continuous_fffl$aStrength_posterior,
-                flfl = MCMC_continuous_flfl$aStrength_posterior,
-                ffll = MCMC_continuous_ffll$aStrength_posterior,
-                flll = MCMC_continuous_flll$aStrength_posterior,
-                llll = MCMC_continuous_llll$aStrength_posterior
-            ),
-            b = list(
-                ffff = MCMC_continuous_ffff$bStrength_posterior,
-                fffl = MCMC_continuous_fffl$bStrength_posterior,
-                flfl = MCMC_continuous_flfl$bStrength_posterior,
-                ffll = MCMC_continuous_ffll$bStrength_posterior,
-                flll = MCMC_continuous_flll$bStrength_posterior,
-                llll = MCMC_continuous_llll$bStrength_posterior
-            )
-        ),
-        MCMC_discrete = list(
-            a = list(
-                ffff = MCMC_discrete_ffff$aStrength_posterior,
-                fffl = MCMC_discrete_fffl$aStrength_posterior,
-                flfl = MCMC_discrete_flfl$aStrength_posterior,
-                ffll = MCMC_discrete_ffll$aStrength_posterior,
-                flll = MCMC_discrete_flll$aStrength_posterior,
-                llll = MCMC_discrete_llll$aStrength_posterior
-            ),
-            b = list(
-                ffff = MCMC_discrete_ffff$bStrength_posterior,
-                fffl = MCMC_discrete_fffl$bStrength_posterior,
-                flfl = MCMC_discrete_flfl$bStrength_posterior,
-                ffll = MCMC_discrete_ffll$bStrength_posterior,
-                flll = MCMC_discrete_flll$bStrength_posterior,
-                llll = MCMC_discrete_llll$bStrength_posterior
-            )
-        ),
-        enumerate = list(
-            a = list(
-                ffff = enumerate_ffff$aStrength_posterior,
-                fffl = enumerate_fffl$aStrength_posterior,
-                flfl = enumerate_flfl$aStrength_posterior,
-                ffll = enumerate_ffll$aStrength_posterior,
-                flll = enumerate_flll$aStrength_posterior,
-                llll = enumerate_llll$aStrength_posterior
-            ),
-            b = list(
-                ffff = enumerate_ffff$bStrength_posterior,
-                fffl = enumerate_fffl$bStrength_posterior,
-                flfl = enumerate_flfl$bStrength_posterior,
-                ffll = enumerate_ffll$bStrength_posterior,
-                flll = enumerate_flll$bStrength_posterior,
-                llll = enumerate_llll$bStrength_posterior
-            )
-        )
-    )
-
-    print("Now compare visually")
-
-    show(P_results_summary)
-
-    # Convert posteriors_summary to tidy format for plotting
-    posteriors_tidy <- map_dfr(names(posteriors_summary), function(method_name) {
-        map_dfr(c("a", "b"), function(agent) {
-            map_dfr(names(posteriors_summary[[method_name]][[agent]]), function(scenario) {
-            tibble(
-                method = method_name,
-                agent = agent,
-                scenario = scenario,
-                strength = posteriors_summary[[method_name]][[agent]][[scenario]]
-            )
-            })
-        })
-    })
-
-    # Plot density of posteriors for each scenario
-    show(
-        ggplot(posteriors_tidy, aes(x = strength, color = method, linetype = agent)) +
-            geom_density() +
-            facet_wrap(~scenario, scales = "free_y") +
-            labs(
-                title = "Strength Posteriors Across Scenarios",
-                x = "Strength",
-                y = "Density",
-                color = "Method",
-                linetype = "Agent"
-            ) +
-            theme_minimal() +
-            theme(legend.position = "bottom")
-    )
-
-    print("Now separately for each method (or method and agent) and so that we can ensure that there are no missing posteriors")
-
-    show(
-        ggplot(posteriors_tidy, aes(x = strength, color = method, linetype = agent)) +
-            geom_density() +
-            facet_grid(method~scenario, scales = "free_y") +
-            labs(
-                title = "Strength Posteriors Across Scenarios",
-                x = "Strength",
-                y = "Density",
-                color = "Method",
-                linetype = "Agent"
-            ) +
-            theme_minimal() +
-            theme(legend.position = "bottom")
-    )
-
-    show(
-        ggplot(posteriors_tidy, aes(x = strength, color = method, linetype = agent)) +
-            geom_density() +
-            facet_grid(method~scenario+agent, scales = "free_y") +
-            labs(
-                title = "Strength Posteriors Across Scenarios",
-                x = "Strength",
-                y = "Density",
-                color = "Method",
-                linetype = "Agent"
-            ) +
-            theme_minimal() +
-            theme(legend.position = "bottom")
-    )
-
-    print("Compare all output values across methods")
-
-    print("Extract all final_table values into a comprehensive summary")
-
-    all_results <- tibble(
-        scenario = rep(c("ffff","fffl","flfl","ffll","flll","llll"), 3),
-        method = rep(c("MCMC_continuous", "MCMC_discrete", "enumerate"), each = 6),
-        startingE = c(
-            # MCMC_continuous
-            MCMC_continuous_ffff$startingE, MCMC_continuous_fffl$startingE, MCMC_continuous_flfl$startingE,
-            MCMC_continuous_ffll$startingE, MCMC_continuous_flll$startingE, MCMC_continuous_llll$startingE,
-            # MCMC_discrete
-            MCMC_discrete_ffff$startingE, MCMC_discrete_fffl$startingE, MCMC_discrete_flfl$startingE,
-            MCMC_discrete_ffll$startingE, MCMC_discrete_flll$startingE, MCMC_discrete_llll$startingE,
-            # enumerate
-            enumerate_ffff$startingE, enumerate_fffl$startingE, enumerate_flfl$startingE,
-            enumerate_ffll$startingE, enumerate_flll$startingE, enumerate_llll$startingE
-        ),
-        aE = c(
-            # MCMC_continuous
-            MCMC_continuous_ffff$final_table$aE, MCMC_continuous_fffl$final_table$aE, MCMC_continuous_flfl$final_table$aE,
-            MCMC_continuous_ffll$final_table$aE, MCMC_continuous_flll$final_table$aE, MCMC_continuous_llll$final_table$aE,
-            # MCMC_discrete
-            MCMC_discrete_ffff$final_table$aE, MCMC_discrete_fffl$final_table$aE, MCMC_discrete_flfl$final_table$aE,
-            MCMC_discrete_ffll$final_table$aE, MCMC_discrete_flll$final_table$aE, MCMC_discrete_llll$final_table$aE,
-            # enumerate
-            enumerate_ffff$final_table$aE, enumerate_fffl$final_table$aE, enumerate_flfl$final_table$aE,
-            enumerate_ffll$final_table$aE, enumerate_flll$final_table$aE, enumerate_llll$final_table$aE
-        ),
-        bE = c(
-            # MCMC_continuous
-            MCMC_continuous_ffff$final_table$bE, MCMC_continuous_fffl$final_table$bE, MCMC_continuous_flfl$final_table$bE,
-            MCMC_continuous_ffll$final_table$bE, MCMC_continuous_flll$final_table$bE, MCMC_continuous_llll$final_table$bE,
-            # MCMC_discrete
-            MCMC_discrete_ffff$final_table$bE, MCMC_discrete_fffl$final_table$bE, MCMC_discrete_flfl$final_table$bE,
-            MCMC_discrete_ffll$final_table$bE, MCMC_discrete_flll$final_table$bE, MCMC_discrete_llll$final_table$bE,
-            # enumerate
-            enumerate_ffff$final_table$bE, enumerate_fffl$final_table$bE, enumerate_flfl$final_table$bE,
-            enumerate_ffll$final_table$bE, enumerate_flll$final_table$bE, enumerate_llll$final_table$bE
-        ),
-        aU = c(
-            # MCMC_continuous
-            MCMC_continuous_ffff$final_table$aU, MCMC_continuous_fffl$final_table$aU, MCMC_continuous_flfl$final_table$aU,
-            MCMC_continuous_ffll$final_table$aU, MCMC_continuous_flll$final_table$aU, MCMC_continuous_llll$final_table$aU,
-            # MCMC_discrete
-            MCMC_discrete_ffff$final_table$aU, MCMC_discrete_fffl$final_table$aU, MCMC_discrete_flfl$final_table$aU,
-            MCMC_discrete_ffll$final_table$aU, MCMC_discrete_flll$final_table$aU, MCMC_discrete_llll$final_table$aU,
-            # enumerate
-            enumerate_ffff$final_table$aU, enumerate_fffl$final_table$aU, enumerate_flfl$final_table$aU,
-            enumerate_ffll$final_table$aU, enumerate_flll$final_table$aU, enumerate_llll$final_table$aU
-        ),
-        bU = c(
-            # MCMC_continuous
-            MCMC_continuous_ffff$final_table$bU, MCMC_continuous_fffl$final_table$bU, MCMC_continuous_flfl$final_table$bU,
-            MCMC_continuous_ffll$final_table$bU, MCMC_continuous_flll$final_table$bU, MCMC_continuous_llll$final_table$bU,
-            # MCMC_discrete
-            MCMC_discrete_ffff$final_table$bU, MCMC_discrete_fffl$final_table$bU, MCMC_discrete_flfl$final_table$bU,
-            MCMC_discrete_ffll$final_table$bU, MCMC_discrete_flll$final_table$bU, MCMC_discrete_llll$final_table$bU,
-            # enumerate
-            enumerate_ffff$final_table$bU, enumerate_fffl$final_table$bU, enumerate_flfl$final_table$bU,
-            enumerate_ffll$final_table$bU, enumerate_flll$final_table$bU, enumerate_llll$final_table$bU
-        ),
-        jointU = c(
-            # MCMC_continuous
-            MCMC_continuous_ffff$final_table$jointU, MCMC_continuous_fffl$final_table$jointU, MCMC_continuous_flfl$final_table$jointU,
-            MCMC_continuous_ffll$final_table$jointU, MCMC_continuous_flll$final_table$jointU, MCMC_continuous_llll$final_table$jointU,
-            # MCMC_discrete
-            MCMC_discrete_ffff$final_table$jointU, MCMC_discrete_fffl$final_table$jointU, MCMC_discrete_flfl$final_table$jointU,
-            MCMC_discrete_ffll$final_table$jointU, MCMC_discrete_flll$final_table$jointU, MCMC_discrete_llll$final_table$jointU,
-            # enumerate
-            enumerate_ffff$final_table$jointU, enumerate_fffl$final_table$jointU, enumerate_flfl$final_table$jointU,
-            enumerate_ffll$final_table$jointU, enumerate_flll$final_table$jointU, enumerate_llll$final_table$jointU
-        ),
-        P = c(
-            # MCMC_continuous
-            MCMC_continuous_ffff$P, MCMC_continuous_fffl$P, MCMC_continuous_flfl$P,
-            MCMC_continuous_ffll$P, MCMC_continuous_flll$P, MCMC_continuous_llll$P,
-            # MCMC_discrete
-            MCMC_discrete_ffff$P, MCMC_discrete_fffl$P, MCMC_discrete_flfl$P,
-            MCMC_discrete_ffll$P, MCMC_discrete_flll$P, MCMC_discrete_llll$P,
-            # enumerate
-            enumerate_ffff$P, enumerate_fffl$P, enumerate_flfl$P,
-            enumerate_ffll$P, enumerate_flll$P, enumerate_llll$P
-        )
-    )
-
-    # Display the full comparison table
-    show(all_results)
-
-    # Pivot to wide format for easier comparison across methods
-    all_results_wide <- all_results %>%
-        pivot_longer(cols = c(startingE, aE, bE, aU, bU, jointU, P),
-                    names_to = "variable",
-                    values_to = "value") %>%
-        pivot_wider(names_from = method,
-                    values_from = value,
-                    id_cols = c(scenario, variable))
-
-    # Display wide format
-    show(all_results_wide)
-
-    # Plot comparisons for each variable
-    all_results_long <- all_results %>%
-        pivot_longer(cols = c(startingE, aE, bE, aU, bU, jointU, P),
-                    names_to = "variable",
-                    values_to = "value")
-
-    show(
-        ggplot(all_results_long, aes(x = scenario, y = value, fill = method)) +
-            geom_col(position = "dodge") +
-            facet_wrap(~variable, scales = "free_y", ncol = 2) +
-            labs(
-                title = "All Output Variables Comparison Across Methods and Scenarios",
-                x = "Scenario",
-                y = "Value",
-                fill = "Method"
-            ) +
-            theme_minimal() +
-            theme(axis.text.x = element_text(angle = 45, hjust = 1))
-    )
-
-    # # Calculate differences between methods for each variable
-    # all_results_differences <- all_results_wide %>%
-    #     mutate(
-    #         diff_continuous_discrete = MCMC_continuous - MCMC_discrete,
-    #         diff_discrete_enumerate = MCMC_discrete - enumerate,
-    #         diff_continuous_enumerate = MCMC_continuous - enumerate
-    #     )
-
-    # # Summary of differences
-    # all_results_differences %>%
-    #     group_by(variable) %>%
-    #     summarise(
-    #         mean_abs_diff_continuous_discrete = mean(abs(diff_continuous_discrete)),
-    #         max_abs_diff_continuous_discrete = max(abs(diff_continuous_discrete)),
-    #         mean_abs_diff_discrete_enumerate = mean(abs(diff_discrete_enumerate)),
-    #         max_abs_diff_discrete_enumerate = max(abs(diff_discrete_enumerate)),
-    #         mean_abs_diff_continuous_enumerate = mean(abs(diff_continuous_enumerate)),
-    #         max_abs_diff_continuous_enumerate = max(abs(diff_continuous_enumerate))
-    #     ) %>%
-    #     show()
-
-
-
-
-
-    # To evaluate how startingE was found, inspect $startingE_table:
-    startingE_all_results <- tibble(
-        scenario = rep(c("ffff","fffl","flfl","ffll","flll","llll"), 3),
-        method = rep(c("MCMC_continuous", "MCMC_discrete", "enumerate"), each = 6),
-        aE = c(
-            # MCMC_continuous
-            MCMC_continuous_ffff$startingE_table$aE, MCMC_continuous_fffl$startingE_table$aE, MCMC_continuous_flfl$startingE_table$aE,
-            MCMC_continuous_ffll$startingE_table$aE, MCMC_continuous_flll$startingE_table$aE, MCMC_continuous_llll$startingE_table$aE,
-            # MCMC_discrete
-            MCMC_discrete_ffff$startingE_table$aE, MCMC_discrete_fffl$startingE_table$aE, MCMC_discrete_flfl$startingE_table$aE,
-            MCMC_discrete_ffll$startingE_table$aE, MCMC_discrete_flll$startingE_table$aE, MCMC_discrete_llll$startingE_table$aE,
-            # enumerate
-            enumerate_ffff$startingE_table$aE, enumerate_fffl$startingE_table$aE, enumerate_flfl$startingE_table$aE,
-            enumerate_ffll$startingE_table$aE, enumerate_flll$startingE_table$aE, enumerate_llll$startingE_table$aE
-        ),
-        bE = c(
-            # MCMC_continuous
-            MCMC_continuous_ffff$startingE_table$bE, MCMC_continuous_fffl$startingE_table$bE, MCMC_continuous_flfl$startingE_table$bE,
-            MCMC_continuous_ffll$startingE_table$bE, MCMC_continuous_flll$startingE_table$bE, MCMC_continuous_llll$startingE_table$bE,
-            # MCMC_discrete
-            MCMC_discrete_ffff$startingE_table$bE, MCMC_discrete_fffl$startingE_table$bE, MCMC_discrete_flfl$startingE_table$bE,
-            MCMC_discrete_ffll$startingE_table$bE, MCMC_discrete_flll$startingE_table$bE, MCMC_discrete_llll$startingE_table$bE,
-            # enumerate
-            enumerate_ffff$startingE_table$bE, enumerate_fffl$startingE_table$bE, enumerate_flfl$startingE_table$bE,
-            enumerate_ffll$startingE_table$bE, enumerate_flll$startingE_table$bE, enumerate_llll$startingE_table$bE
-        ),
-        aU = c(
-            # MCMC_continuous
-            MCMC_continuous_ffff$startingE_table$aU, MCMC_continuous_fffl$startingE_table$aU, MCMC_continuous_flfl$startingE_table$aU,
-            MCMC_continuous_ffll$startingE_table$aU, MCMC_continuous_flll$startingE_table$aU, MCMC_continuous_llll$startingE_table$aU,
-            # MCMC_discrete
-            MCMC_discrete_ffff$startingE_table$aU, MCMC_discrete_fffl$startingE_table$aU, MCMC_discrete_flfl$startingE_table$aU,
-            MCMC_discrete_ffll$startingE_table$aU, MCMC_discrete_flll$startingE_table$aU, MCMC_discrete_llll$startingE_table$aU,
-            # enumerate
-            enumerate_ffff$startingE_table$aU, enumerate_fffl$startingE_table$aU, enumerate_flfl$startingE_table$aU,
-            enumerate_ffll$startingE_table$aU, enumerate_flll$startingE_table$aU, enumerate_llll$startingE_table$aU
-        ),
-        bU = c(
-            # MCMC_continuous
-            MCMC_continuous_ffff$startingE_table$bU, MCMC_continuous_fffl$startingE_table$bU, MCMC_continuous_flfl$startingE_table$bU,
-            MCMC_continuous_ffll$startingE_table$bU, MCMC_continuous_flll$startingE_table$bU, MCMC_continuous_llll$startingE_table$bU,
-            # MCMC_discrete
-            MCMC_discrete_ffff$startingE_table$bU, MCMC_discrete_fffl$startingE_table$bU, MCMC_discrete_flfl$startingE_table$bU,
-            MCMC_discrete_ffll$startingE_table$bU, MCMC_discrete_flll$startingE_table$bU, MCMC_discrete_llll$startingE_table$bU,
-            # enumerate
-            enumerate_ffff$startingE_table$bU, enumerate_fffl$startingE_table$bU, enumerate_flfl$startingE_table$bU,
-            enumerate_ffll$startingE_table$bU, enumerate_flll$startingE_table$bU, enumerate_llll$startingE_table$bU
-        ),
-        jointU = c(
-            # MCMC_continuous
-            MCMC_continuous_ffff$startingE_table$jointU, MCMC_continuous_fffl$startingE_table$jointU, MCMC_continuous_flfl$startingE_table$jointU,
-            MCMC_continuous_ffll$startingE_table$jointU, MCMC_continuous_flll$startingE_table$jointU, MCMC_continuous_llll$startingE_table$jointU,
-            # MCMC_discrete
-            MCMC_discrete_ffff$startingE_table$jointU, MCMC_discrete_fffl$startingE_table$jointU, MCMC_discrete_flfl$startingE_table$jointU,
-            MCMC_discrete_ffll$startingE_table$jointU, MCMC_discrete_flll$startingE_table$jointU, MCMC_discrete_llll$startingE_table$jointU,
-            # enumerate
-            enumerate_ffff$startingE_table$jointU, enumerate_fffl$startingE_table$jointU, enumerate_flfl$startingE_table$jointU,
-            enumerate_ffll$startingE_table$jointU, enumerate_flll$startingE_table$jointU, enumerate_llll$startingE_table$jointU
-        )
-    )
-
-    # Display the full comparison table
-    show(startingE_all_results)
-
-    # Pivot to wide format for easier comparison across methods
-    startingE_all_results_wide <- startingE_all_results %>%
-        pivot_longer(cols = c(aE, bE, aU, bU, jointU),
-                    names_to = "variable",
-                    values_to = "value") %>%
-        pivot_wider(names_from = method,
-                    values_from = value,
-                    id_cols = c(scenario, variable))
-
-    # Display wide format
-    show(startingE_all_results_wide)
-
-    # Plot comparisons for each variable
-    startingE_all_results_long <- startingE_all_results %>%
-        pivot_longer(cols = c(aE, bE, aU, bU, jointU),
-                    names_to = "variable",
-                    values_to = "value")
-
-    show(
-        ggplot(startingE_all_results_long, aes(x = scenario, y = value, fill = method)) +
-            geom_col(position = "dodge") +
-            facet_wrap(~variable, scales = "free_y", ncol = 2) +
-            labs(
-                title = "(starting effort) All Output Variables Comparison Across Methods and Scenarios",
-                x = "Scenario",
-                y = "Value",
-                fill = "Method"
-            ) +
-            theme_minimal() +
-            theme(axis.text.x = element_text(angle = 45, hjust = 1))
-    )
-}
-```
-
-```{r}
-compare_results()
+compare_results(
+  MCMC_continuous = MCMC_continuous_results_all,
+  MCMC_discrete = MCMC_discrete_results_all,
+  enumerate = enumerate_results_all
+)
 ```
 
 ### strength prior (1,10)
@@ -1085,191 +689,32 @@ compare_results()
 #### mcmc with discrete prior (1,10)
 
 ```{r}
-#| label: mcmc_disc_1-exclexcl
+#| label: mcmc_disc_all_exclexcl
 #| cache: true
-suppressWarnings(rwebppl::kill_webppl())
-MCMC_discrete_ffff <- rwebppl::webppl(program_file = "webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl", data=data.frame(
-    method = "MCMC",
-    discrete = TRUE,
-    strengthPriorPrecision = 1,
-    strengthPriorVersion = "(1,10)",
-
-    a_r1result = FAIL, b_r1result = FAIL,
-    a_r2result = FAIL, b_r2result = FAIL
-), data_var="params_df", random_seed=1)
-```
-
-```{r}
-#| label: mcmc_disc_2-exclexcl
-#| cache: true
-suppressWarnings(rwebppl::kill_webppl())
-MCMC_discrete_fffl <- rwebppl::webppl(program_file = "webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl", data=data.frame(
-    method = "MCMC",
-    discrete = TRUE,
-    strengthPriorPrecision = 1,
-    strengthPriorVersion = "(1,10)",
-
-    a_r1result = FAIL, b_r1result = FAIL,
-    a_r2result = FAIL, b_r2result = LIFT
-), data_var="params_df", random_seed=1)
-```
-
-```{r}
-#| label: mcmc_disc_3-exclexcl
-#| cache: true
-suppressWarnings(rwebppl::kill_webppl())
-MCMC_discrete_flfl <- rwebppl::webppl(program_file = "webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl", data=data.frame(
-    method = "MCMC",
-    discrete = TRUE,
-    strengthPriorPrecision = 1,
-    strengthPriorVersion = "(1,10)",
-
-    a_r1result = FAIL, b_r1result = LIFT,
-    a_r2result = FAIL, b_r2result = LIFT
-), data_var="params_df", random_seed=1)
-```
-
-```{r}
-#| label: mcmc_disc_4-exclexcl
-#| cache: true
-suppressWarnings(rwebppl::kill_webppl())
-MCMC_discrete_ffll <- rwebppl::webppl(program_file = "webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl", data=data.frame(
-    method = "MCMC",
-    discrete = TRUE,
-    strengthPriorPrecision = 1,
-    strengthPriorVersion = "(1,10)",
-
-    a_r1result = FAIL, b_r1result = FAIL,
-    a_r2result = LIFT, b_r2result = LIFT
-), data_var="params_df", random_seed=1)
-```
-
-```{r}
-#| label: mcmc_disc_5-exclexcl
-#| cache: true
-suppressWarnings(rwebppl::kill_webppl())
-MCMC_discrete_flll <- rwebppl::webppl(program_file = "webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl", data=data.frame(
-    method = "MCMC",
-    discrete = TRUE,
-    strengthPriorPrecision = 1,
-    strengthPriorVersion = "(1,10)",
-
-    a_r1result = FAIL, b_r1result = LIFT,
-    a_r2result = LIFT, b_r2result = LIFT
-), data_var="params_df", random_seed=1)
-```
-
-```{r}
-#| label: mcmc_disc_6-exclexcl
-#| cache: true
-suppressWarnings(rwebppl::kill_webppl())
-MCMC_discrete_llll <- rwebppl::webppl(program_file = "webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl", data=data.frame(
-    method = "MCMC",
-    discrete = TRUE,
-    strengthPriorPrecision = 1,
-    strengthPriorVersion = "(1,10)",
-
-    a_r1result = LIFT, b_r1result = LIFT,
-    a_r2result = LIFT, b_r2result = LIFT
-), data_var="params_df", random_seed=1)
+MCMC_discrete_results_exclexcl <- run_all_scenarios(
+  "MCMC", discrete = TRUE,
+  strengthPriorPrecision = .05, strengthPriorVersion = "(1,10)"
+)
 ```
 
 #### enumerate with discrete prior (1,10)
 
 ```{r}
-#| label: enumerate_1-exclexcl
+#| label: enumerate_all_exclexcl
 #| cache: true
-suppressWarnings(rwebppl::kill_webppl())
-enumerate_ffff <- rwebppl::webppl(program_file = "webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl", data=data.frame(
-    method = "enumerate",
-    discrete = TRUE,
-    strengthPriorPrecision = 1,
-    strengthPriorVersion = "(1,10)",
-
-    a_r1result = FAIL, b_r1result = FAIL,
-    a_r2result = FAIL, b_r2result = FAIL
-), data_var="params_df", random_seed=1)
-```
-
-```{r}
-#| label: enumerate_2-exclexcl
-#| cache: true
-suppressWarnings(rwebppl::kill_webppl())
-enumerate_fffl <- rwebppl::webppl(program_file = "webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl", data=data.frame(
-    method = "enumerate",
-    discrete = TRUE,
-    strengthPriorPrecision = 1,
-    strengthPriorVersion = "(1,10)",
-
-    a_r1result = FAIL, b_r1result = FAIL,
-    a_r2result = FAIL, b_r2result = LIFT
-), data_var="params_df", random_seed=1)
-```
-
-```{r}
-#| label: enumerate_3-exclexcl
-#| cache: true
-suppressWarnings(rwebppl::kill_webppl())
-enumerate_flfl <- rwebppl::webppl(program_file = "webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl", data=data.frame(
-    method = "enumerate",
-    discrete = TRUE,
-    strengthPriorPrecision = 1,
-    strengthPriorVersion = "(1,10)",
-
-    a_r1result = FAIL, b_r1result = LIFT,
-    a_r2result = FAIL, b_r2result = LIFT
-), data_var="params_df", random_seed=1)
-```
-
-```{r}
-#| label: enumerate_4-exclexcl
-#| cache: true
-suppressWarnings(rwebppl::kill_webppl())
-enumerate_ffll <- rwebppl::webppl(program_file = "webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl", data=data.frame(
-    method = "enumerate",
-    discrete = TRUE,
-    strengthPriorPrecision = 1,
-    strengthPriorVersion = "(1,10)",
-
-    a_r1result = FAIL, b_r1result = FAIL,
-    a_r2result = LIFT, b_r2result = LIFT
-), data_var="params_df", random_seed=1)
-```
-
-```{r}
-#| label: enumerate_5-exclexcl
-#| cache: true
-suppressWarnings(rwebppl::kill_webppl())
-enumerate_flll <- rwebppl::webppl(program_file = "webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl", data=data.frame(
-    method = "enumerate",
-    discrete = TRUE,
-    strengthPriorPrecision = 1,
-    strengthPriorVersion = "(1,10)",
-
-    a_r1result = FAIL, b_r1result = LIFT,
-    a_r2result = LIFT, b_r2result = LIFT
-), data_var="params_df", random_seed=1)
-```
-
-```{r}
-#| label: enumerate_6-exclexcl
-#| cache: true
-suppressWarnings(rwebppl::kill_webppl())
-enumerate_llll <- rwebppl::webppl(program_file = "webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl", data=data.frame(
-    method = "enumerate",
-    discrete = TRUE,
-    strengthPriorPrecision = 1,
-    strengthPriorVersion = "(1,10)",
-
-    a_r1result = LIFT, b_r1result = LIFT,
-    a_r2result = LIFT, b_r2result = LIFT
-), data_var="params_df", random_seed=1)
+enumerate_results_exclexcl <- run_all_scenarios(
+  "enumerate", discrete = TRUE,
+  strengthPriorPrecision = .05, strengthPriorVersion = "(1,10)"
+)
 ```
 
 #### summarize
 
 ```{r}
-compare_results()
+compare_results(
+  MCMC_continuous = MCMC_continuous_results_all,
+  MCMC_discrete = MCMC_discrete_results_exclexcl,
+  enumerate = enumerate_results_exclexcl
+)
 ```
 
-TODO Okay not sure why result is kinda unreliable; maybe need to ensure that the different methods' results aren't getting mixed up during caching. ALSO, not sure why P jumps to 1 so fast after F,F;F,F! **maybe I need to fully regenerate the results each time I change anything, since Quarto's caching might not be sufficient**

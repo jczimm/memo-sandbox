@@ -313,189 +313,210 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
 <span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a><span class="co"># F,F;F,F</span></span>
-<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a>mdl <span class="ot">&lt;-</span> <span class="fu">paste0</span>(effort_space_joint, mdl1, <span class="st">"false"</span>, mdl2, <span class="st">"false"</span>, mdl3, <span class="st">"false"</span>, mdl4, <span class="st">"false"</span>, mdl5)</span>
-<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">webppl</span>(mdl)</span>
-<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a>joint<span class="sc">$</span>prob[joint<span class="sc">$</span>round<span class="sc">==</span><span class="dv">3</span> <span class="sc">&amp;</span> joint<span class="sc">$</span>scenario<span class="sc">==</span><span class="st">'F,F;F,F'</span>] <span class="ot">&lt;-</span> a<span class="sc">$</span>P<span class="sc">*</span><span class="dv">100</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a><span class="co"># mdl &lt;- paste0(effort_space_joint, mdl1, "false", mdl2, "false", mdl3, "false", mdl4, "false", mdl5)</span></span>
+<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a><span class="co"># a &lt;- rwebppl::webppl(mdl)</span></span>
+<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a><span class="co"># joint$prob[joint$round==3 &amp; joint$scenario=='F,F;F,F'] &lt;- a$P*100</span></span>
+<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a><span class="co"># joint</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>joint</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>original_ffff <span class="ot">&lt;-</span> <span class="fu">paste0</span>(effort_space_joint, mdl1, <span class="st">"false"</span>, mdl2, <span class="st">"false"</span>, mdl3, <span class="st">"false"</span>, mdl4, <span class="st">"false"</span>, mdl5) <span class="sc">|&gt;</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>()</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>original_fffl <span class="ot">&lt;-</span> <span class="fu">paste0</span>(effort_space_joint, mdl1, <span class="st">"false"</span>, mdl2, <span class="st">"false"</span>, mdl3, <span class="st">"false"</span>, mdl4, <span class="st">"true"</span>, mdl5) <span class="sc">|&gt;</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>()</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>original_flfl <span class="ot">&lt;-</span> <span class="fu">paste0</span>(effort_space_joint, mdl1, <span class="st">"false"</span>, mdl2, <span class="st">"true"</span>, mdl3, <span class="st">"false"</span>, mdl4, <span class="st">"true"</span>, mdl5) <span class="sc">|&gt;</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>()</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>original_ffll <span class="ot">&lt;-</span> <span class="fu">paste0</span>(effort_space_joint, mdl1, <span class="st">"false"</span>, mdl2, <span class="st">"false"</span>, mdl3, <span class="st">"true"</span>, mdl4, <span class="st">"true"</span>, mdl5) <span class="sc">|&gt;</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>()</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>original_flll <span class="ot">&lt;-</span> <span class="fu">paste0</span>(effort_space_joint, mdl1, <span class="st">"false"</span>, mdl2, <span class="st">"true"</span>, mdl3, <span class="st">"true"</span>, mdl4, <span class="st">"true"</span>, mdl5) <span class="sc">|&gt;</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>()</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>original_llll <span class="ot">&lt;-</span> <span class="fu">paste0</span>(effort_space_joint, mdl1, <span class="st">"true"</span>, mdl2, <span class="st">"true"</span>, mdl3, <span class="st">"true"</span>, mdl4, <span class="st">"true"</span>, mdl5) <span class="sc">|&gt;</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># plot</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">bind_rows</span>(</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>(<span class="at">scenario=</span><span class="st">'F,F;F,F'</span>, <span class="at">P=</span>original_ffff<span class="sc">$</span>P),</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>(<span class="at">scenario=</span><span class="st">'F,F;F,L'</span>, <span class="at">P=</span>original_fffl<span class="sc">$</span>P),</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>(<span class="at">scenario=</span><span class="st">'F,L;F,L'</span>, <span class="at">P=</span>original_flfl<span class="sc">$</span>P),</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>(<span class="at">scenario=</span><span class="st">'F,F;L,L'</span>, <span class="at">P=</span>original_ffll<span class="sc">$</span>P),</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>(<span class="at">scenario=</span><span class="st">'F,L;L,L'</span>, <span class="at">P=</span>original_flll<span class="sc">$</span>P),</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>(<span class="at">scenario=</span><span class="st">'L,L;L,L'</span>, <span class="at">P=</span>original_llll<span class="sc">$</span>P)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>scenario, <span class="at">y=</span>P<span class="sc">*</span><span class="dv">100</span>)) <span class="sc">+</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>() <span class="sc">+</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">'Round 3 Success Probability by Scenario (MCMC, ORIGINAL CODE)'</span>, <span class="at">y=</span><span class="st">'Probability (%)'</span>, <span class="at">x=</span><span class="st">'Scenario'</span>) <span class="sc">+</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="enumeration" class="level2">
 <h2 class="anchored" data-anchor-id="enumeration">2 - enumeration</h2>
 <p>now trying it using enumeration (using a discretized strength space), as a step towards translating into memo:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>effort_space_joint <span class="ot">&lt;-</span> <span class="st">"var efforts = [0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1]"</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="do">## R3 Probability</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>mdl1 <span class="ot">&lt;-</span> <span class="st">"</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="st">// convert to a @jax.jit?</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="st">var argMax = function(f, ar){</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="st">  return maxWith(f, ar)[0]</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="st">};</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="st">var alpha = 13.5, beta = 24.5</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="st">var weight = mem(function (box) {return 5})</span></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="st">var lowR = 10</span></span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="st">var highR = 20</span></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="st">// convert to a @jax.jit</span></span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="st">var lift = function(strength,box,effort){</span></span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="st">  return (effort*strength &gt;= weight(box))</span></span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="st">// convert to a @jax.jit</span></span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="st">var optE = function(strength,box,reward) {</span></span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="st">  return argMax(</span></span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="st">    function(effort) {</span></span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="st">      if (strength.length &gt; 1)</span></span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="st">        {return reward*listMean(map(function(i){return lift(i,box,effort)}, strength)) - alpha*effort}</span></span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="st">        else </span></span>
-<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="st">          {return reward*lift(strength,box,effort) - alpha*effort}</span></span>
-<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="st">    },</span></span>
-<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a><span class="st">    efforts);</span></span>
-<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a><span class="st">};</span></span>
-<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a><span class="st">// convert to a @jax.jit</span></span>
-<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a><span class="st">var outcome = function(strength,box,reward) {</span></span>
-<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a><span class="st">  if (strength.length &gt; 1)</span></span>
-<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a><span class="st">    { var opt_effort = optE(strength,box,reward)</span></span>
-<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a><span class="st">      return listMean(map(function(i){return lift(i,box,opt_effort)}, strength))}</span></span>
-<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a><span class="st">  else </span></span>
-<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a><span class="st">  {return lift(strength,box,optE(strength,box,reward))}</span></span>
-<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a><span class="st">// convert to a @memo, and instead of pushing x2a and x2b to a global variable, bring in the computations which use them into the @memo ?</span></span>
-<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a><span class="st">var x2a = [], x2b = []</span></span>
-<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a><span class="st">var samples2 = Infer({ method: 'enumerate', model() {</span></span>
-<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a><span class="st">  var sa = (11+randomInteger(89))/10 // not in a general form, but computes values in (1, 10) instead of in [1, 10] to see if that fixes things</span></span>
-<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a><span class="st">  var sb = (11+randomInteger(89))/10</span></span>
-<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a><span class="st">  condition(outcome(sa,'box',lowR) == "</span></span>
-<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>mdl2 <span class="ot">&lt;-</span> <span class="st">")</span></span>
-<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a><span class="st">  condition(outcome(sb,'box',lowR) == "</span></span>
-<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>mdl3 <span class="ot">&lt;-</span> <span class="st">")</span></span>
-<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a><span class="st">  condition(outcome(sa,'box',highR) == "</span></span>
-<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>mdl4 <span class="ot">&lt;-</span> <span class="st">")</span></span>
-<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a><span class="st">  condition(outcome(sb,'box',highR) == "</span></span>
-<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>mdl5 <span class="ot">&lt;-</span> <span class="st">")</span></span>
-<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a><span class="st">  x2a.push(sa)</span></span>
-<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a><span class="st">  x2b.push(sb)</span></span>
-<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a><span class="st">  return 0</span></span>
-<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a><span class="st">}})</span></span>
-<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a><span class="st">// convert to a combination of @jax.jit and @memo ? so I'm not doing two-step nested optimization (like the difference between RSA in webppl and in memo)</span></span>
-<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a><span class="st">var jointUtility = function(init_effort,a_strength,b_strength){</span></span>
-<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a><span class="st">  var r3_reward = highR // round 3 reward</span></span>
-<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a><span class="st">  </span></span>
-<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a><span class="st">  var lift2 = function(strength,strength2,box,effort,effort2){</span></span>
-<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a><span class="st">    return (effort*strength + effort2*strength2) &gt;= weight(box)</span></span>
-<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
-<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a><span class="st">  var gini = function(effort, effort2) {return (effort == effort2 ? 0 : Math.abs(effort-effort2)/4/(effort+effort2))}</span></span>
-<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a><span class="st">  // For the Maximum effort model, the Gini coefficient is always 0, so it is fine to keep this term in here for the maximum effort model.</span></span>
-<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a><span class="st">  </span></span>
-<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a><span class="st">  var a = function(depth,reward) {</span></span>
-<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a><span class="st">      var effort2 = b(depth - 1,reward)</span></span>
-<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a><span class="st">      var optEffort = function(strength,strength2,box,reward) {</span></span>
-<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a><span class="st">        return argMax(</span></span>
-<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a><span class="st">          function(effort) {</span></span>
-<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a><span class="st">            if (a_strength.length &gt; 1) {</span></span>
-<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a><span class="st">              return reward*listMean(map2(function(i,j){return lift2(i,j,box,effort,effort2)}, strength,strength2)) - alpha*effort - beta*gini(effort,effort2)</span></span>
-<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a><span class="st">            } else {</span></span>
-<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a><span class="st">              return reward*lift2(strength,strength2,box,effort,effort2) - alpha*effort - beta*gini(effort,effort2)</span></span>
-<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a><span class="st">            }</span></span>
-<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a><span class="st">          },</span></span>
-<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a><span class="st">          efforts);</span></span>
-<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a><span class="st">      };</span></span>
-<span id="cb4-83"><a href="#cb4-83" aria-hidden="true" tabindex="-1"></a><span class="st">    return optEffort(a_strength,b_strength,'box',reward)</span></span>
-<span id="cb4-84"><a href="#cb4-84" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
-<span id="cb4-85"><a href="#cb4-85" aria-hidden="true" tabindex="-1"></a><span class="st">  </span></span>
-<span id="cb4-86"><a href="#cb4-86" aria-hidden="true" tabindex="-1"></a><span class="st">  var b = function(depth,reward) {</span></span>
-<span id="cb4-87"><a href="#cb4-87" aria-hidden="true" tabindex="-1"></a><span class="st">      var effort2 = depth===0 ? init_effort : a(depth,reward)</span></span>
-<span id="cb4-88"><a href="#cb4-88" aria-hidden="true" tabindex="-1"></a><span class="st">      var optEffort = function(strength,strength2,box,reward) {</span></span>
-<span id="cb4-89"><a href="#cb4-89" aria-hidden="true" tabindex="-1"></a><span class="st">        return argMax(</span></span>
-<span id="cb4-90"><a href="#cb4-90" aria-hidden="true" tabindex="-1"></a><span class="st">          function(effort) {</span></span>
-<span id="cb4-91"><a href="#cb4-91" aria-hidden="true" tabindex="-1"></a><span class="st">            if (a_strength.length &gt; 1) {</span></span>
-<span id="cb4-92"><a href="#cb4-92" aria-hidden="true" tabindex="-1"></a><span class="st">              return reward*listMean(map2(function(i,j){return lift2(i,j,box,effort,effort2)}, strength,strength2)) - alpha*effort - beta*gini(effort,effort2)</span></span>
-<span id="cb4-93"><a href="#cb4-93" aria-hidden="true" tabindex="-1"></a><span class="st">            } else {</span></span>
-<span id="cb4-94"><a href="#cb4-94" aria-hidden="true" tabindex="-1"></a><span class="st">              return reward*lift2(strength,strength2,box,effort,effort2) - alpha*effort - beta*gini(effort,effort2)</span></span>
-<span id="cb4-95"><a href="#cb4-95" aria-hidden="true" tabindex="-1"></a><span class="st">            }</span></span>
-<span id="cb4-96"><a href="#cb4-96" aria-hidden="true" tabindex="-1"></a><span class="st">          },</span></span>
-<span id="cb4-97"><a href="#cb4-97" aria-hidden="true" tabindex="-1"></a><span class="st">          efforts);</span></span>
-<span id="cb4-98"><a href="#cb4-98" aria-hidden="true" tabindex="-1"></a><span class="st">      };</span></span>
-<span id="cb4-99"><a href="#cb4-99" aria-hidden="true" tabindex="-1"></a><span class="st">    return optEffort(b_strength,a_strength,'box',reward)</span></span>
-<span id="cb4-100"><a href="#cb4-100" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
-<span id="cb4-101"><a href="#cb4-101" aria-hidden="true" tabindex="-1"></a><span class="st">  </span></span>
-<span id="cb4-102"><a href="#cb4-102" aria-hidden="true" tabindex="-1"></a><span class="st">  var findDepth = function(x) { // find the depth that is needed to converge</span></span>
-<span id="cb4-103"><a href="#cb4-103" aria-hidden="true" tabindex="-1"></a><span class="st">     if (Math.abs(b(x,r3_reward) - b(x+1,r3_reward)) &lt; 0.06) {</span></span>
-<span id="cb4-104"><a href="#cb4-104" aria-hidden="true" tabindex="-1"></a><span class="st">       return x;</span></span>
-<span id="cb4-105"><a href="#cb4-105" aria-hidden="true" tabindex="-1"></a><span class="st">     } else {</span></span>
-<span id="cb4-106"><a href="#cb4-106" aria-hidden="true" tabindex="-1"></a><span class="st">       return -1;</span></span>
-<span id="cb4-107"><a href="#cb4-107" aria-hidden="true" tabindex="-1"></a><span class="st">     }</span></span>
-<span id="cb4-108"><a href="#cb4-108" aria-hidden="true" tabindex="-1"></a><span class="st">   };</span></span>
-<span id="cb4-109"><a href="#cb4-109" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-110"><a href="#cb4-110" aria-hidden="true" tabindex="-1"></a><span class="st">  var ds = [1,2,5,10]; // if converges in 1 round, then depth = 1; if not, then try 2, 5, 10.</span></span>
-<span id="cb4-111"><a href="#cb4-111" aria-hidden="true" tabindex="-1"></a><span class="st">  var d = function() {</span></span>
-<span id="cb4-112"><a href="#cb4-112" aria-hidden="true" tabindex="-1"></a><span class="st">     if (findDepth(ds[0]) &gt; 0) {</span></span>
-<span id="cb4-113"><a href="#cb4-113" aria-hidden="true" tabindex="-1"></a><span class="st">       return ds[0]</span></span>
-<span id="cb4-114"><a href="#cb4-114" aria-hidden="true" tabindex="-1"></a><span class="st">     } else if (findDepth(ds[1]) &gt; 0) {</span></span>
-<span id="cb4-115"><a href="#cb4-115" aria-hidden="true" tabindex="-1"></a><span class="st">       return ds[1]</span></span>
-<span id="cb4-116"><a href="#cb4-116" aria-hidden="true" tabindex="-1"></a><span class="st">     } else if (findDepth(ds[2]) &gt; 0) {</span></span>
-<span id="cb4-117"><a href="#cb4-117" aria-hidden="true" tabindex="-1"></a><span class="st">       return ds[2]</span></span>
-<span id="cb4-118"><a href="#cb4-118" aria-hidden="true" tabindex="-1"></a><span class="st">     } else if (findDepth(ds[3]) &gt; 0) {</span></span>
-<span id="cb4-119"><a href="#cb4-119" aria-hidden="true" tabindex="-1"></a><span class="st">       return ds[3]</span></span>
-<span id="cb4-120"><a href="#cb4-120" aria-hidden="true" tabindex="-1"></a><span class="st">     } else {</span></span>
-<span id="cb4-121"><a href="#cb4-121" aria-hidden="true" tabindex="-1"></a><span class="st">       display('Effort could not converge in ' + ds[3] + ' iterations. Increase the number of iterations and try again.')</span></span>
-<span id="cb4-122"><a href="#cb4-122" aria-hidden="true" tabindex="-1"></a><span class="st">     }</span></span>
-<span id="cb4-123"><a href="#cb4-123" aria-hidden="true" tabindex="-1"></a><span class="st">   };</span></span>
-<span id="cb4-124"><a href="#cb4-124" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-125"><a href="#cb4-125" aria-hidden="true" tabindex="-1"></a><span class="st">  var depth = d()</span></span>
-<span id="cb4-126"><a href="#cb4-126" aria-hidden="true" tabindex="-1"></a><span class="st">  var aE = a(depth+1,r3_reward)</span></span>
-<span id="cb4-127"><a href="#cb4-127" aria-hidden="true" tabindex="-1"></a><span class="st">  var bE = b(depth,r3_reward)</span></span>
-<span id="cb4-128"><a href="#cb4-128" aria-hidden="true" tabindex="-1"></a><span class="st">  </span></span>
-<span id="cb4-129"><a href="#cb4-129" aria-hidden="true" tabindex="-1"></a><span class="st">  var outcome2 = function(a_strength,b_strength,box) {</span></span>
-<span id="cb4-130"><a href="#cb4-130" aria-hidden="true" tabindex="-1"></a><span class="st">    if (a_strength.length &gt; 1) { </span></span>
-<span id="cb4-131"><a href="#cb4-131" aria-hidden="true" tabindex="-1"></a><span class="st">      return listMean(map2(function(i,j){return lift2(i,j,box,aE,bE)}, a_strength,b_strength))</span></span>
-<span id="cb4-132"><a href="#cb4-132" aria-hidden="true" tabindex="-1"></a><span class="st">    } else {</span></span>
-<span id="cb4-133"><a href="#cb4-133" aria-hidden="true" tabindex="-1"></a><span class="st">      return lift2(a_strength,b_strength,box,aE,bE)</span></span>
-<span id="cb4-134"><a href="#cb4-134" aria-hidden="true" tabindex="-1"></a><span class="st">    }</span></span>
-<span id="cb4-135"><a href="#cb4-135" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
-<span id="cb4-136"><a href="#cb4-136" aria-hidden="true" tabindex="-1"></a><span class="st">    </span></span>
-<span id="cb4-137"><a href="#cb4-137" aria-hidden="true" tabindex="-1"></a><span class="st">  // calculate agents' utility</span></span>
-<span id="cb4-138"><a href="#cb4-138" aria-hidden="true" tabindex="-1"></a><span class="st">  if (a_strength.length &gt; 1) {</span></span>
-<span id="cb4-139"><a href="#cb4-139" aria-hidden="true" tabindex="-1"></a><span class="st">    var aU = r3_reward*listMean(map2(function(i,j){return lift2(i,j,'box',aE,bE)}, a_strength,b_strength)) - alpha*aE - beta*gini(aE,bE)</span></span>
-<span id="cb4-140"><a href="#cb4-140" aria-hidden="true" tabindex="-1"></a><span class="st">    var bU = r3_reward*listMean(map2(function(i,j){return lift2(i,j,'box',bE,aE)}, b_strength,a_strength)) - alpha*bE - beta*gini(bE,aE)</span></span>
-<span id="cb4-141"><a href="#cb4-141" aria-hidden="true" tabindex="-1"></a><span class="st">    var table = { aU: aU, bU: bU, aE: aE, bE: bE, jointU: aU+bU, outcome: outcome2(a_strength,b_strength,'box'), a_strength: a_strength, b_strength: b_strength};</span></span>
-<span id="cb4-142"><a href="#cb4-142" aria-hidden="true" tabindex="-1"></a><span class="st">    return table</span></span>
-<span id="cb4-143"><a href="#cb4-143" aria-hidden="true" tabindex="-1"></a><span class="st">  } else {</span></span>
-<span id="cb4-144"><a href="#cb4-144" aria-hidden="true" tabindex="-1"></a><span class="st">    var aU = r3_reward*lift2(a_strength,b_strength,'box',aE,bE) - alpha*aE - beta*gini(aE,bE)</span></span>
-<span id="cb4-145"><a href="#cb4-145" aria-hidden="true" tabindex="-1"></a><span class="st">    var bU = r3_reward*lift2(b_strength,a_strength,'box',bE,aE) - alpha*bE - beta*gini(bE,aE)</span></span>
-<span id="cb4-146"><a href="#cb4-146" aria-hidden="true" tabindex="-1"></a><span class="st">    var table = { aU: aU, bU: bU, aE: aE, bE: bE, jointU: aU+bU, outcome: outcome2(a_strength,b_strength,'box'), a_strength: a_strength, b_strength: b_strength};</span></span>
-<span id="cb4-147"><a href="#cb4-147" aria-hidden="true" tabindex="-1"></a><span class="st">    return table</span></span>
-<span id="cb4-148"><a href="#cb4-148" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
-<span id="cb4-149"><a href="#cb4-149" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb4-150"><a href="#cb4-150" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-151"><a href="#cb4-151" aria-hidden="true" tabindex="-1"></a><span class="st">// convert to a @jax.jit</span></span>
-<span id="cb4-152"><a href="#cb4-152" aria-hidden="true" tabindex="-1"></a><span class="st">// find the intial effort that maximizes the joint utility</span></span>
-<span id="cb4-153"><a href="#cb4-153" aria-hidden="true" tabindex="-1"></a><span class="st">var startingEffort = function(a_strength,b_strength) {</span></span>
-<span id="cb4-154"><a href="#cb4-154" aria-hidden="true" tabindex="-1"></a><span class="st">  return argMax(</span></span>
-<span id="cb4-155"><a href="#cb4-155" aria-hidden="true" tabindex="-1"></a><span class="st">    function(init_effort) {</span></span>
-<span id="cb4-156"><a href="#cb4-156" aria-hidden="true" tabindex="-1"></a><span class="st">      var tbl = jointUtility(init_effort,a_strength,b_strength)</span></span>
-<span id="cb4-157"><a href="#cb4-157" aria-hidden="true" tabindex="-1"></a><span class="st">      return tbl.jointU</span></span>
-<span id="cb4-158"><a href="#cb4-158" aria-hidden="true" tabindex="-1"></a><span class="st">    },</span></span>
-<span id="cb4-159"><a href="#cb4-159" aria-hidden="true" tabindex="-1"></a><span class="st">    efforts);</span></span>
-<span id="cb4-160"><a href="#cb4-160" aria-hidden="true" tabindex="-1"></a><span class="st">};</span></span>
-<span id="cb4-161"><a href="#cb4-161" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-162"><a href="#cb4-162" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-163"><a href="#cb4-163" aria-hidden="true" tabindex="-1"></a><span class="st">var startingE = startingEffort(x2a,x2b)</span></span>
-<span id="cb4-164"><a href="#cb4-164" aria-hidden="true" tabindex="-1"></a><span class="st">// display(jointUtility(startingE,x2a,x2b))</span></span>
-<span id="cb4-165"><a href="#cb4-165" aria-hidden="true" tabindex="-1"></a><span class="st">var output = {P: jointUtility(startingE,x2a,x2b).outcome}</span></span>
-<span id="cb4-166"><a href="#cb4-166" aria-hidden="true" tabindex="-1"></a><span class="st">output</span></span>
-<span id="cb4-167"><a href="#cb4-167" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
-<span id="cb4-168"><a href="#cb4-168" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-169"><a href="#cb4-169" aria-hidden="true" tabindex="-1"></a><span class="co"># F,F;F,F</span></span>
-<span id="cb4-170"><a href="#cb4-170" aria-hidden="true" tabindex="-1"></a>mdl <span class="ot">&lt;-</span> <span class="fu">paste0</span>(effort_space_joint, mdl1, <span class="st">"false"</span>, mdl2, <span class="st">"false"</span>, mdl3, <span class="st">"false"</span>, mdl4, <span class="st">"false"</span>, mdl5)</span>
-<span id="cb4-171"><a href="#cb4-171" aria-hidden="true" tabindex="-1"></a><span class="fu">webppl</span>(mdl)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>effort_space_joint <span class="ot">&lt;-</span> <span class="st">"var efforts = [0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1]"</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="do">## R3 Probability</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>mdl1 <span class="ot">&lt;-</span> <span class="st">"</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="st">// convert to a @jax.jit?</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="st">var argMax = function(f, ar){</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="st">  return maxWith(f, ar)[0]</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="st">};</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="st">var alpha = 13.5, beta = 24.5</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="st">var weight = mem(function (box) {return 5})</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="st">var lowR = 10</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="st">var highR = 20</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="st">// convert to a @jax.jit</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="st">var lift = function(strength,box,effort){</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="st">  return (effort*strength &gt;= weight(box))</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="st">// convert to a @jax.jit</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="st">var optE = function(strength,box,reward) {</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="st">  return argMax(</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="st">    function(effort) {</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="st">      if (strength.length &gt; 1)</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a><span class="st">        {return reward*listMean(map(function(i){return lift(i,box,effort)}, strength)) - alpha*effort}</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a><span class="st">        else </span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a><span class="st">          {return reward*lift(strength,box,effort) - alpha*effort}</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a><span class="st">    },</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a><span class="st">    efforts);</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a><span class="st">};</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a><span class="st">// convert to a @jax.jit</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a><span class="st">var outcome = function(strength,box,reward) {</span></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a><span class="st">  if (strength.length &gt; 1)</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a><span class="st">    { var opt_effort = optE(strength,box,reward)</span></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a><span class="st">      return listMean(map(function(i){return lift(i,box,opt_effort)}, strength))}</span></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a><span class="st">  else </span></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a><span class="st">  {return lift(strength,box,optE(strength,box,reward))}</span></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a><span class="st">// convert to a @memo, and instead of pushing x2a and x2b to a global variable, bring in the computations which use them into the @memo ?</span></span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a><span class="st">var x2a = [], x2b = []</span></span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a><span class="st">var samples2 = Infer({ method: 'enumerate', model() {</span></span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a><span class="st">  var sa = (11+randomInteger(89))/10 // not in a general form, but computes values in (1, 10) instead of in [1, 10] to see if that fixes things</span></span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a><span class="st">  var sb = (11+randomInteger(89))/10</span></span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a><span class="st">  condition(outcome(sa,'box',lowR) == "</span></span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>mdl2 <span class="ot">&lt;-</span> <span class="st">")</span></span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a><span class="st">  condition(outcome(sb,'box',lowR) == "</span></span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>mdl3 <span class="ot">&lt;-</span> <span class="st">")</span></span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a><span class="st">  condition(outcome(sa,'box',highR) == "</span></span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>mdl4 <span class="ot">&lt;-</span> <span class="st">")</span></span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a><span class="st">  condition(outcome(sb,'box',highR) == "</span></span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>mdl5 <span class="ot">&lt;-</span> <span class="st">")</span></span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a><span class="st">  x2a.push(sa)</span></span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a><span class="st">  x2b.push(sb)</span></span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a><span class="st">  return 0</span></span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a><span class="st">}})</span></span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a><span class="st">// convert to a combination of @jax.jit and @memo ? so I'm not doing two-step nested optimization (like the difference between RSA in webppl and in memo)</span></span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a><span class="st">var jointUtility = function(init_effort,a_strength,b_strength){</span></span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a><span class="st">  var r3_reward = highR // round 3 reward</span></span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a><span class="st">  var lift2 = function(strength,strength2,box,effort,effort2){</span></span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a><span class="st">    return (effort*strength + effort2*strength2) &gt;= weight(box)</span></span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a><span class="st">  var gini = function(effort, effort2) {return (effort == effort2 ? 0 : Math.abs(effort-effort2)/4/(effort+effort2))}</span></span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a><span class="st">  // For the Maximum effort model, the Gini coefficient is always 0, so it is fine to keep this term in here for the maximum effort model.</span></span>
+<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a><span class="st">  var a = function(depth,reward) {</span></span>
+<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a><span class="st">      var effort2 = b(depth - 1,reward)</span></span>
+<span id="cb5-72"><a href="#cb5-72" aria-hidden="true" tabindex="-1"></a><span class="st">      var optEffort = function(strength,strength2,box,reward) {</span></span>
+<span id="cb5-73"><a href="#cb5-73" aria-hidden="true" tabindex="-1"></a><span class="st">        return argMax(</span></span>
+<span id="cb5-74"><a href="#cb5-74" aria-hidden="true" tabindex="-1"></a><span class="st">          function(effort) {</span></span>
+<span id="cb5-75"><a href="#cb5-75" aria-hidden="true" tabindex="-1"></a><span class="st">            if (a_strength.length &gt; 1) {</span></span>
+<span id="cb5-76"><a href="#cb5-76" aria-hidden="true" tabindex="-1"></a><span class="st">              return reward*listMean(map2(function(i,j){return lift2(i,j,box,effort,effort2)}, strength,strength2)) - alpha*effort - beta*gini(effort,effort2)</span></span>
+<span id="cb5-77"><a href="#cb5-77" aria-hidden="true" tabindex="-1"></a><span class="st">            } else {</span></span>
+<span id="cb5-78"><a href="#cb5-78" aria-hidden="true" tabindex="-1"></a><span class="st">              return reward*lift2(strength,strength2,box,effort,effort2) - alpha*effort - beta*gini(effort,effort2)</span></span>
+<span id="cb5-79"><a href="#cb5-79" aria-hidden="true" tabindex="-1"></a><span class="st">            }</span></span>
+<span id="cb5-80"><a href="#cb5-80" aria-hidden="true" tabindex="-1"></a><span class="st">          },</span></span>
+<span id="cb5-81"><a href="#cb5-81" aria-hidden="true" tabindex="-1"></a><span class="st">          efforts);</span></span>
+<span id="cb5-82"><a href="#cb5-82" aria-hidden="true" tabindex="-1"></a><span class="st">      };</span></span>
+<span id="cb5-83"><a href="#cb5-83" aria-hidden="true" tabindex="-1"></a><span class="st">    return optEffort(a_strength,b_strength,'box',reward)</span></span>
+<span id="cb5-84"><a href="#cb5-84" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb5-85"><a href="#cb5-85" aria-hidden="true" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb5-86"><a href="#cb5-86" aria-hidden="true" tabindex="-1"></a><span class="st">  var b = function(depth,reward) {</span></span>
+<span id="cb5-87"><a href="#cb5-87" aria-hidden="true" tabindex="-1"></a><span class="st">      var effort2 = depth===0 ? init_effort : a(depth,reward)</span></span>
+<span id="cb5-88"><a href="#cb5-88" aria-hidden="true" tabindex="-1"></a><span class="st">      var optEffort = function(strength,strength2,box,reward) {</span></span>
+<span id="cb5-89"><a href="#cb5-89" aria-hidden="true" tabindex="-1"></a><span class="st">        return argMax(</span></span>
+<span id="cb5-90"><a href="#cb5-90" aria-hidden="true" tabindex="-1"></a><span class="st">          function(effort) {</span></span>
+<span id="cb5-91"><a href="#cb5-91" aria-hidden="true" tabindex="-1"></a><span class="st">            if (a_strength.length &gt; 1) {</span></span>
+<span id="cb5-92"><a href="#cb5-92" aria-hidden="true" tabindex="-1"></a><span class="st">              return reward*listMean(map2(function(i,j){return lift2(i,j,box,effort,effort2)}, strength,strength2)) - alpha*effort - beta*gini(effort,effort2)</span></span>
+<span id="cb5-93"><a href="#cb5-93" aria-hidden="true" tabindex="-1"></a><span class="st">            } else {</span></span>
+<span id="cb5-94"><a href="#cb5-94" aria-hidden="true" tabindex="-1"></a><span class="st">              return reward*lift2(strength,strength2,box,effort,effort2) - alpha*effort - beta*gini(effort,effort2)</span></span>
+<span id="cb5-95"><a href="#cb5-95" aria-hidden="true" tabindex="-1"></a><span class="st">            }</span></span>
+<span id="cb5-96"><a href="#cb5-96" aria-hidden="true" tabindex="-1"></a><span class="st">          },</span></span>
+<span id="cb5-97"><a href="#cb5-97" aria-hidden="true" tabindex="-1"></a><span class="st">          efforts);</span></span>
+<span id="cb5-98"><a href="#cb5-98" aria-hidden="true" tabindex="-1"></a><span class="st">      };</span></span>
+<span id="cb5-99"><a href="#cb5-99" aria-hidden="true" tabindex="-1"></a><span class="st">    return optEffort(b_strength,a_strength,'box',reward)</span></span>
+<span id="cb5-100"><a href="#cb5-100" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb5-101"><a href="#cb5-101" aria-hidden="true" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb5-102"><a href="#cb5-102" aria-hidden="true" tabindex="-1"></a><span class="st">  var findDepth = function(x) { // find the depth that is needed to converge</span></span>
+<span id="cb5-103"><a href="#cb5-103" aria-hidden="true" tabindex="-1"></a><span class="st">     if (Math.abs(b(x,r3_reward) - b(x+1,r3_reward)) &lt; 0.06) {</span></span>
+<span id="cb5-104"><a href="#cb5-104" aria-hidden="true" tabindex="-1"></a><span class="st">       return x;</span></span>
+<span id="cb5-105"><a href="#cb5-105" aria-hidden="true" tabindex="-1"></a><span class="st">     } else {</span></span>
+<span id="cb5-106"><a href="#cb5-106" aria-hidden="true" tabindex="-1"></a><span class="st">       return -1;</span></span>
+<span id="cb5-107"><a href="#cb5-107" aria-hidden="true" tabindex="-1"></a><span class="st">     }</span></span>
+<span id="cb5-108"><a href="#cb5-108" aria-hidden="true" tabindex="-1"></a><span class="st">   };</span></span>
+<span id="cb5-109"><a href="#cb5-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-110"><a href="#cb5-110" aria-hidden="true" tabindex="-1"></a><span class="st">  var ds = [1,2,5,10]; // if converges in 1 round, then depth = 1; if not, then try 2, 5, 10.</span></span>
+<span id="cb5-111"><a href="#cb5-111" aria-hidden="true" tabindex="-1"></a><span class="st">  var d = function() {</span></span>
+<span id="cb5-112"><a href="#cb5-112" aria-hidden="true" tabindex="-1"></a><span class="st">     if (findDepth(ds[0]) &gt; 0) {</span></span>
+<span id="cb5-113"><a href="#cb5-113" aria-hidden="true" tabindex="-1"></a><span class="st">       return ds[0]</span></span>
+<span id="cb5-114"><a href="#cb5-114" aria-hidden="true" tabindex="-1"></a><span class="st">     } else if (findDepth(ds[1]) &gt; 0) {</span></span>
+<span id="cb5-115"><a href="#cb5-115" aria-hidden="true" tabindex="-1"></a><span class="st">       return ds[1]</span></span>
+<span id="cb5-116"><a href="#cb5-116" aria-hidden="true" tabindex="-1"></a><span class="st">     } else if (findDepth(ds[2]) &gt; 0) {</span></span>
+<span id="cb5-117"><a href="#cb5-117" aria-hidden="true" tabindex="-1"></a><span class="st">       return ds[2]</span></span>
+<span id="cb5-118"><a href="#cb5-118" aria-hidden="true" tabindex="-1"></a><span class="st">     } else if (findDepth(ds[3]) &gt; 0) {</span></span>
+<span id="cb5-119"><a href="#cb5-119" aria-hidden="true" tabindex="-1"></a><span class="st">       return ds[3]</span></span>
+<span id="cb5-120"><a href="#cb5-120" aria-hidden="true" tabindex="-1"></a><span class="st">     } else {</span></span>
+<span id="cb5-121"><a href="#cb5-121" aria-hidden="true" tabindex="-1"></a><span class="st">       display('Effort could not converge in ' + ds[3] + ' iterations. Increase the number of iterations and try again.')</span></span>
+<span id="cb5-122"><a href="#cb5-122" aria-hidden="true" tabindex="-1"></a><span class="st">     }</span></span>
+<span id="cb5-123"><a href="#cb5-123" aria-hidden="true" tabindex="-1"></a><span class="st">   };</span></span>
+<span id="cb5-124"><a href="#cb5-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-125"><a href="#cb5-125" aria-hidden="true" tabindex="-1"></a><span class="st">  var depth = d()</span></span>
+<span id="cb5-126"><a href="#cb5-126" aria-hidden="true" tabindex="-1"></a><span class="st">  var aE = a(depth+1,r3_reward)</span></span>
+<span id="cb5-127"><a href="#cb5-127" aria-hidden="true" tabindex="-1"></a><span class="st">  var bE = b(depth,r3_reward)</span></span>
+<span id="cb5-128"><a href="#cb5-128" aria-hidden="true" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb5-129"><a href="#cb5-129" aria-hidden="true" tabindex="-1"></a><span class="st">  var outcome2 = function(a_strength,b_strength,box) {</span></span>
+<span id="cb5-130"><a href="#cb5-130" aria-hidden="true" tabindex="-1"></a><span class="st">    if (a_strength.length &gt; 1) { </span></span>
+<span id="cb5-131"><a href="#cb5-131" aria-hidden="true" tabindex="-1"></a><span class="st">      return listMean(map2(function(i,j){return lift2(i,j,box,aE,bE)}, a_strength,b_strength))</span></span>
+<span id="cb5-132"><a href="#cb5-132" aria-hidden="true" tabindex="-1"></a><span class="st">    } else {</span></span>
+<span id="cb5-133"><a href="#cb5-133" aria-hidden="true" tabindex="-1"></a><span class="st">      return lift2(a_strength,b_strength,box,aE,bE)</span></span>
+<span id="cb5-134"><a href="#cb5-134" aria-hidden="true" tabindex="-1"></a><span class="st">    }</span></span>
+<span id="cb5-135"><a href="#cb5-135" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb5-136"><a href="#cb5-136" aria-hidden="true" tabindex="-1"></a><span class="st">    </span></span>
+<span id="cb5-137"><a href="#cb5-137" aria-hidden="true" tabindex="-1"></a><span class="st">  // calculate agents' utility</span></span>
+<span id="cb5-138"><a href="#cb5-138" aria-hidden="true" tabindex="-1"></a><span class="st">  if (a_strength.length &gt; 1) {</span></span>
+<span id="cb5-139"><a href="#cb5-139" aria-hidden="true" tabindex="-1"></a><span class="st">    var aU = r3_reward*listMean(map2(function(i,j){return lift2(i,j,'box',aE,bE)}, a_strength,b_strength)) - alpha*aE - beta*gini(aE,bE)</span></span>
+<span id="cb5-140"><a href="#cb5-140" aria-hidden="true" tabindex="-1"></a><span class="st">    var bU = r3_reward*listMean(map2(function(i,j){return lift2(i,j,'box',bE,aE)}, b_strength,a_strength)) - alpha*bE - beta*gini(bE,aE)</span></span>
+<span id="cb5-141"><a href="#cb5-141" aria-hidden="true" tabindex="-1"></a><span class="st">    var table = { aU: aU, bU: bU, aE: aE, bE: bE, jointU: aU+bU, outcome: outcome2(a_strength,b_strength,'box'), a_strength: a_strength, b_strength: b_strength};</span></span>
+<span id="cb5-142"><a href="#cb5-142" aria-hidden="true" tabindex="-1"></a><span class="st">    return table</span></span>
+<span id="cb5-143"><a href="#cb5-143" aria-hidden="true" tabindex="-1"></a><span class="st">  } else {</span></span>
+<span id="cb5-144"><a href="#cb5-144" aria-hidden="true" tabindex="-1"></a><span class="st">    var aU = r3_reward*lift2(a_strength,b_strength,'box',aE,bE) - alpha*aE - beta*gini(aE,bE)</span></span>
+<span id="cb5-145"><a href="#cb5-145" aria-hidden="true" tabindex="-1"></a><span class="st">    var bU = r3_reward*lift2(b_strength,a_strength,'box',bE,aE) - alpha*bE - beta*gini(bE,aE)</span></span>
+<span id="cb5-146"><a href="#cb5-146" aria-hidden="true" tabindex="-1"></a><span class="st">    var table = { aU: aU, bU: bU, aE: aE, bE: bE, jointU: aU+bU, outcome: outcome2(a_strength,b_strength,'box'), a_strength: a_strength, b_strength: b_strength};</span></span>
+<span id="cb5-147"><a href="#cb5-147" aria-hidden="true" tabindex="-1"></a><span class="st">    return table</span></span>
+<span id="cb5-148"><a href="#cb5-148" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb5-149"><a href="#cb5-149" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb5-150"><a href="#cb5-150" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-151"><a href="#cb5-151" aria-hidden="true" tabindex="-1"></a><span class="st">// convert to a @jax.jit</span></span>
+<span id="cb5-152"><a href="#cb5-152" aria-hidden="true" tabindex="-1"></a><span class="st">// find the intial effort that maximizes the joint utility</span></span>
+<span id="cb5-153"><a href="#cb5-153" aria-hidden="true" tabindex="-1"></a><span class="st">var startingEffort = function(a_strength,b_strength) {</span></span>
+<span id="cb5-154"><a href="#cb5-154" aria-hidden="true" tabindex="-1"></a><span class="st">  return argMax(</span></span>
+<span id="cb5-155"><a href="#cb5-155" aria-hidden="true" tabindex="-1"></a><span class="st">    function(init_effort) {</span></span>
+<span id="cb5-156"><a href="#cb5-156" aria-hidden="true" tabindex="-1"></a><span class="st">      var tbl = jointUtility(init_effort,a_strength,b_strength)</span></span>
+<span id="cb5-157"><a href="#cb5-157" aria-hidden="true" tabindex="-1"></a><span class="st">      return tbl.jointU</span></span>
+<span id="cb5-158"><a href="#cb5-158" aria-hidden="true" tabindex="-1"></a><span class="st">    },</span></span>
+<span id="cb5-159"><a href="#cb5-159" aria-hidden="true" tabindex="-1"></a><span class="st">    efforts);</span></span>
+<span id="cb5-160"><a href="#cb5-160" aria-hidden="true" tabindex="-1"></a><span class="st">};</span></span>
+<span id="cb5-161"><a href="#cb5-161" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-162"><a href="#cb5-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-163"><a href="#cb5-163" aria-hidden="true" tabindex="-1"></a><span class="st">var startingE = startingEffort(x2a,x2b)</span></span>
+<span id="cb5-164"><a href="#cb5-164" aria-hidden="true" tabindex="-1"></a><span class="st">// display(jointUtility(startingE,x2a,x2b))</span></span>
+<span id="cb5-165"><a href="#cb5-165" aria-hidden="true" tabindex="-1"></a><span class="st">var output = {P: jointUtility(startingE,x2a,x2b).outcome}</span></span>
+<span id="cb5-166"><a href="#cb5-166" aria-hidden="true" tabindex="-1"></a><span class="st">output</span></span>
+<span id="cb5-167"><a href="#cb5-167" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb5-168"><a href="#cb5-168" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-169"><a href="#cb5-169" aria-hidden="true" tabindex="-1"></a><span class="co"># F,F;F,F</span></span>
+<span id="cb5-170"><a href="#cb5-170" aria-hidden="true" tabindex="-1"></a>mdl <span class="ot">&lt;-</span> <span class="fu">paste0</span>(effort_space_joint, mdl1, <span class="st">"false"</span>, mdl2, <span class="st">"false"</span>, mdl3, <span class="st">"false"</span>, mdl4, <span class="st">"false"</span>, mdl5)</span>
+<span id="cb5-171"><a href="#cb5-171" aria-hidden="true" tabindex="-1"></a><span class="fu">webppl</span>(mdl)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <ul>
 <li><ul>
@@ -524,19 +545,67 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><ol start="3" type="1">
 <li>webppl enumerate (below)</li>
 </ol>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="">determine if need to use (1,10) (or another variant) instead of [1,10] for strength prior. I think we should be able to use [1,10] unless we see mismatch with original method</label>
 <ul>
-<li>TODO (in-progress) determine if need to use (1,10) (or another variant) instead of [1,10] for strength prior</li>
+<li>[c] not sure why P jumps to 1 so fast after F,F;F,F!
+<ul class="task-list">
+<li><label><input type="checkbox" checked="">figure out how the mcmc mode of my current debugging webppl version diverged from the original mcmc version (reproduced at top)</label></li>
 </ul></li>
+<li><em>If want more reliable MCMC results: for MCMC versions, use 10 iterations to recreate paper’s method of avging across 10 model runs</em></li>
+<li>**<del>seems like we’ll need to avoid one of the extremes to prevent startingE from being chosen as 1!</del>
+<ul>
+<li>OR we can see if increasing precision fixes things - Claude thinks that <strong>small error in strength estimates (due to discretization) could be amplified by the equilibrium-finding process</strong>, so we need greater precision.
+<ul>
+<li>NOTE: if we use memo frames instead of game-theoretic nested optimization, then maybe this isn’t a problem anymore</li>
+<li>-&gt; deciding that [1,10] is sufficient since it’s not actually the source of discrepancy; the source is discretization itself… see explanation from Claude below. <strong>choosing to skip now to memo, where I can have very high precision more easily, to see if that matches the original (continuous) MCMC model’s startingE_table and final_table</strong></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+<blockquote class="blockquote">
+<ol type="1">
+<li>Posterior Mean Mismatch
+<ul>
+<li>Continuous (MCMC): Posterior mean might be 2.347</li>
+<li>Discrete (0.1 steps): Posterior can only represent 2.3 or 2.4, so mean ≈ 2.35</li>
+<li>Small error in mean strength propagates forward</li>
+</ul></li>
+<li>Critical Thresholds
+<ul>
+<li>Joint lifting condition: effort_a × strength_a + effort_b × strength_b ≥ 5</li>
+<li>Near threshold boundaries (e.g., strength 2.5-7), small discretization errors flip lift outcomes from success→fail or vice versa</li>
+<li>This creates discontinuous jumps in expected utility</li>
+</ul></li>
+<li>Cascade Through Equilibrium Finding
+<ul>
+<li>jointUtility averages lift2() over all posterior samples: listMean(map2(lift2, strength_a, strength_b))</li>
+<li>Discrete approximation of this average differs from continuous</li>
+<li>The nested best-response iteration (lines 163-210) magnifies this error</li>
+<li>Different expected lift probabilities → different optimal efforts → different equilibria</li>
+</ul></li>
+<li>Amplification
+<ul>
+<li>Small error in posterior mean (0.05 units)</li>
+<li>→ Different lift probabilities (5-10% difference)</li>
+<li>→ Different equilibrium efforts (0.1-0.2 difference)</li>
+<li>→ Large divergence in final joint utility and outcome probability</li>
+</ul></li>
+</ol>
+<p>Why it matters most in mid-range (2.5-7): This is where the lift threshold creates maximum sensitivity—agents transition from “can only jointly lift” to “can lift solo,” making the utility function most nonlinear.</p>
+</blockquote>
+<ul>
 <li><ol start="4" type="1">
-<li>TODO finish memo enumerate, with same parameters as webppl enumerate (xiang2023-exp1-round3-memo.qmd); and log all the stats (see <code>stats</code>) – and investigate discrepancies. e.g.&nbsp;why is Joint utility at optimum so high? why are the agents’ utilities different from each other?</li>
+<li>TODO finish memo enumerate, with same parameters as webppl enumerate (xiang2023-exp1-round3-memo.qmd), but higher precision; and log all the stats (see <code>stats</code>) – and investigate discrepancies. e.g.&nbsp;why is Joint utility at optimum so high? why are the agents’ utilities different from each other?</li>
 </ol></li>
 <li><ol start="5" type="1">
-<li>moonshot: memo enumerate, but the equilibrium-finding process uses memo frames in order to model agent’s uncertainty about each other (still accelerated by JAX, but now in the language of memo, and considering the uncertainty)</li>
+<li>TODO modify memo joint effort model to implement solitary effort and compensatory effort models, and check that the P results match up with the P results from the paper (simple, no need to validate incrementally)</li>
 </ol></li>
+<li>moonshot: memo enumerate, but the equilibrium-finding process uses memo frames in order to model agent’s uncertainty about each other (still accelerated by JAX, but now in the language of memo, and considering the uncertainty)</li>
 </ul>
-<p>TODO: recreate compensatory effort and solitary effort models in memo; simple, no need to validate incrementally like doing for joint effort model</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
 ✔ dplyr     1.1.4     ✔ readr     2.1.5
@@ -549,8 +618,190 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 ✖ dplyr::lag()    masks stats::lag()
 ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>FAIL <span class="ot">=</span> <span class="cn">FALSE</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>LIFT <span class="ot">=</span> <span class="cn">TRUE</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>FAIL <span class="ot">&lt;-</span> <span class="cn">FALSE</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>LIFT <span class="ot">&lt;-</span> <span class="cn">TRUE</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the 6 scenarios</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>scenarios <span class="ot">&lt;-</span> <span class="fu">tribble</span>(</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="sc">~</span>name,      <span class="sc">~</span>a_r1result, <span class="sc">~</span>b_r1result, <span class="sc">~</span>a_r2result, <span class="sc">~</span>b_r2result,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"ffff"</span>,     FAIL,        FAIL,        FAIL,        FAIL,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"fffl"</span>,     FAIL,        FAIL,        FAIL,        LIFT,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"flfl"</span>,     FAIL,        LIFT,        FAIL,        LIFT,</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">"ffll"</span>,     FAIL,        FAIL,        LIFT,        LIFT,</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">"flll"</span>,     FAIL,        LIFT,        LIFT,        LIFT,</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">"llll"</span>,     LIFT,        LIFT,        LIFT,        LIFT</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Helper function to run a single scenario</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>run_scenario <span class="ot">&lt;-</span> <span class="cf">function</span>(scenario_name, method, <span class="at">discrete =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>                        <span class="at">strengthPriorPrecision =</span> <span class="cn">NULL</span>,</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>                        <span class="at">strengthPriorVersion =</span> <span class="cn">NULL</span>) {</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>  scenario <span class="ot">&lt;-</span> scenarios <span class="sc">%&gt;%</span> <span class="fu">filter</span>(name <span class="sc">==</span> scenario_name)</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>  params <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> method,</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> discrete,</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> scenario<span class="sc">$</span>a_r1result,</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">b_r1result =</span> scenario<span class="sc">$</span>b_r1result,</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> scenario<span class="sc">$</span>a_r2result,</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">b_r2result =</span> scenario<span class="sc">$</span>b_r2result</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(strengthPriorPrecision)) {</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    params<span class="sc">$</span>strengthPriorPrecision <span class="ot">&lt;-</span> strengthPriorPrecision</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(strengthPriorVersion)) {</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>    params<span class="sc">$</span>strengthPriorVersion <span class="ot">&lt;-</span> strengthPriorVersion</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">interactive</span>()) {</span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>    <span class="fu">message</span>(<span class="fu">sprintf</span>(<span class="st">"Running %s for scenario %s"</span>, method, scenario_name))</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>  rwebppl<span class="sc">::</span><span class="fu">webppl</span>(</span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>    <span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>,</span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> params,</span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>    <span class="at">data_var =</span> <span class="st">"params_df"</span>,</span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>    <span class="at">random_seed =</span> <span class="dv">1</span></span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a><span class="co"># Helper function to run all scenarios for a given method configuration</span></span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>run_all_scenarios <span class="ot">&lt;-</span> <span class="cf">function</span>(...) {</span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>  results <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (scenario_name <span class="cf">in</span> scenarios<span class="sc">$</span>name) {</span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>    results[[scenario_name]] <span class="ot">&lt;-</span> <span class="fu">run_scenario</span>(scenario_name, ...)</span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>  results_tidy <span class="ot">&lt;-</span> results <span class="sc">|&gt;</span></span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a>    <span class="fu">enframe</span>() <span class="sc">|&gt;</span></span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unnest_wider</span>(value) <span class="sc">|&gt;</span></span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unnest_wider</span>(final_table) <span class="sc">|&gt;</span></span>
+<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rename</span>(<span class="at">scenario =</span> name)</span>
+<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a>  results_tidy</span>
+<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a>compare_results <span class="ot">&lt;-</span> <span class="cf">function</span>(...) {</span>
+<span id="cb8-64"><a href="#cb8-64" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Accepts data frames as inputs</span></span>
+<span id="cb8-65"><a href="#cb8-65" aria-hidden="true" tabindex="-1"></a>  results_list <span class="ot">&lt;-</span> <span class="fu">list</span>(...)</span>
+<span id="cb8-66"><a href="#cb8-66" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">length</span>(results_list) <span class="sc">==</span> <span class="dv">0</span>) {</span>
+<span id="cb8-67"><a href="#cb8-67" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stop</span>(<span class="st">"At least one set of results must be provided"</span>)</span>
+<span id="cb8-68"><a href="#cb8-68" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb8-69"><a href="#cb8-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-70"><a href="#cb8-70" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Build summaries</span></span>
+<span id="cb8-71"><a href="#cb8-71" aria-hidden="true" tabindex="-1"></a>  results_combined <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(results_list, <span class="at">.id=</span><span class="st">"method"</span>)</span>
+<span id="cb8-72"><a href="#cb8-72" aria-hidden="true" tabindex="-1"></a>  P_results_summary <span class="ot">&lt;-</span> results_combined <span class="sc">|&gt;</span> <span class="fu">select</span>(method, scenario, P)</span>
+<span id="cb8-73"><a href="#cb8-73" aria-hidden="true" tabindex="-1"></a>  posteriors_summary <span class="ot">&lt;-</span> results_combined <span class="sc">|&gt;</span> <span class="fu">select</span>(method, scenario, aStrength_posterior, bStrength_posterior)</span>
+<span id="cb8-74"><a href="#cb8-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-75"><a href="#cb8-75" aria-hidden="true" tabindex="-1"></a>  <span class="fu">message</span>(<span class="st">"Now compare visually"</span>)</span>
+<span id="cb8-76"><a href="#cb8-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-77"><a href="#cb8-77" aria-hidden="true" tabindex="-1"></a>  <span class="fu">show</span>(P_results_summary)</span>
+<span id="cb8-78"><a href="#cb8-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-79"><a href="#cb8-79" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Make posteriors_summary longer for plotting (cols: method, agent, scenario, strength)</span></span>
+<span id="cb8-80"><a href="#cb8-80" aria-hidden="true" tabindex="-1"></a>  posteriors_long <span class="ot">&lt;-</span> posteriors_summary <span class="sc">|&gt;</span></span>
+<span id="cb8-81"><a href="#cb8-81" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">c</span>(aStrength_posterior, bStrength_posterior),</span>
+<span id="cb8-82"><a href="#cb8-82" aria-hidden="true" tabindex="-1"></a>                  <span class="at">names_to =</span> <span class="st">"agent"</span>,</span>
+<span id="cb8-83"><a href="#cb8-83" aria-hidden="true" tabindex="-1"></a>                  <span class="at">values_to =</span> <span class="st">"strength"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb8-84"><a href="#cb8-84" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">agent =</span> <span class="fu">ifelse</span>(agent <span class="sc">==</span> <span class="st">"aStrength_posterior"</span>, <span class="st">"a"</span>, <span class="st">"b"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb8-85"><a href="#cb8-85" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unnest_longer</span>(strength)</span>
+<span id="cb8-86"><a href="#cb8-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-87"><a href="#cb8-87" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Plot density of posteriors for each scenario</span></span>
+<span id="cb8-88"><a href="#cb8-88" aria-hidden="true" tabindex="-1"></a>  <span class="fu">show</span>(</span>
+<span id="cb8-89"><a href="#cb8-89" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(posteriors_long, <span class="fu">aes</span>(<span class="at">x =</span> strength, <span class="at">color =</span> method, <span class="at">linetype =</span> agent)) <span class="sc">+</span></span>
+<span id="cb8-90"><a href="#cb8-90" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_density</span>() <span class="sc">+</span></span>
+<span id="cb8-91"><a href="#cb8-91" aria-hidden="true" tabindex="-1"></a>      <span class="fu">facet_wrap</span>(<span class="sc">~</span>scenario, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
+<span id="cb8-92"><a href="#cb8-92" aria-hidden="true" tabindex="-1"></a>      <span class="fu">labs</span>(</span>
+<span id="cb8-93"><a href="#cb8-93" aria-hidden="true" tabindex="-1"></a>        <span class="at">title =</span> <span class="st">"Strength Posteriors Across Scenarios"</span>,</span>
+<span id="cb8-94"><a href="#cb8-94" aria-hidden="true" tabindex="-1"></a>        <span class="at">x =</span> <span class="st">"Strength"</span>,</span>
+<span id="cb8-95"><a href="#cb8-95" aria-hidden="true" tabindex="-1"></a>        <span class="at">y =</span> <span class="st">"Density"</span>,</span>
+<span id="cb8-96"><a href="#cb8-96" aria-hidden="true" tabindex="-1"></a>        <span class="at">color =</span> <span class="st">"Method"</span>,</span>
+<span id="cb8-97"><a href="#cb8-97" aria-hidden="true" tabindex="-1"></a>        <span class="at">linetype =</span> <span class="st">"Agent"</span></span>
+<span id="cb8-98"><a href="#cb8-98" aria-hidden="true" tabindex="-1"></a>      ) <span class="sc">+</span></span>
+<span id="cb8-99"><a href="#cb8-99" aria-hidden="true" tabindex="-1"></a>      <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb8-100"><a href="#cb8-100" aria-hidden="true" tabindex="-1"></a>      <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span>
+<span id="cb8-101"><a href="#cb8-101" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb8-102"><a href="#cb8-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-103"><a href="#cb8-103" aria-hidden="true" tabindex="-1"></a>  <span class="fu">message</span>(<span class="st">"Now separately for each method (or method and agent) and so that we can ensure that there are no missing posteriors"</span>)</span>
+<span id="cb8-104"><a href="#cb8-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-105"><a href="#cb8-105" aria-hidden="true" tabindex="-1"></a>  <span class="fu">show</span>(</span>
+<span id="cb8-106"><a href="#cb8-106" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(posteriors_long, <span class="fu">aes</span>(<span class="at">x =</span> strength, <span class="at">color =</span> method, <span class="at">linetype =</span> agent)) <span class="sc">+</span></span>
+<span id="cb8-107"><a href="#cb8-107" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_density</span>() <span class="sc">+</span></span>
+<span id="cb8-108"><a href="#cb8-108" aria-hidden="true" tabindex="-1"></a>      <span class="fu">facet_grid</span>(method<span class="sc">~</span>scenario, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
+<span id="cb8-109"><a href="#cb8-109" aria-hidden="true" tabindex="-1"></a>      <span class="fu">labs</span>(</span>
+<span id="cb8-110"><a href="#cb8-110" aria-hidden="true" tabindex="-1"></a>        <span class="at">title =</span> <span class="st">"Strength Posteriors Across Scenarios"</span>,</span>
+<span id="cb8-111"><a href="#cb8-111" aria-hidden="true" tabindex="-1"></a>        <span class="at">x =</span> <span class="st">"Strength"</span>,</span>
+<span id="cb8-112"><a href="#cb8-112" aria-hidden="true" tabindex="-1"></a>        <span class="at">y =</span> <span class="st">"Density"</span>,</span>
+<span id="cb8-113"><a href="#cb8-113" aria-hidden="true" tabindex="-1"></a>        <span class="at">color =</span> <span class="st">"Method"</span>,</span>
+<span id="cb8-114"><a href="#cb8-114" aria-hidden="true" tabindex="-1"></a>        <span class="at">linetype =</span> <span class="st">"Agent"</span></span>
+<span id="cb8-115"><a href="#cb8-115" aria-hidden="true" tabindex="-1"></a>      ) <span class="sc">+</span></span>
+<span id="cb8-116"><a href="#cb8-116" aria-hidden="true" tabindex="-1"></a>      <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb8-117"><a href="#cb8-117" aria-hidden="true" tabindex="-1"></a>      <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span>
+<span id="cb8-118"><a href="#cb8-118" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb8-119"><a href="#cb8-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-120"><a href="#cb8-120" aria-hidden="true" tabindex="-1"></a>  <span class="fu">show</span>(</span>
+<span id="cb8-121"><a href="#cb8-121" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(posteriors_long, <span class="fu">aes</span>(<span class="at">x =</span> strength, <span class="at">color =</span> method, <span class="at">linetype =</span> agent)) <span class="sc">+</span></span>
+<span id="cb8-122"><a href="#cb8-122" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_density</span>() <span class="sc">+</span></span>
+<span id="cb8-123"><a href="#cb8-123" aria-hidden="true" tabindex="-1"></a>      <span class="fu">facet_grid</span>(method<span class="sc">~</span>scenario<span class="sc">+</span>agent, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
+<span id="cb8-124"><a href="#cb8-124" aria-hidden="true" tabindex="-1"></a>      <span class="fu">labs</span>(</span>
+<span id="cb8-125"><a href="#cb8-125" aria-hidden="true" tabindex="-1"></a>        <span class="at">title =</span> <span class="st">"Strength Posteriors Across Scenarios"</span>,</span>
+<span id="cb8-126"><a href="#cb8-126" aria-hidden="true" tabindex="-1"></a>        <span class="at">x =</span> <span class="st">"Strength"</span>,</span>
+<span id="cb8-127"><a href="#cb8-127" aria-hidden="true" tabindex="-1"></a>        <span class="at">y =</span> <span class="st">"Density"</span>,</span>
+<span id="cb8-128"><a href="#cb8-128" aria-hidden="true" tabindex="-1"></a>        <span class="at">color =</span> <span class="st">"Method"</span>,</span>
+<span id="cb8-129"><a href="#cb8-129" aria-hidden="true" tabindex="-1"></a>        <span class="at">linetype =</span> <span class="st">"Agent"</span></span>
+<span id="cb8-130"><a href="#cb8-130" aria-hidden="true" tabindex="-1"></a>      ) <span class="sc">+</span></span>
+<span id="cb8-131"><a href="#cb8-131" aria-hidden="true" tabindex="-1"></a>      <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb8-132"><a href="#cb8-132" aria-hidden="true" tabindex="-1"></a>      <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span>
+<span id="cb8-133"><a href="#cb8-133" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb8-134"><a href="#cb8-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-135"><a href="#cb8-135" aria-hidden="true" tabindex="-1"></a>  <span class="fu">message</span>(<span class="st">"Compare all output values across methods"</span>)</span>
+<span id="cb8-136"><a href="#cb8-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-137"><a href="#cb8-137" aria-hidden="true" tabindex="-1"></a>  <span class="fu">show</span>(results_combined <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">-</span>aStrength_posterior, <span class="sc">-</span>bStrength_posterior, <span class="sc">-</span>startingE_table))</span>
+<span id="cb8-138"><a href="#cb8-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-139"><a href="#cb8-139" aria-hidden="true" tabindex="-1"></a>  <span class="fu">message</span>(<span class="st">"Extract all final_table values into a comprehensive summary"</span>)</span>
+<span id="cb8-140"><a href="#cb8-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-141"><a href="#cb8-141" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Plot comparisons for the rest of the variables</span></span>
+<span id="cb8-142"><a href="#cb8-142" aria-hidden="true" tabindex="-1"></a>  results_combined_vars_long <span class="ot">&lt;-</span> results_combined <span class="sc">|&gt;</span></span>
+<span id="cb8-143"><a href="#cb8-143" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(<span class="sc">-</span><span class="fu">where</span>(is.list)) <span class="sc">|&gt;</span></span>
+<span id="cb8-144"><a href="#cb8-144" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pivot_longer</span>(<span class="sc">-</span><span class="fu">c</span>(method, scenario), <span class="at">values_to=</span><span class="st">"value"</span>, <span class="at">names_to=</span><span class="st">"variable"</span>)</span>
+<span id="cb8-145"><a href="#cb8-145" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-146"><a href="#cb8-146" aria-hidden="true" tabindex="-1"></a>  <span class="fu">show</span>(</span>
+<span id="cb8-147"><a href="#cb8-147" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(results_combined_vars_long, <span class="fu">aes</span>(<span class="at">x =</span> scenario, <span class="at">y =</span> value, <span class="at">fill =</span> method)) <span class="sc">+</span></span>
+<span id="cb8-148"><a href="#cb8-148" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_col</span>(<span class="at">position =</span> <span class="st">"dodge"</span>) <span class="sc">+</span></span>
+<span id="cb8-149"><a href="#cb8-149" aria-hidden="true" tabindex="-1"></a>      <span class="fu">facet_wrap</span>(<span class="sc">~</span>variable, <span class="at">scales =</span> <span class="st">"free_y"</span>, <span class="at">ncol =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb8-150"><a href="#cb8-150" aria-hidden="true" tabindex="-1"></a>      <span class="fu">labs</span>(</span>
+<span id="cb8-151"><a href="#cb8-151" aria-hidden="true" tabindex="-1"></a>        <span class="at">title =</span> <span class="st">"Output Variables Comparison Across Methods and Scenarios"</span>,</span>
+<span id="cb8-152"><a href="#cb8-152" aria-hidden="true" tabindex="-1"></a>        <span class="at">x =</span> <span class="st">"Scenario"</span>,</span>
+<span id="cb8-153"><a href="#cb8-153" aria-hidden="true" tabindex="-1"></a>        <span class="at">y =</span> <span class="st">"Value"</span>,</span>
+<span id="cb8-154"><a href="#cb8-154" aria-hidden="true" tabindex="-1"></a>        <span class="at">fill =</span> <span class="st">"Method"</span></span>
+<span id="cb8-155"><a href="#cb8-155" aria-hidden="true" tabindex="-1"></a>      ) <span class="sc">+</span></span>
+<span id="cb8-156"><a href="#cb8-156" aria-hidden="true" tabindex="-1"></a>      <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb8-157"><a href="#cb8-157" aria-hidden="true" tabindex="-1"></a>      <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span>
+<span id="cb8-158"><a href="#cb8-158" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb8-159"><a href="#cb8-159" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-160"><a href="#cb8-160" aria-hidden="true" tabindex="-1"></a>  <span class="fu">message</span>(<span class="st">"Look at startingE details"</span>)</span>
+<span id="cb8-161"><a href="#cb8-161" aria-hidden="true" tabindex="-1"></a>  results_combined_startingE_vars <span class="ot">&lt;-</span> results_combined <span class="sc">|&gt;</span></span>
+<span id="cb8-162"><a href="#cb8-162" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(method, scenario, startingE, startingE_table) <span class="sc">|&gt;</span></span>
+<span id="cb8-163"><a href="#cb8-163" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unnest_wider</span>(startingE_table)</span>
+<span id="cb8-164"><a href="#cb8-164" aria-hidden="true" tabindex="-1"></a>  <span class="fu">show</span>(results_combined_startingE_vars)</span>
+<span id="cb8-165"><a href="#cb8-165" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-166"><a href="#cb8-166" aria-hidden="true" tabindex="-1"></a>  results_combined_startingE_vars_long <span class="ot">&lt;-</span> results_combined <span class="sc">|&gt;</span></span>
+<span id="cb8-167"><a href="#cb8-167" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(method, scenario, startingE_table) <span class="sc">|&gt;</span></span>
+<span id="cb8-168"><a href="#cb8-168" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unnest_longer</span>(startingE_table, <span class="at">indices_to =</span> <span class="st">"variable"</span>, <span class="at">values_to =</span> <span class="st">"value"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb8-169"><a href="#cb8-169" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unnest_longer</span>(value)</span>
+<span id="cb8-170"><a href="#cb8-170" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-171"><a href="#cb8-171" aria-hidden="true" tabindex="-1"></a>  <span class="fu">show</span>(</span>
+<span id="cb8-172"><a href="#cb8-172" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(results_combined_startingE_vars_long, <span class="fu">aes</span>(<span class="at">x =</span> scenario, <span class="at">y =</span> value, <span class="at">fill =</span> method)) <span class="sc">+</span></span>
+<span id="cb8-173"><a href="#cb8-173" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_col</span>(<span class="at">position =</span> <span class="st">"dodge"</span>) <span class="sc">+</span></span>
+<span id="cb8-174"><a href="#cb8-174" aria-hidden="true" tabindex="-1"></a>      <span class="fu">facet_wrap</span>(<span class="sc">~</span>variable, <span class="at">scales =</span> <span class="st">"free_y"</span>, <span class="at">ncol =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb8-175"><a href="#cb8-175" aria-hidden="true" tabindex="-1"></a>      <span class="fu">labs</span>(</span>
+<span id="cb8-176"><a href="#cb8-176" aria-hidden="true" tabindex="-1"></a>        <span class="at">title =</span> <span class="st">"startingE_table Variables Comparison Across Methods and Scenarios"</span>,</span>
+<span id="cb8-177"><a href="#cb8-177" aria-hidden="true" tabindex="-1"></a>        <span class="at">x =</span> <span class="st">"Scenario"</span>,</span>
+<span id="cb8-178"><a href="#cb8-178" aria-hidden="true" tabindex="-1"></a>        <span class="at">y =</span> <span class="st">"Value"</span>,</span>
+<span id="cb8-179"><a href="#cb8-179" aria-hidden="true" tabindex="-1"></a>        <span class="at">fill =</span> <span class="st">"Method"</span></span>
+<span id="cb8-180"><a href="#cb8-180" aria-hidden="true" tabindex="-1"></a>      ) <span class="sc">+</span></span>
+<span id="cb8-181"><a href="#cb8-181" aria-hidden="true" tabindex="-1"></a>      <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb8-182"><a href="#cb8-182" aria-hidden="true" tabindex="-1"></a>      <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span>
+<span id="cb8-183"><a href="#cb8-183" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb8-184"><a href="#cb8-184" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <section id="paper-results" class="level3">
 <h3 class="anchored" data-anchor-id="paper-results">paper results</h3>
@@ -561,234 +812,220 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="mcmc-with-continuous-prior-110-like-paper" class="level4">
 <h4 class="anchored" data-anchor-id="mcmc-with-continuous-prior-110-like-paper">mcmc with continuous prior [1,10] (like paper)</h4>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>MCMC_continuous_results_all <span class="ot">&lt;-</span> <span class="fu">run_all_scenarios</span>(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"MCMC"</span>, <span class="at">discrete =</span> <span class="cn">FALSE</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>using webppl version: main v0.9.15-27823b2 /Users/jacobzimmerman/ucsd/fyp/memo-sandbox/.pixi/envs/default/lib/R/library/rwebppl/js/webppl</code></pre>
+<pre><code>using webppl version: main v0.9.15-0eb9bf5 /Users/jacobzimmerman/ucsd/fyp/memo-sandbox/.pixi/envs/default/lib/R/library/rwebppl/js/webppl</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>MCMC_continuous_ffff <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"MCMC"</span>,</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> FAIL,</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> FAIL, <span class="at">b_r2result =</span> FAIL</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>MCMC_continuous_fffl <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"MCMC"</span>,</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> FAIL,</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> FAIL, <span class="at">b_r2result =</span> LIFT</span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>MCMC_continuous_flfl <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"MCMC"</span>,</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> LIFT,</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> FAIL, <span class="at">b_r2result =</span> LIFT</span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>MCMC_continuous_ffll <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"MCMC"</span>,</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> FAIL,</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> LIFT, <span class="at">b_r2result =</span> LIFT</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>MCMC_continuous_flll <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"MCMC"</span>,</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> LIFT,</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> LIFT, <span class="at">b_r2result =</span> LIFT</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>MCMC_continuous_llll <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"MCMC"</span>,</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> LIFT, <span class="at">b_r1result =</span> LIFT,</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> LIFT, <span class="at">b_r2result =</span> LIFT</span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="mcmc-with-discrete-prior-110" class="level4">
 <h4 class="anchored" data-anchor-id="mcmc-with-discrete-prior-110">mcmc with discrete prior [1,10]</h4>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>MCMC_discrete_ffff <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"MCMC"</span>,</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"[1,10]"</span>,</span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> FAIL,</span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> FAIL, <span class="at">b_r2result =</span> FAIL</span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>MCMC_discrete_results_all <span class="ot">&lt;-</span> <span class="fu">run_all_scenarios</span>(</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"MCMC"</span>, <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">strengthPriorPrecision =</span> .<span class="dv">05</span>, <span class="at">strengthPriorVersion =</span> <span class="st">"[1,10]"</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>using webppl version: main v0.9.15-0eb9bf5 /Users/jacobzimmerman/ucsd/fyp/memo-sandbox/.pixi/envs/default/lib/R/library/rwebppl/js/webppl</code></pre>
 </div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>MCMC_discrete_fffl <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"MCMC"</span>,</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"[1,10]"</span>,</span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> FAIL,</span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> FAIL, <span class="at">b_r2result =</span> LIFT</span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>MCMC_discrete_flfl <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"MCMC"</span>,</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"[1,10]"</span>,</span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> LIFT,</span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> FAIL, <span class="at">b_r2result =</span> LIFT</span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>MCMC_discrete_ffll <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"MCMC"</span>,</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"[1,10]"</span>,</span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> FAIL,</span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> LIFT, <span class="at">b_r2result =</span> LIFT</span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>MCMC_discrete_flll <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"MCMC"</span>,</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"[1,10]"</span>,</span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> LIFT,</span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> LIFT, <span class="at">b_r2result =</span> LIFT</span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>MCMC_discrete_llll <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"MCMC"</span>,</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"[1,10]"</span>,</span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> LIFT, <span class="at">b_r1result =</span> LIFT,</span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> LIFT, <span class="at">b_r2result =</span> LIFT</span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="enumerate-with-discrete-prior-110" class="level4">
 <h4 class="anchored" data-anchor-id="enumerate-with-discrete-prior-110">enumerate with discrete prior [1,10]</h4>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>enumerate_ffff <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"enumerate"</span>,</span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"[1,10]"</span>,</span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> FAIL,</span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> FAIL, <span class="at">b_r2result =</span> FAIL</span>
-<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>enumerate_fffl <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"enumerate"</span>,</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"[1,10]"</span>,</span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> FAIL,</span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> FAIL, <span class="at">b_r2result =</span> LIFT</span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>enumerate_flfl <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"enumerate"</span>,</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"[1,10]"</span>,</span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> LIFT,</span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> FAIL, <span class="at">b_r2result =</span> LIFT</span>
-<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>enumerate_ffll <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"enumerate"</span>,</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"[1,10]"</span>,</span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> FAIL,</span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> LIFT, <span class="at">b_r2result =</span> LIFT</span>
-<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>enumerate_flll <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"enumerate"</span>,</span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"[1,10]"</span>,</span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> LIFT,</span>
-<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> LIFT, <span class="at">b_r2result =</span> LIFT</span>
-<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>enumerate_llll <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"enumerate"</span>,</span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"[1,10]"</span>,</span>
-<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> LIFT, <span class="at">b_r1result =</span> LIFT,</span>
-<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> LIFT, <span class="at">b_r2result =</span> LIFT</span>
-<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>enumerate_results_all <span class="ot">&lt;-</span> <span class="fu">run_all_scenarios</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"enumerate"</span>, <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">strengthPriorPrecision =</span> .<span class="dv">05</span>, <span class="at">strengthPriorVersion =</span> <span class="st">"[1,10]"</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="summarize" class="level4">
 <h4 class="anchored" data-anchor-id="summarize">summarize</h4>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">compare_results</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">compare_results</span>(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">MCMC_continuous =</span> MCMC_continuous_results_all,</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">MCMC_discrete =</span> MCMC_discrete_results_all,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">enumerate =</span> enumerate_results_all</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Now compare visually</code></pre>
+</div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "Now compare visually"
-# A tibble: 6 × 4
-  scenario MCMC_continuous MCMC_discrete enumerate
-  &lt;chr&gt;              &lt;int&gt;         &lt;dbl&gt;     &lt;dbl&gt;
-1 F,F;F,F                0         0.711     0.649
-2 F,F;F,L                1         1         1    
-3 F,L;F,L                1         1         1    
-4 F,F;L,L                1         1         1    
-5 F,L;L,L                1         1         1    
-6 L,L;L,L                1         1         1    </code></pre>
+<pre><code># A tibble: 18 × 3
+   method          scenario     P
+   &lt;chr&gt;           &lt;chr&gt;    &lt;dbl&gt;
+ 1 MCMC_continuous ffff     0.612
+ 2 MCMC_continuous fffl     0.969
+ 3 MCMC_continuous flfl     0.953
+ 4 MCMC_continuous ffll     1    
+ 5 MCMC_continuous flll     0.993
+ 6 MCMC_continuous llll     1    
+ 7 MCMC_discrete   ffff     0.637
+ 8 MCMC_discrete   fffl     0.968
+ 9 MCMC_discrete   flfl     0.949
+10 MCMC_discrete   ffll     1    
+11 MCMC_discrete   flll     0.991
+12 MCMC_discrete   llll     1    
+13 enumerate       ffff     0.714
+14 enumerate       fffl     0.964
+15 enumerate       flfl     0.970
+16 enumerate       ffll     1    
+17 enumerate       flll     0.989
+18 enumerate       llll     1    </code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="xiang2023-exp1-round3_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Now separately for each method (or method and agent) and so that we can ensure that there are no missing posteriors</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="xiang2023-exp1-round3_files/figure-html/unnamed-chunk-6-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="xiang2023-exp1-round3_files/figure-html/unnamed-chunk-6-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Compare all output values across methods</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 18 × 12
+   method   scenario     P      aU      bU    aE    bE jointU outcome a_strength
+   &lt;chr&gt;    &lt;chr&gt;    &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt; &lt;list&gt;    
+ 1 MCMC_co… ffff     0.612  0.0939  0.0939  0.9   0.9   0.188   0.612 &lt;dbl&gt;     
+ 2 MCMC_co… fffl     0.969 12.1     5.36    0.35  0.85 17.5     0.969 &lt;dbl&gt;     
+ 3 MCMC_co… flfl     0.953 12.0    11.4     0.5   0.55 23.4     0.953 &lt;dbl&gt;     
+ 4 MCMC_co… ffll     1     13.2    13.2     0.5   0.5  26.5     1     &lt;dbl&gt;     
+ 5 MCMC_co… flll     0.993 14.5    14.5     0.4   0.4  28.9     0.993 &lt;dbl&gt;     
+ 6 MCMC_co… llll     1     15.3    15.3     0.35  0.35 30.6     1     &lt;dbl&gt;     
+ 7 MCMC_di… ffff     0.637 -0.244   0.431   0.95  0.9   0.187   0.637 &lt;dbl&gt;     
+ 8 MCMC_di… fffl     0.968 12.1     5.33    0.35  0.85 17.4     0.968 &lt;dbl&gt;     
+ 9 MCMC_di… flfl     0.949 11.9    11.3     0.5   0.55 23.2     0.949 &lt;dbl&gt;     
+10 MCMC_di… ffll     1     13.2    13.2     0.5   0.5  26.5     1     &lt;dbl&gt;     
+11 MCMC_di… flll     0.991 14.4    14.4     0.4   0.4  28.9     0.991 &lt;dbl&gt;     
+12 MCMC_di… llll     1     15.3    15.3     0.35  0.35 30.6     1     &lt;dbl&gt;     
+13 enumera… ffff     0.714  0.781   0.781   1     1     1.56    0.714 &lt;dbl&gt;     
+14 enumera… fffl     0.964 12.0     5.26    0.35  0.85 17.3     0.964 &lt;dbl&gt;     
+15 enumera… flfl     0.970 13.1     9.68    0.35  0.6  22.7     0.970 &lt;dbl&gt;     
+16 enumera… ffll     1     13.2    13.2     0.5   0.5  26.5     1     &lt;dbl&gt;     
+17 enumera… flll     0.989 14.4    14.4     0.4   0.4  28.8     0.989 &lt;dbl&gt;     
+18 enumera… llll     1     15.3    15.3     0.35  0.35 30.6     1     &lt;dbl&gt;     
+# ℹ 2 more variables: b_strength &lt;list&gt;, startingE &lt;dbl&gt;</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Extract all final_table values into a comprehensive summary</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="xiang2023-exp1-round3_files/figure-html/unnamed-chunk-6-4.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Look at startingE details</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 18 × 11
+   method   scenario startingE    aU    bU    aE    bE jointU outcome a_strength
+   &lt;chr&gt;    &lt;chr&gt;        &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;   &lt;int&gt; &lt;list&gt;    
+ 1 MCMC_co… ffff          0.65   0   0      0     0       0         0 &lt;dbl&gt;     
+ 2 MCMC_co… fffl          0.3   13.9 0.375  0     1      14.2       1 &lt;dbl&gt;     
+ 3 MCMC_co… flfl          0.5   14.1 5.96   0.1   0.7    20.0       1 &lt;dbl&gt;     
+ 4 MCMC_co… ffll          0.4   13.9 0.375  0     1      14.2       1 &lt;dbl&gt;     
+ 5 MCMC_co… flll          0.4   14.2 6.73   0.1   0.65   20.9       1 &lt;dbl&gt;     
+ 6 MCMC_co… llll          0.35  14.3 8.23   0.15  0.6    22.5       1 &lt;dbl&gt;     
+ 7 MCMC_di… ffff          0.65   0   0      0     0       0         0 &lt;dbl&gt;     
+ 8 MCMC_di… fffl          0.3   13.9 0.375  0     1      14.2       1 &lt;dbl&gt;     
+ 9 MCMC_di… flfl          0.5   14.1 5.96   0.1   0.7    20.0       1 &lt;dbl&gt;     
+10 MCMC_di… ffll          0.4   13.9 0.375  0     1      14.2       1 &lt;dbl&gt;     
+11 MCMC_di… flll          0.4   14.2 6.73   0.1   0.65   20.9       1 &lt;dbl&gt;     
+12 MCMC_di… llll          0.35  14.3 8.23   0.15  0.6    22.5       1 &lt;dbl&gt;     
+13 enumera… ffff          1      0   0      0     0       0         0 &lt;dbl&gt;     
+14 enumera… fffl          0.3   13.9 0.375  0     1      14.2       1 &lt;dbl&gt;     
+15 enumera… flfl          0.3   14.1 5.96   0.1   0.7    20.0       1 &lt;dbl&gt;     
+16 enumera… ffll          0.4   13.9 0.375  0     1      14.2       1 &lt;dbl&gt;     
+17 enumera… flll          0.4   14.2 6.73   0.1   0.65   20.9       1 &lt;dbl&gt;     
+18 enumera… llll          0.35  14.3 8.23   0.15  0.6    22.5       1 &lt;dbl&gt;     
+# ℹ 1 more variable: b_strength &lt;list&gt;</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="xiang2023-exp1-round3_files/figure-html/unnamed-chunk-6-5.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="strength-prior-110-1" class="level3">
+<h3 class="anchored" data-anchor-id="strength-prior-110-1">strength prior (1,10)</h3>
+<section id="mcmc-with-discrete-prior-110-1" class="level4">
+<h4 class="anchored" data-anchor-id="mcmc-with-discrete-prior-110-1">mcmc with discrete prior (1,10)</h4>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>MCMC_discrete_results_exclexcl <span class="ot">&lt;-</span> <span class="fu">run_all_scenarios</span>(</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"MCMC"</span>, <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">strengthPriorPrecision =</span> .<span class="dv">05</span>, <span class="at">strengthPriorVersion =</span> <span class="st">"(1,10)"</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="enumerate-with-discrete-prior-110-1" class="level4">
+<h4 class="anchored" data-anchor-id="enumerate-with-discrete-prior-110-1">enumerate with discrete prior (1,10)</h4>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>enumerate_results_exclexcl <span class="ot">&lt;-</span> <span class="fu">run_all_scenarios</span>(</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"enumerate"</span>, <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">strengthPriorPrecision =</span> .<span class="dv">05</span>, <span class="at">strengthPriorVersion =</span> <span class="st">"(1,10)"</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="summarize-1" class="level4">
+<h4 class="anchored" data-anchor-id="summarize-1">summarize</h4>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">compare_results</span>(</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">MCMC_continuous =</span> MCMC_continuous_results_all,</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">MCMC_discrete =</span> MCMC_discrete_results_exclexcl,</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">enumerate =</span> enumerate_results_exclexcl</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Now compare visually</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 18 × 3
+   method          scenario     P
+   &lt;chr&gt;           &lt;chr&gt;    &lt;dbl&gt;
+ 1 MCMC_continuous ffff     0.612
+ 2 MCMC_continuous fffl     0.969
+ 3 MCMC_continuous flfl     0.953
+ 4 MCMC_continuous ffll     1    
+ 5 MCMC_continuous flll     0.993
+ 6 MCMC_continuous llll     1    
+ 7 MCMC_discrete   ffff     0.733
+ 8 MCMC_discrete   fffl     0.969
+ 9 MCMC_discrete   flfl     0.950
+10 MCMC_discrete   ffll     1    
+11 MCMC_discrete   flll     0.990
+12 MCMC_discrete   llll     1    
+13 enumerate       ffff     0.726
+14 enumerate       fffl     0.967
+15 enumerate       flfl     0.972
+16 enumerate       ffll     1    
+17 enumerate       flll     0.989
+18 enumerate       llll     1    </code></pre>
 </div>
 <div class="cell-output-display">
 <div>
@@ -797,8 +1034,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </figure>
 </div>
 </div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "Now separately for each method (or method and agent) and so that we can ensure that there are no missing posteriors"</code></pre>
+<div class="cell-output cell-output-stderr">
+<pre><code>Now separately for each method (or method and agent) and so that we can ensure that there are no missing posteriors</code></pre>
 </div>
 <div class="cell-output-display">
 <div>
@@ -814,44 +1051,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </figure>
 </div>
 </div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Compare all output values across methods</code></pre>
+</div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "Compare all output values across methods"
-[1] "Extract all final_table values into a comprehensive summary"
-# A tibble: 18 × 9
-   scenario method          startingE    aE    bE     aU     bU jointU     P
-   &lt;chr&gt;    &lt;chr&gt;               &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;
- 1 ffff     MCMC_continuous     0.188  0.15  0.15 -2.02  -2.02  -4.05  0    
- 2 fffl     MCMC_continuous    17.5    0     1    13.9    0.375 14.2   1    
- 3 flfl     MCMC_continuous    23.4    0.1   0.7  14.1    5.96  20.0   1    
- 4 ffll     MCMC_continuous    26.5    1     0     0.375 13.9   14.2   1    
- 5 flll     MCMC_continuous    28.9    1     0     0.375 13.9   14.2   1    
- 6 llll     MCMC_continuous    30.6    0.6   0.1   7.52  14.3   21.8   1    
- 7 ffff     MCMC_discrete       1.46   1     1     0.728  0.728  1.46  0.711
- 8 fffl     MCMC_discrete      17.1    0     1    13.9    0.375 14.2   1    
- 9 flfl     MCMC_discrete      22.9    0.1   0.7  14.1    5.96  20.0   1    
-10 ffll     MCMC_discrete      26.5    1     0     0.375 13.9   14.2   1    
-11 flll     MCMC_discrete      28.8    1     0     0.375 13.9   14.2   1    
-12 llll     MCMC_discrete      30.6    0.6   0.1   7.52  14.3   21.8   1    
-13 ffff     enumerate           1.38   0.95  0.95  0.163  0.163  0.325 0.649
-14 fffl     enumerate          17.1    0     1    13.9    0.375 14.2   1    
-15 flfl     enumerate          22.8    0.1   0.7  14.1    5.96  20.0   1    
-16 ffll     enumerate          26.5    1     0     0.375 13.9   14.2   1    
-17 flll     enumerate          28.8    1     0     0.375 13.9   14.2   1    
-18 llll     enumerate          30.6    0.6   0.1   7.52  14.3   21.8   1    
-# A tibble: 42 × 5
-   scenario variable  MCMC_continuous MCMC_discrete enumerate
-   &lt;chr&gt;    &lt;chr&gt;               &lt;dbl&gt;         &lt;dbl&gt;     &lt;dbl&gt;
- 1 ffff     startingE           0.188         1.46      1.38 
- 2 ffff     aE                  0.15          1         0.95 
- 3 ffff     bE                  0.15          1         0.95 
- 4 ffff     aU                 -2.02          0.728     0.163
- 5 ffff     bU                 -2.02          0.728     0.163
- 6 ffff     jointU             -4.05          1.46      0.325
- 7 ffff     P                   0             0.711     0.649
- 8 fffl     startingE          17.5          17.1      17.1  
- 9 fffl     aE                  0             0         0    
-10 fffl     bE                  1             1         1    
-# ℹ 32 more rows</code></pre>
+<pre><code># A tibble: 18 × 12
+   method   scenario     P      aU      bU    aE    bE jointU outcome a_strength
+   &lt;chr&gt;    &lt;chr&gt;    &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt; &lt;list&gt;    
+ 1 MCMC_co… ffff     0.612  0.0939  0.0939  0.9   0.9   0.188   0.612 &lt;dbl&gt;     
+ 2 MCMC_co… fffl     0.969 12.1     5.36    0.35  0.85 17.5     0.969 &lt;dbl&gt;     
+ 3 MCMC_co… flfl     0.953 12.0    11.4     0.5   0.55 23.4     0.953 &lt;dbl&gt;     
+ 4 MCMC_co… ffll     1     13.2    13.2     0.5   0.5  26.5     1     &lt;dbl&gt;     
+ 5 MCMC_co… flll     0.993 14.5    14.5     0.4   0.4  28.9     0.993 &lt;dbl&gt;     
+ 6 MCMC_co… llll     1     15.3    15.3     0.35  0.35 30.6     1     &lt;dbl&gt;     
+ 7 MCMC_di… ffff     0.733  1.16    1.16    1     1     2.33    0.733 &lt;dbl&gt;     
+ 8 MCMC_di… fffl     0.969 12.1     5.35    0.35  0.85 17.4     0.969 &lt;dbl&gt;     
+ 9 MCMC_di… flfl     0.950 12.0    11.3     0.5   0.55 23.2     0.950 &lt;dbl&gt;     
+10 MCMC_di… ffll     1     13.2    13.2     0.5   0.5  26.5     1     &lt;dbl&gt;     
+11 MCMC_di… flll     0.990 14.4    14.4     0.4   0.4  28.8     0.990 &lt;dbl&gt;     
+12 MCMC_di… llll     1     15.3    15.3     0.35  0.35 30.6     1     &lt;dbl&gt;     
+13 enumera… ffff     0.726  1.02    1.02    1     1     2.03    0.726 &lt;dbl&gt;     
+14 enumera… fffl     0.967 12.1     5.31    0.35  0.85 17.4     0.967 &lt;dbl&gt;     
+15 enumera… flfl     0.972 13.1     9.72    0.35  0.6  22.8     0.972 &lt;dbl&gt;     
+16 enumera… ffll     1     13.2    13.2     0.5   0.5  26.5     1     &lt;dbl&gt;     
+17 enumera… flll     0.989 14.4    14.4     0.4   0.4  28.7     0.989 &lt;dbl&gt;     
+18 enumera… llll     1     15.3    15.3     0.35  0.35 30.6     1     &lt;dbl&gt;     
+# ℹ 2 more variables: b_strength &lt;list&gt;, startingE &lt;dbl&gt;</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Extract all final_table values into a comprehensive summary</code></pre>
 </div>
 <div class="cell-output-display">
 <div>
@@ -860,42 +1088,32 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </figure>
 </div>
 </div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Look at startingE details</code></pre>
+</div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 18 × 7
-   scenario method             aE    bE      aU      bU jointU
-   &lt;chr&gt;    &lt;chr&gt;           &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;
- 1 ffff     MCMC_continuous  0.9   0.9   0.0939  0.0939  0.188
- 2 fffl     MCMC_continuous  0.35  0.85 12.1     5.36   17.5  
- 3 flfl     MCMC_continuous  0.5   0.55 12.0    11.4    23.4  
- 4 ffll     MCMC_continuous  0.5   0.5  13.2    13.2    26.5  
- 5 flll     MCMC_continuous  0.4   0.4  14.5    14.5    28.9  
- 6 llll     MCMC_continuous  0.35  0.35 15.3    15.3    30.6  
- 7 ffff     MCMC_discrete    1     1     0.728   0.728   1.46 
- 8 fffl     MCMC_discrete    0.35  0.85 11.9     5.18   17.1  
- 9 flfl     MCMC_discrete    0.35  0.6  13.2     9.78   22.9  
-10 ffll     MCMC_discrete    0.5   0.5  13.2    13.2    26.5  
-11 flll     MCMC_discrete    0.4   0.4  14.4    14.4    28.8  
-12 llll     MCMC_discrete    0.35  0.35 15.3    15.3    30.6  
-13 ffff     enumerate        1     1     0.688   0.688   1.38 
-14 fffl     enumerate        0.35  0.85 11.9     5.18   17.1  
-15 flfl     enumerate        0.35  0.6  13.1     9.72   22.8  
-16 ffll     enumerate        0.5   0.5  13.2    13.2    26.5  
-17 flll     enumerate        0.4   0.4  14.4    14.4    28.8  
-18 llll     enumerate        0.35  0.35 15.3    15.3    30.6  
-# A tibble: 30 × 5
-   scenario variable MCMC_continuous MCMC_discrete enumerate
-   &lt;chr&gt;    &lt;chr&gt;              &lt;dbl&gt;         &lt;dbl&gt;     &lt;dbl&gt;
- 1 ffff     aE                0.9            1         1    
- 2 ffff     bE                0.9            1         1    
- 3 ffff     aU                0.0939         0.728     0.688
- 4 ffff     bU                0.0939         0.728     0.688
- 5 ffff     jointU            0.188          1.46      1.38 
- 6 fffl     aE                0.35           0.35      0.35 
- 7 fffl     bE                0.85           0.85      0.85 
- 8 fffl     aU               12.1           11.9      11.9  
- 9 fffl     bU                5.36           5.18      5.18 
-10 fffl     jointU           17.5           17.1      17.1  
-# ℹ 20 more rows</code></pre>
+<pre><code># A tibble: 18 × 11
+   method   scenario startingE    aU    bU    aE    bE jointU outcome a_strength
+   &lt;chr&gt;    &lt;chr&gt;        &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;   &lt;int&gt; &lt;list&gt;    
+ 1 MCMC_co… ffff          0.65   0   0      0     0       0         0 &lt;dbl&gt;     
+ 2 MCMC_co… fffl          0.3   13.9 0.375  0     1      14.2       1 &lt;dbl&gt;     
+ 3 MCMC_co… flfl          0.5   14.1 5.96   0.1   0.7    20.0       1 &lt;dbl&gt;     
+ 4 MCMC_co… ffll          0.4   13.9 0.375  0     1      14.2       1 &lt;dbl&gt;     
+ 5 MCMC_co… flll          0.4   14.2 6.73   0.1   0.65   20.9       1 &lt;dbl&gt;     
+ 6 MCMC_co… llll          0.35  14.3 8.23   0.15  0.6    22.5       1 &lt;dbl&gt;     
+ 7 MCMC_di… ffff          1      0   0      0     0       0         0 &lt;dbl&gt;     
+ 8 MCMC_di… fffl          0.3   13.9 0.375  0     1      14.2       1 &lt;dbl&gt;     
+ 9 MCMC_di… flfl          0.5   14.1 5.96   0.1   0.7    20.0       1 &lt;dbl&gt;     
+10 MCMC_di… ffll          0.4   13.9 0.375  0     1      14.2       1 &lt;dbl&gt;     
+11 MCMC_di… flll          0.4   14.2 6.73   0.1   0.65   20.9       1 &lt;dbl&gt;     
+12 MCMC_di… llll          0.35  14.3 8.23   0.15  0.6    22.5       1 &lt;dbl&gt;     
+13 enumera… ffff          1      0   0      0     0       0         0 &lt;dbl&gt;     
+14 enumera… fffl          0.3   13.9 0.375  0     1      14.2       1 &lt;dbl&gt;     
+15 enumera… flfl          0.3   14.1 5.96   0.1   0.7    20.0       1 &lt;dbl&gt;     
+16 enumera… ffll          0.4   13.9 0.375  0     1      14.2       1 &lt;dbl&gt;     
+17 enumera… flll          0.4   14.2 6.73   0.1   0.65   20.9       1 &lt;dbl&gt;     
+18 enumera… llll          0.35  14.3 8.23   0.15  0.6    22.5       1 &lt;dbl&gt;     
+# ℹ 1 more variable: b_strength &lt;list&gt;</code></pre>
 </div>
 <div class="cell-output-display">
 <div>
@@ -905,295 +1123,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-</section>
-</section>
-<section id="strength-prior-110-1" class="level3">
-<h3 class="anchored" data-anchor-id="strength-prior-110-1">strength prior (1,10)</h3>
-<section id="mcmc-with-discrete-prior-110-1" class="level4">
-<h4 class="anchored" data-anchor-id="mcmc-with-discrete-prior-110-1">mcmc with discrete prior (1,10)</h4>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>using webppl version: main v0.9.15-27823b2 /Users/jacobzimmerman/ucsd/fyp/memo-sandbox/.pixi/envs/default/lib/R/library/rwebppl/js/webppl</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>MCMC_discrete_ffff <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"MCMC"</span>,</span>
-<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
-<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"(1,10)"</span>,</span>
-<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> FAIL,</span>
-<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> FAIL, <span class="at">b_r2result =</span> FAIL</span>
-<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>MCMC_discrete_fffl <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"MCMC"</span>,</span>
-<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
-<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"(1,10)"</span>,</span>
-<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> FAIL,</span>
-<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> FAIL, <span class="at">b_r2result =</span> LIFT</span>
-<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>MCMC_discrete_flfl <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"MCMC"</span>,</span>
-<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
-<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"(1,10)"</span>,</span>
-<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> LIFT,</span>
-<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> FAIL, <span class="at">b_r2result =</span> LIFT</span>
-<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>MCMC_discrete_ffll <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"MCMC"</span>,</span>
-<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
-<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"(1,10)"</span>,</span>
-<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> FAIL,</span>
-<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> LIFT, <span class="at">b_r2result =</span> LIFT</span>
-<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>MCMC_discrete_flll <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"MCMC"</span>,</span>
-<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
-<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"(1,10)"</span>,</span>
-<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> LIFT,</span>
-<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> LIFT, <span class="at">b_r2result =</span> LIFT</span>
-<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>MCMC_discrete_llll <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"MCMC"</span>,</span>
-<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
-<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"(1,10)"</span>,</span>
-<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> LIFT, <span class="at">b_r1result =</span> LIFT,</span>
-<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> LIFT, <span class="at">b_r2result =</span> LIFT</span>
-<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section>
-<section id="enumerate-with-discrete-prior-110-1" class="level4">
-<h4 class="anchored" data-anchor-id="enumerate-with-discrete-prior-110-1">enumerate with discrete prior (1,10)</h4>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>enumerate_ffff <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"enumerate"</span>,</span>
-<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
-<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"(1,10)"</span>,</span>
-<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> FAIL,</span>
-<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> FAIL, <span class="at">b_r2result =</span> FAIL</span>
-<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>enumerate_fffl <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"enumerate"</span>,</span>
-<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
-<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"(1,10)"</span>,</span>
-<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> FAIL,</span>
-<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> FAIL, <span class="at">b_r2result =</span> LIFT</span>
-<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>enumerate_flfl <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"enumerate"</span>,</span>
-<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
-<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"(1,10)"</span>,</span>
-<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> LIFT,</span>
-<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> FAIL, <span class="at">b_r2result =</span> LIFT</span>
-<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>enumerate_ffll <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"enumerate"</span>,</span>
-<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
-<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"(1,10)"</span>,</span>
-<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> FAIL,</span>
-<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> LIFT, <span class="at">b_r2result =</span> LIFT</span>
-<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>enumerate_flll <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"enumerate"</span>,</span>
-<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
-<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"(1,10)"</span>,</span>
-<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> FAIL, <span class="at">b_r1result =</span> LIFT,</span>
-<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> LIFT, <span class="at">b_r2result =</span> LIFT</span>
-<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(rwebppl<span class="sc">::</span><span class="fu">kill_webppl</span>())</span>
-<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>enumerate_llll <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(<span class="at">program_file =</span> <span class="st">"webppl vs memo/xiang2023-exp1-round3-with-debugging.wppl"</span>, <span class="at">data=</span><span class="fu">data.frame</span>(</span>
-<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"enumerate"</span>,</span>
-<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">discrete =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> <span class="dv">1</span>,</span>
-<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"(1,10)"</span>,</span>
-<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r1result =</span> LIFT, <span class="at">b_r1result =</span> LIFT,</span>
-<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">a_r2result =</span> LIFT, <span class="at">b_r2result =</span> LIFT</span>
-<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">data_var=</span><span class="st">"params_df"</span>, <span class="at">random_seed=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section>
-<section id="summarize-1" class="level4">
-<h4 class="anchored" data-anchor-id="summarize-1">summarize</h4>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">compare_results</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "Now compare visually"
-# A tibble: 6 × 4
-  scenario MCMC_continuous MCMC_discrete enumerate
-  &lt;chr&gt;              &lt;int&gt;         &lt;int&gt;     &lt;int&gt;
-1 F,F;F,F                0             0         0
-2 F,F;F,L                1             1         1
-3 F,L;F,L                1             1         1
-4 F,F;L,L                1             1         1
-5 F,L;L,L                1             1         1
-6 L,L;L,L                1             1         1</code></pre>
-</div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="xiang2023-exp1-round3_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "Now separately for each method (or method and agent) and so that we can ensure that there are no missing posteriors"</code></pre>
-</div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="xiang2023-exp1-round3_files/figure-html/unnamed-chunk-8-2.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="xiang2023-exp1-round3_files/figure-html/unnamed-chunk-8-3.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "Compare all output values across methods"
-[1] "Extract all final_table values into a comprehensive summary"
-# A tibble: 18 × 9
-   scenario method          startingE    aE    bE     aU     bU jointU     P
-   &lt;chr&gt;    &lt;chr&gt;               &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;int&gt;
- 1 ffff     MCMC_continuous     0.188  0.15  0.15 -2.02  -2.02   -4.05     0
- 2 fffl     MCMC_continuous    17.5    0     1    13.9    0.375  14.2      1
- 3 flfl     MCMC_continuous    23.4    0.1   0.7  14.1    5.96   20.0      1
- 4 ffll     MCMC_continuous    26.5    1     0     0.375 13.9    14.2      1
- 5 flll     MCMC_continuous    28.9    1     0     0.375 13.9    14.2      1
- 6 llll     MCMC_continuous    30.6    0.6   0.1   7.52  14.3    21.8      1
- 7 ffff     MCMC_discrete       2.54   0     0     0      0       0        0
- 8 fffl     MCMC_discrete      18.0    0     1    13.9    0.375  14.2      1
- 9 flfl     MCMC_discrete      23.5    0.1   0.7  14.1    5.96   20.0      1
-10 ffll     MCMC_discrete      26.5    1     0     0.375 13.9    14.2      1
-11 flll     MCMC_discrete      28.8    1     0     0.375 13.9    14.2      1
-12 llll     MCMC_discrete      30.6    0.6   0.1   7.52  14.3    21.8      1
-13 ffff     enumerate           2.32   0     0     0      0       0        0
-14 fffl     enumerate          17.3    0     1    13.9    0.375  14.2      1
-15 flfl     enumerate          23.0    0.1   0.7  14.1    5.96   20.0      1
-16 ffll     enumerate          26.5    1     0     0.375 13.9    14.2      1
-17 flll     enumerate          28.8    1     0     0.375 13.9    14.2      1
-18 llll     enumerate          30.6    0.6   0.1   7.52  14.3    21.8      1
-# A tibble: 42 × 5
-   scenario variable  MCMC_continuous MCMC_discrete enumerate
-   &lt;chr&gt;    &lt;chr&gt;               &lt;dbl&gt;         &lt;dbl&gt;     &lt;dbl&gt;
- 1 ffff     startingE           0.188          2.54      2.32
- 2 ffff     aE                  0.15           0         0   
- 3 ffff     bE                  0.15           0         0   
- 4 ffff     aU                 -2.02           0         0   
- 5 ffff     bU                 -2.02           0         0   
- 6 ffff     jointU             -4.05           0         0   
- 7 ffff     P                   0              0         0   
- 8 fffl     startingE          17.5           18.0      17.3 
- 9 fffl     aE                  0              0         0   
-10 fffl     bE                  1              1         1   
-# ℹ 32 more rows</code></pre>
-</div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="xiang2023-exp1-round3_files/figure-html/unnamed-chunk-8-4.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 18 × 7
-   scenario method             aE    bE      aU      bU jointU
-   &lt;chr&gt;    &lt;chr&gt;           &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;
- 1 ffff     MCMC_continuous  0.9   0.9   0.0939  0.0939  0.188
- 2 fffl     MCMC_continuous  0.35  0.85 12.1     5.36   17.5  
- 3 flfl     MCMC_continuous  0.5   0.55 12.0    11.4    23.4  
- 4 ffll     MCMC_continuous  0.5   0.5  13.2    13.2    26.5  
- 5 flll     MCMC_continuous  0.4   0.4  14.5    14.5    28.9  
- 6 llll     MCMC_continuous  0.35  0.35 15.3    15.3    30.6  
- 7 ffff     MCMC_discrete    1     1     1.27    1.27    2.54 
- 8 fffl     MCMC_discrete    0.55  0.75 10.3     7.64   18.0  
- 9 flfl     MCMC_discrete    0.5   0.55 12.1    11.4    23.5  
-10 ffll     MCMC_discrete    0.5   0.5  13.2    13.2    26.5  
-11 flll     MCMC_discrete    0.4   0.4  14.4    14.4    28.8  
-12 llll     MCMC_discrete    0.35  0.35 15.3    15.3    30.6  
-13 ffff     enumerate        1     1     1.16    1.16    2.32 
-14 fffl     enumerate        0.35  0.85 12.0     5.27   17.3  
-15 flfl     enumerate        0.35  0.6  13.2     9.79   23.0  
-16 ffll     enumerate        0.5   0.5  13.2    13.2    26.5  
-17 flll     enumerate        0.4   0.4  14.4    14.4    28.8  
-18 llll     enumerate        0.35  0.35 15.3    15.3    30.6  
-# A tibble: 30 × 5
-   scenario variable MCMC_continuous MCMC_discrete enumerate
-   &lt;chr&gt;    &lt;chr&gt;              &lt;dbl&gt;         &lt;dbl&gt;     &lt;dbl&gt;
- 1 ffff     aE                0.9             1         1   
- 2 ffff     bE                0.9             1         1   
- 3 ffff     aU                0.0939          1.27      1.16
- 4 ffff     bU                0.0939          1.27      1.16
- 5 ffff     jointU            0.188           2.54      2.32
- 6 fffl     aE                0.35            0.55      0.35
- 7 fffl     bE                0.85            0.75      0.85
- 8 fffl     aU               12.1            10.3      12.0 
- 9 fffl     bU                5.36            7.64      5.27
-10 fffl     jointU           17.5            18.0      17.3 
-# ℹ 20 more rows</code></pre>
-</div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="xiang2023-exp1-round3_files/figure-html/unnamed-chunk-8-5.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Okay not sure why startingE can be 1 sometimes (excluding 1 and 10 does not fix this for MCMC_discrete). Inspecting using startingE_table</p>
 
 
 </section>
