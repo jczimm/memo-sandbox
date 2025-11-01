@@ -166,7 +166,7 @@ This is the most complex part. The original WebPPL code models:
 @jax.jit
 def outcome2(strength_a, strength_b, effort_a, effort_b):
     """Predicted outcome (success probability) for joint agents and efforts"""
-    if np.ndim(strength_a) > 0 or np.ndim(strength_b) > 0:
+    if np.ndim(strength_a) > 0:
         outcomes = jax.vmap(
             lambda sa, sb: lift2(sa, sb, effort_a, effort_b)
         )(strength_a, strength_b)
@@ -250,36 +250,6 @@ def best_response_b(strength_a, strength_b, effort_a):
     #     )(efforts)
 
     return efforts[np.argmax(utilities)]
-
-# potentially more efficient version
-def find_equilibrium_iterative(strength_a, strength_b, init_effort, max_depth=10, verbose=False):
-    """
-    Find Nash equilibrium through iterated best responses (iterative implementation).
-
-    Starting from init_effort for agent B, iterate:
-    - A responds to B
-    - B responds to A
-    Until convergence (or max_depth reached)
-
-    Note: depth starts at 1 to match WebPPL convention (not 0-indexed)
-    """
-    effort_b = init_effort
-
-    # Start depth at 1 to match WebPPL convention
-    for depth in range(1, max_depth + 1):
-        effort_a = best_response_a(strength_a, strength_b, effort_b)
-        effort_b_new = best_response_b(strength_a, strength_b, effort_a)
-
-        # Check convergence
-        if np.abs(effort_b_new - effort_b) < 0.06:
-            if verbose:
-                print(f"  Converged at depth {depth}: effort_a={effort_a:.4f}, effort_b={effort_b_new:.4f}")
-            return effort_a, effort_b_new, depth
-
-        effort_b = effort_b_new
-
-    print(f"Warning: Equilibrium did not converge in {max_depth} iterations")
-    return effort_a, effort_b, max_depth
 
 # matches exactly webppl's version
 def find_equilibrium(strength_a, strength_b, init_effort, max_depth=10, verbose=False, trace=False):
@@ -435,7 +405,7 @@ def expected_joint_utility(init_effort, posterior_sa, posterior_sb):
     sa = np.array(posterior_sa)
     sb = np.array(posterior_sb)
 
-    effort_a, effort_b, depth = find_equilibrium_iterative(sa, sb, init_effort)
+    effort_a, effort_b, depth = find_equilibrium(sa, sb, init_effort)
 
     # print(f"Strengths (A={sa:.2f}, B={sb:.2f}): Efforts (A={effort_a:.4f}, B={effort_b:.4f})")
 
