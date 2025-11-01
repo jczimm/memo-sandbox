@@ -441,7 +441,7 @@ Walking step by step and validate that the values (posteriors and equilibria acr
 >
 > Why it matters most in mid-range (2.5-7): This is where the lift threshold creates maximum sensitivity—agents transition from "can only jointly lift" to "can lift solo," making the utility function most nonlinear.
 
-- 4. TODO finish memo enumerate, with same parameters as webppl enumerate (xiang2023-exp1-round3-memo.qmd), but higher precision; and log all the stats (see `stats`) -- and investigate discrepancies. e.g. why is Joint utility at optimum so high? why are the agents' utilities different from each other? (**compare final P, aU, bU, aE, bE between original version and the memo version**)
+- 4. [x] finish memo enumerate, so that it matches webppl enumerate given the same parameters  (xiang2023-exp1-round3-memo.qmd), but higher precision; and log all the stats (see `stats`) -- and investigate discrepancies. e.g. why is Joint utility at optimum so high? why are the agents' utilities different from each other? (**compare final P, aU, bU, aE, bE between original version and the memo version**)
 
 - 5. TODO modify memo joint effort model to implement solitary effort and compensatory effort models, and check that the P results match up with the P results from the paper (simple, no need to validate incrementally)
 
@@ -727,9 +727,13 @@ compare_results(
 TEMP
 
 ```{r}
-run_scenario(
-  'ffll', 'enumerate', discrete = T,
-  strengthPriorPrecision = 1,
-  strengthPriorVersion = "[1,10]"
+invisible(
+  run_scenario(
+    'ffff', 'enumerate', discrete = T,
+    strengthPriorPrecision = .03,
+    strengthPriorVersion = "[1,10]"
+  )
 )
+
+# and compare to output from memo when using same precision (.05)
 ```

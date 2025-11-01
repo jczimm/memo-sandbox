@@ -1,6 +1,9 @@
-// var efforts = [0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1]
-// TEMP
-var efforts = [0.  , 0.25, 0.5 , 0.75, 1.  ]
+var efforts = [0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1]
+// // TEMP
+// var efforts = [0.  , 0.25, 0.5 , 0.75, 1.  ]
+
+// TRACE CONFIGURATION: Set to true to see detailed equilibrium finding traces
+var ENABLE_TRACE = false
 
 // convert to a @jax.jit?
 var argMax = function(f, ar){
@@ -140,18 +143,22 @@ display("Agent B strength - mean: " + listMean(x2b) + ", min: " + _.min(x2b) + "
 display("First 5 samples (sa, sb): " + JSON.stringify(_.zip(_.take(x2a, 5), _.take(x2b, 5))))
 
 // convert to a combination of @jax.jit and @memo ? so I'm not doing two-step nested optimization (like the difference between RSA in webppl and in memo)
-var jointUtility = function(init_effort,a_strength,b_strength){
+var jointUtility = function(init_effort,a_strength,b_strength,tr){
+  var trace = tr || false; // default to false if not provided
   var r3_reward = highR // round 3 reward
-  
+
   var lift2 = function(strength,strength2,box,effort,effort2){
     return (effort*strength + effort2*strength2) >= weight(box)
   }
 
   var gini = function(effort, effort2) {return (effort == effort2 ? 0 : Math.abs(effort-effort2)/4/(effort+effort2))}
   // For the Maximum effort model, the Gini coefficient is always 0, so it is fine to keep this term in here for the maximum effort model.
-  
+
   var a = function(depth,reward) {
       var effort2 = b(depth - 1,reward)
+      if (trace) {
+        display("  a(depth=" + depth + "): B's effort from b(" + (depth-1) + ") = " + effort2.toFixed(4))
+      }
       var optEffort = function(strength,strength2,box,reward) {
         return argMax(
           function(effort) {
@@ -163,11 +170,24 @@ var jointUtility = function(init_effort,a_strength,b_strength){
           },
           efforts);
       };
-    return optEffort(a_strength,b_strength,'box',reward)
+      var effort_a = optEffort(a_strength,b_strength,'box',reward)
+      if (trace) {
+        display("  a(depth=" + depth + "): A's best response = " + effort_a.toFixed(4))
+      }
+      return effort_a
   }
-  
+
   var b = function(depth,reward) {
-      var effort2 = depth===0 ? init_effort : a(depth,reward)
+      if (depth === 0) {
+        if (trace) {
+          display("  b(depth=" + depth + "): Using init_effort = " + init_effort.toFixed(4))
+        }
+        return init_effort
+      }
+      var effort2 = a(depth,reward)
+      if (trace) {
+        display("  b(depth=" + depth + "): A's effort from a(" + depth + ") = " + effort2.toFixed(4))
+      }
       var optEffort = function(strength,strength2,box,reward) {
         return argMax(
           function(effort) {
@@ -179,16 +199,34 @@ var jointUtility = function(init_effort,a_strength,b_strength){
           },
           efforts);
       };
-    return optEffort(b_strength,a_strength,'box',reward)
+      var effort_b = optEffort(b_strength,a_strength,'box',reward)
+      if (trace) {
+        display("  b(depth=" + depth + "): B's best response = " + effort_b.toFixed(4))
+      }
+      return effort_b
   }
-  
+
   var findDepth = function(x) { // find the depth that is needed to converge
-     if (Math.abs(b(x,r3_reward) - b(x+1,r3_reward)) < 0.06) {
+     var b_at_x = b(x,r3_reward)
+     var b_at_x_plus_1 = b(x+1,r3_reward)
+     var diff = Math.abs(b_at_x - b_at_x_plus_1)
+     var converged = diff < 0.06
+     if (trace) {
+       display("findDepth(" + x + "): b(" + x + ")=" + b_at_x.toFixed(4) +
+               ", b(" + (x+1) + ")=" + b_at_x_plus_1.toFixed(4) +
+               ", diff=" + diff.toFixed(4) +
+               ", converged=" + converged)
+     }
+     if (converged) {
        return x;
      } else {
        return -1;
      }
    };
+
+  if (trace) {
+    display("\n=== find_equilibrium(init_effort=" + init_effort.toFixed(4) + ") ===")
+  }
 
   var ds = [1,2,5,10]; // if converges in 1 round, then depth = 1; if not, then try 2, 5, 10.
   var d = function() {
@@ -245,7 +283,7 @@ var startingEffort = function(a_strength,b_strength) {
   var tables = [];
   var result_starting_effort = argMax(
     function(init_effort) {
-      var tbl = jointUtility(init_effort,a_strength,b_strength)
+      var tbl = jointUtility(init_effort,a_strength,b_strength,ENABLE_TRACE)
       tables.push([init_effort, tbl])
       return tbl.jointU
     },
@@ -264,7 +302,7 @@ var startingE = startingE_results.effort
 // DEBUG: Final results
 display("=== FINAL RESULTS ===")
 display("Optimal starting effort: " + startingE)
-var final_table = jointUtility(startingE,x2a,x2b)
+var final_table = jointUtility(startingE,x2a,x2b,ENABLE_TRACE)
 display("Joint utility at optimum: " + final_table.jointU)
 display("Agent A utility: " + final_table.aU)
 display("Agent B utility: " + final_table.bU)

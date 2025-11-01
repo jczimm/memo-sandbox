@@ -21,20 +21,23 @@ weight_box = 5  # weight of the box
 low_reward = 10
 high_reward = 20
 
-# # Discretized spaces (for computational tractability)
-# efforts = np.array([0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5,
-#                     0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0])
+# Discretized spaces (for computational tractability)
+efforts = np.array([0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5,
+                    0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0])
 
-# # Discretized strength space (replacing continuous uniform(1,10))
-# # # (1,10) with digits=1
-# # strength_values = np.linspace(1.1, 9.9, 89)
+# Discretized strength space (replacing continuous uniform(1,10))
+# # (1,10) with digits=1
+# strength_values = np.linspace(1.1, 9.9, 89)
 # # [1,10] with step size of .05
 # strength_values = np.linspace(1., 10., 181)
 
-# TEMP
-# Dummy inputs for debugging
-efforts = np.linspace(0., 1., 5)
-strength_values = np.linspace(1., 10., 10)
+# [1,10] with step size of .03
+strength_values = np.linspace(1., 10., 301)
+
+# # TEMP
+# # Dummy inputs for debugging
+# efforts = np.linspace(0., 1., 5)
+# strength_values = np.linspace(1., 10., 10)
 ```
 
 ## Helper Functions (JAX-compatible)
@@ -161,24 +164,31 @@ This is the most complex part. The original WebPPL code models:
 
 ```{python}
 @jax.jit
-def joint_utility_single_strength(strength_a, strength_b, effort_a, effort_b):
-    """
-    Compute utilities for both agents given fixed strengths and efforts.
+def outcome2(strength_a, strength_b, effort_a, effort_b):
+    """Predicted outcome (success probability) for joint agents and efforts"""
+    if np.ndim(strength_a) > 0 or np.ndim(strength_b) > 0:
+        outcomes = jax.vmap(
+            lambda sa, sb: lift2(sa, sb, effort_a, effort_b)
+        )(strength_a, strength_b)
+        return np.mean(outcomes)
+    else:
+        return lift2(strength_a, strength_b, effort_a, effort_b)
 
-    Returns: (utility_a, utility_b, success_prob)
-    """
-    # Ensure that strength_a and strength_b are floats, not arrays
-    if isinstance(strength_a, list) or isinstance(strength_b, list):
-        raise ValueError("strength_a and strength_b must be single float values")
+# @jax.jit
+# def joint_utility_single_strength(strength_a, strength_b, effort_a, effort_b):
+#     """
+#     Compute utilities for both agents given fixed strengths and efforts.
 
-    reward = high_reward  # Round 3 uses high reward
-    success = lift2(strength_a, strength_b, effort_a, effort_b)
-    gini_coef = gini(effort_a, effort_b)
+#     Returns: (utility_a, utility_b, success_prob)
+#     """
+#     reward = high_reward  # Round 3 uses high reward
+#     success = lift2(strength_a, strength_b, effort_a, effort_b)
+#     gini_coef = gini(effort_a, effort_b)
 
-    utility_a = reward * success - alpha * effort_a - beta * gini_coef
-    utility_b = reward * success - alpha * effort_b - beta * gini_coef
+#     utility_a = reward * success - alpha * effort_a - beta * gini_coef
+#     utility_b = reward * success - alpha * effort_b - beta * gini_coef
 
-    return utility_a, utility_b, success
+#     return utility_a, utility_b, success
 
 @jax.jit
 def joint_utility_multiple_strength(strength_a, strength_b, effort_a, effort_b):
@@ -187,18 +197,12 @@ def joint_utility_multiple_strength(strength_a, strength_b, effort_a, effort_b):
 
     Returns: (utility_a, utility_b, success_prob)
     """
-    # Ensure that strength_a and strength_b are arrays, not floats
-    if not isinstance(strength_a, list) or not isinstance(strength_b, list):
-        raise ValueError("strength_a and strength_b must be arrays of float values")
-
     reward = high_reward  # Round 3 uses high reward
 
     # translation of listMean(map2(function(i,j){return lift2(i,j,box,effort,effort2)}, strength,strength2))
     # note that map2 maps over the input arrays *concurrently*
-    print(strength_a)
-    print(strength_b)
     success = np.mean(
-        jax.pmap(
+        jax.vmap(
             lambda sa, sb: lift2(sa, sb, effort_a, effort_b)
         )(strength_a, strength_b)
     )
@@ -216,16 +220,16 @@ def best_response_a(strength_a, strength_b, effort_b):
 
     Agent A optimizes: max_{e_a} E[utility_a(e_a, e_b) | s_a, s_b]
     """
-    if isinstance(strength_a, list) or isinstance(strength_b, list):
-        # Multiple strength values
-        utilities = jax.vmap(
-            lambda ea: joint_utility_multiple_strength(strength_a, strength_b, ea, effort_b)[0]
-        )(efforts)
-    else:
-        # Single strength values
-        utilities = jax.vmap(
-            lambda ea: joint_utility_single_strength(strength_a, strength_b, ea, effort_b)[0]
-        )(efforts)
+    # if np.ndim(strength_a) > 0 or np.ndim(strength_b) > 0:
+    # Multiple strength values
+    utilities = jax.vmap(
+        lambda ea: joint_utility_multiple_strength(strength_a, strength_b, ea, effort_b)[0]
+    )(efforts)
+    # else:
+    #     # Single strength values
+    #     utilities = jax.vmap(
+    #         lambda ea: joint_utility_single_strength(strength_a, strength_b, ea, effort_b)[0]
+    #     )(efforts)
 
     return efforts[np.argmax(utilities)]
 
@@ -234,22 +238,23 @@ def best_response_b(strength_a, strength_b, effort_a):
     """
     Find agent B's best response to agent A's effort.
     """
-    if isinstance(strength_a, list) or isinstance(strength_b, list):
-        # Multiple strength values
-        utilities = jax.vmap(
-            lambda eb: joint_utility_multiple_strength(strength_a, strength_b, effort_a, eb)[1]
-        )(efforts)
-    else:
-        # Single strength values
-        utilities = jax.vmap(
-            lambda eb: joint_utility_single_strength(strength_a, strength_b, effort_a, eb)[1]
-        )(efforts)
+    # if np.ndim(strength_a) > 0 or np.ndim(strength_b) > 0:
+    # Multiple strength values
+    utilities = jax.vmap(
+        lambda eb: joint_utility_multiple_strength(strength_a, strength_b, effort_a, eb)[1]
+    )(efforts)
+    # else:
+    #     # Single strength values
+    #     utilities = jax.vmap(
+    #         lambda eb: joint_utility_single_strength(strength_a, strength_b, effort_a, eb)[1]
+    #     )(efforts)
 
     return efforts[np.argmax(utilities)]
 
-def find_equilibrium(strength_a, strength_b, init_effort, max_depth=10, verbose=False):
+# potentially more efficient version
+def find_equilibrium_iterative(strength_a, strength_b, init_effort, max_depth=10, verbose=False):
     """
-    Find Nash equilibrium through iterated best responses.
+    Find Nash equilibrium through iterated best responses (iterative implementation).
 
     Starting from init_effort for agent B, iterate:
     - A responds to B
@@ -258,23 +263,135 @@ def find_equilibrium(strength_a, strength_b, init_effort, max_depth=10, verbose=
 
     Note: depth starts at 1 to match WebPPL convention (not 0-indexed)
     """
-    effort_a = init_effort
+    effort_b = init_effort
 
     # Start depth at 1 to match WebPPL convention
     for depth in range(1, max_depth + 1):
-        effort_b = best_response_b(strength_a, strength_b, effort_a)
-        effort_a_new = best_response_a(strength_a, strength_b, effort_b)
+        effort_a = best_response_a(strength_a, strength_b, effort_b)
+        effort_b_new = best_response_b(strength_a, strength_b, effort_a)
 
         # Check convergence
-        if np.abs(effort_a_new - effort_a) < 0.06:
+        if np.abs(effort_b_new - effort_b) < 0.06:
             if verbose:
-                print(f"  Converged at depth {depth}: effort_a={effort_a_new:.4f}, effort_b={effort_b:.4f}")
-            return effort_a_new, effort_b, depth
+                print(f"  Converged at depth {depth}: effort_a={effort_a:.4f}, effort_b={effort_b_new:.4f}")
+            return effort_a, effort_b_new, depth
 
-        effort_a = effort_a_new
+        effort_b = effort_b_new
 
     print(f"Warning: Equilibrium did not converge in {max_depth} iterations")
     return effort_a, effort_b, max_depth
+
+# matches exactly webppl's version
+def find_equilibrium(strength_a, strength_b, init_effort, max_depth=10, verbose=False, trace=False):
+    """
+    Find Nash equilibrium through mutually recursive best responses.
+
+    This implementation EXACTLY matches the WebPPL version's recursive structure:
+    - a(depth, reward) calls b(depth-1, reward)
+    - b(depth, reward) calls a(depth, reward) if depth > 0, else uses init_effort
+    - Convergence checked using findDepth() at specific depths [1, 2, 5, 10]
+
+    Args:
+        strength_a: Agent A's strength (scalar or array)
+        strength_b: Agent B's strength (scalar or array)
+        init_effort: Initial effort for agent B at depth=0
+        max_depth: Maximum recursion depth
+        verbose: Print convergence info
+        trace: Print detailed trace of recursive calls
+
+    Returns:
+        (effort_a, effort_b, converged_depth)
+    """
+    reward = high_reward  # Round 3 reward (matches WebPPL r3_reward)
+
+    # Cache for memoizing recursive calls (mimics WebPPL's call stack behavior)
+    cache_a = {}
+    cache_b = {}
+
+    def a(depth):
+        """Agent A's best response at given recursion depth."""
+        if depth in cache_a:
+            return cache_a[depth]
+
+        # Get B's effort from one level down
+        effort_b = b(depth - 1)
+
+        if trace:
+            print(f"  a(depth={depth}): B's effort from b({depth-1}) = {effort_b:.4f}")
+
+        # A optimizes given B's effort
+        effort_a = best_response_a(strength_a, strength_b, effort_b)
+
+        if trace:
+            print(f"  a(depth={depth}): A's best response = {effort_a:.4f}")
+
+        cache_a[depth] = effort_a
+        return effort_a
+
+    def b(depth):
+        """Agent B's best response at given recursion depth."""
+        if depth in cache_b:
+            return cache_b[depth]
+
+        # Base case: depth 0 uses initial effort
+        if depth == 0:
+            if trace:
+                print(f"  b(depth={depth}): Using init_effort = {init_effort:.4f}")
+            cache_b[depth] = init_effort
+            return init_effort
+
+        # Get A's effort from same level
+        effort_a = a(depth)
+
+        if trace:
+            print(f"  b(depth={depth}): A's effort from a({depth}) = {effort_a:.4f}")
+
+        # B optimizes given A's effort
+        effort_b = best_response_b(strength_a, strength_b, effort_a)
+
+        if trace:
+            print(f"  b(depth={depth}): B's best response = {effort_b:.4f}")
+
+        cache_b[depth] = effort_b
+        return effort_b
+
+    def findDepth(x):
+        """Check if convergence achieved at depth x (matches WebPPL logic)."""
+        b_at_x = b(x)
+        b_at_x_plus_1 = b(x + 1)
+        converged = np.abs(b_at_x - b_at_x_plus_1) < 0.06
+
+        if trace:
+            print(f"findDepth({x}): b({x})={b_at_x:.4f}, b({x+1})={b_at_x_plus_1:.4f}, diff={np.abs(b_at_x - b_at_x_plus_1):.4f}, converged={converged}")
+
+        return x if converged else -1
+
+    # Try depths in order [1, 2, 5, 10] (matches WebPPL ds array)
+    candidate_depths = [1, 2, 5, 10]
+
+    if trace:
+        print(f"\n=== find_equilibrium(init_effort={init_effort:.4f}) ===")
+
+    for depth_candidate in candidate_depths:
+        if depth_candidate > max_depth:
+            break
+        result = findDepth(depth_candidate)
+        if result > 0:
+            # Converged at this depth
+            # Return efforts from depth+1 for A, depth for B (matches WebPPL lines 209-210)
+            effort_a = a(result + 1)
+            effort_b = b(result)
+
+            if verbose:
+                print(f"  Converged at depth {result}: effort_a={effort_a:.4f}, effort_b={effort_b:.4f}")
+
+            return effort_a, effort_b, result
+
+    # Did not converge
+    print(f"Warning: Effort could not converge in {candidate_depths[-1]} iterations")
+    effort_a = a(candidate_depths[-1] + 1)
+    effort_b = b(candidate_depths[-1])
+    return effort_a, effort_b, candidate_depths[-1]
 
 # To find the optimal initial effort, we'd search over init_effort values
 def starting_effort(posterior_sa, posterior_sb):
@@ -317,12 +434,13 @@ def expected_joint_utility(init_effort, posterior_sa, posterior_sb):
     # Compute expectations by averaging over samples
     sa = np.array(posterior_sa)
     sb = np.array(posterior_sb)
-    effort_a, effort_b, depth = find_equilibrium(sa, sb, init_effort)
+
+    effort_a, effort_b, depth = find_equilibrium_iterative(sa, sb, init_effort)
 
     # print(f"Strengths (A={sa:.2f}, B={sb:.2f}): Efforts (A={effort_a:.4f}, B={effort_b:.4f})")
 
     # Compute utilities and outcome at equilibrium
-    utility_a, utility_b, success_prob = joint_utility_single_strength(sa, sb, effort_a, effort_b)
+    utility_a, utility_b, success_prob = joint_utility_multiple_strength(sa, sb, effort_a, effort_b)
 
     # Test equilibrium finding with a sample strength pair
     if (init_effort == 0.0):
@@ -336,8 +454,8 @@ def expected_joint_utility(init_effort, posterior_sa, posterior_sb):
         'aU': utility_a,
         'bU': utility_b,
         'aE': effort_a,
-        'bE': effort_b
-        # 'outcome': outcome2(sa, sb) # TODO
+        'bE': effort_b,
+        'outcome': outcome2(sa, sb, effort_a, effort_b)
     }
 ```
 
@@ -347,7 +465,7 @@ def expected_joint_utility(init_effort, posterior_sa, posterior_sb):
 # Get posterior over strengths
 print("\nComputing posterior over agent strengths...")
 
-posterior_strengths = infer_strengths(0.0, 0.0, 1.0, 1.0)
+posterior_strengths = infer_strengths(0.0, 0.0, 0.0, 0.0)
 
 # DEBUG: Bayesian inference statistics
 print("\n=== BAYESIAN INFERENCE STATISTICS ===")
@@ -415,7 +533,6 @@ for i, sa in enumerate(strength_values):
             # num_samples = int(prob * 1000)
             # posterior_sa.extend([sa] * num_samples)
             # posterior_sb.extend([sb] * num_samples)
-
             posterior_sa.extend([sa] * 1)
             posterior_sb.extend([sb] * 1)
 posterior_sa = np.array(posterior_sa)
@@ -426,7 +543,7 @@ print(f"First 5 samples (sa, sb): {np.array(list(zip(list(reversed(posterior_sa)
 
 optimal_init_effort = starting_effort(posterior_sa, posterior_sb)
 print(f"Using initial effort: {optimal_init_effort}")
-# TODO!: optimal_init_effort should be 0.5! may need to reimplement nash equilibrium part
+
 
 # Compute expected statistics at equilibrium (utilities, efforts, outcome)
 print("\nComputing expected statistics at equilibrium...")
@@ -439,7 +556,7 @@ print(f"Agent A utility: {stats['aU']:.6f}")
 print(f"Agent B utility: {stats['bU']:.6f}")
 print(f"Agent A equilibrium effort: {stats['aE']:.6f}")
 print(f"Agent B equilibrium effort: {stats['bE']:.6f}")
-# print(f"Expected outcome probability: {stats['outcome']:.6f}")
+print(f"Expected outcome probability: {stats['outcome']:.6f}")
 print(f"\n(Compare to original WebPPL output)")
 
 # Sanity check: joint utility should equal sum of individual utilities
