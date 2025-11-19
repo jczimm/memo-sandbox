@@ -125,6 +125,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#paper-results" id="toc-paper-results" class="nav-link" data-scroll-target="#paper-results">paper results</a></li>
   <li><a href="#strength-prior-110" id="toc-strength-prior-110" class="nav-link" data-scroll-target="#strength-prior-110">strength prior [1,10]</a></li>
   <li><a href="#strength-prior-110-1" id="toc-strength-prior-110-1" class="nav-link" data-scroll-target="#strength-prior-110-1">strength prior (1,10)</a></li>
+  <li><a href="#testing" id="toc-testing" class="nav-link" data-scroll-target="#testing">testing</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -136,6 +137,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <p>code adapted from https://github.com/jczimm/competence_effort/blob/main/Code/main_text/exp1_simulation.R</p>
+<p>NOTE 10/20/25: next time I run the cached cells, I’ll need to remove the “webppl vs memo/” directory prefix, and add a code block that sets the working directory appropriately for interactive execution</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rwebppl)</span>
@@ -597,8 +599,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </blockquote>
 <ul>
 <li><ol start="4" type="1">
-<li>TODO finish memo enumerate, with same parameters as webppl enumerate (xiang2023-exp1-round3-memo.qmd), but higher precision; and log all the stats (see <code>stats</code>) – and investigate discrepancies. e.g.&nbsp;why is Joint utility at optimum so high? why are the agents’ utilities different from each other?</li>
-</ol></li>
+<li><label><input type="checkbox" checked="">finish memo enumerate, so that it matches webppl enumerate given the same parameters (xiang2023-exp1-round3-memo.qmd), but higher precision; and log all the stats (see <code>stats</code>) – and investigate discrepancies. e.g.&nbsp;why is Joint utility at optimum so high? why are the agents’ utilities different from each other? (<del><strong>compare final P, aU, bU, aE, bE between original version and the memo version</strong></del>)</label></li>
+</ol>
+<ul>
+<li>I think the MCMC version is the wrong one, since the outcomes of enumerate webppl exactly match those of the enumerate memo across all scenarios! I’m deciding that not trying to match MCMC but matching the original implementation. I could argue that one issue with MCMC is that it’s imprecise or could have systematic error maybe (e.g., due to autocorrelation?) that’s amplified during equilibrium finding. next I need to</li>
+<li><label><input type="checkbox" checked="">double-check parity between enumerate versions- compare all the specific stats for the memo enumerate version and the webppl enumerate version, and plot them together like I do with <code>compare_results</code></label></li>
+</ul></li>
 <li><ol start="5" type="1">
 <li>TODO modify memo joint effort model to implement solitary effort and compensatory effort models, and check that the P results match up with the P results from the paper (simple, no need to validate incrementally)</li>
 </ol></li>
@@ -1123,9 +1129,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-
-
 </section>
+</section>
+<section id="testing" class="level3">
+<h3 class="anchored" data-anchor-id="testing">testing</h3>
+<p>TEMP</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">invisible</span>(</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">run_scenario</span>(</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'ffff'</span>, <span class="st">'enumerate'</span>, <span class="at">discrete =</span> T,</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorPrecision =</span> .<span class="dv">03</span>,</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">strengthPriorVersion =</span> <span class="st">"[1,10]"</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a><span class="co"># and compare to output from memo when using same precision (.05)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+
+
 </section>
 </section>
 
