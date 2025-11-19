@@ -12,7 +12,7 @@ rerender = "quarto render --cache-refresh"
 force_rerender = "rm -rf .quarto && quarto render"
 
 [pypi-dependencies]
-memo-lang = "~=1.2.4"
+memo-lang = ">=1.2.7, <2"
 
 [dependencies]
 python = ">=3.14.0,<3.15"
@@ -29,3 +29,4 @@ jupyterlab = ">=4.4.9,<5"
 r-httpgd = ">=2.0.4,<3"
 r-languageserver = ">=0.3.16,<0.4"
 jupyter-cache = ">=1.0.1,<2"
+pandas = ">=2.3.3,<3"

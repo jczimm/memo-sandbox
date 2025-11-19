@@ -193,6 +193,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/openssl-3.5.4-h5503f6c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/overrides-7.7.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/packaging-25.0-pyh29332c3_1.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/pandas-2.3.3-py314ha3d490a_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/pandoc-3.6.3-hce30654_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pandocfilters-1.5.0-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/pango-1.56.4-h875632e_0.conda
@@ -221,6 +222,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-fastjsonschema-2.21.2-pyhe01879c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-gil-3.14.0-h4df99d1_101.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-json-logger-2.0.7-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/python-tzdata-2025.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python_abi-3.14-8_cp314.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pytz-2025.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pyyaml-6.0.3-pyh7db6752_0.conda
@@ -462,7 +464,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.7-h6491c7d_2.conda
       - pypi: https://files.pythonhosted.org/packages/d5/e6/5fd0f6fff79eb47469ff9c4fa27125b661517a2fbf8884689b02e9fdfaa8/jax-0.7.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/de/9c/44efc0f1636e96292339d9fbef34261ba57d7197d527c302d52fac584016/jaxlib-0.7.2-cp314-cp314-macosx_11_0_arm64.whl
-      - pypi: https://files.pythonhosted.org/packages/90/01/d9b06a47e2bc795c12475e074d239a6456073b38ce7676ab7795206316b3/memo_lang-1.2.4-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/b1/7e/2bb3a395b48ebf128fe1b8b8ef20fd8349051aec6663cd691882142bf45e/memo_lang-1.2.7-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7c/88/8612ff177d043a474b9408f0382605d881eeb4125ba89d4d4b3286573a83/ml_dtypes-0.5.3-cp314-cp314-macosx_10_13_universal2.whl
       - pypi: https://files.pythonhosted.org/packages/23/cd/066e86230ae37ed0be70aae89aabf03ca8d9f39c8aea0dec8029455b5540/opt_einsum-3.4.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/ff/f6/5779049ed119c5b503b0f3dc6d6f3f68eefc3a9190d4ad4c276f854f051b/scipy-1.16.2-cp314-cp314-macosx_12_0_arm64.whl
@@ -2764,10 +2766,10 @@ packages:
   - pkg:pypi/matplotlib-inline?source=hash-mapping
   size: 14467
   timestamp: 1733417051523
-- pypi: https://files.pythonhosted.org/packages/90/01/d9b06a47e2bc795c12475e074d239a6456073b38ce7676ab7795206316b3/memo_lang-1.2.4-py3-none-any.whl
+- pypi: https://files.pythonhosted.org/packages/b1/7e/2bb3a395b48ebf128fe1b8b8ef20fd8349051aec6663cd691882142bf45e/memo_lang-1.2.7-py3-none-any.whl
   name: memo-lang
-  version: 1.2.4
-  sha256: 64fce4f9181cc13f2b4ecf3f00fc6d9c0b5ee25c7dc925dcf64d7ea23cabf91a
+  version: 1.2.7
+  sha256: 72071d9e4c4fcbaa8a8fc1b8ac97605bba4fde18d7937b896693a172f34c1a90
   requires_dist:
   - jax
   requires_python: '>=3.12'
@@ -3000,6 +3002,58 @@ packages:
   - pkg:pypi/packaging?source=hash-mapping
   size: 62477
   timestamp: 1745345660407
+- conda: https://conda.anaconda.org/conda-forge/osx-arm64/pandas-2.3.3-py314ha3d490a_1.conda
+  sha256: 48b32ef03a360c6365efd3799a1f65fd510a1a0c22ac364fa07e79369db0daba
+  md5: 9ddeb938ece18b5d9b534494cfe0facd
+  depends:
+  - __osx >=11.0
+  - libcxx >=19
+  - numpy >=1.22.4
+  - numpy >=1.23,<3
+  - python >=3.14.0rc3,<3.15.0a0
+  - python >=3.14.0rc3,<3.15.0a0 *_cp314
+  - python-dateutil >=2.8.2
+  - python-tzdata >=2022.7
+  - python_abi 3.14.* *_cp314
+  - pytz >=2020.1
+  constrains:
+  - html5lib >=1.1
+  - pyarrow >=10.0.1
+  - gcsfs >=2022.11.0
+  - xlrd >=2.0.1
+  - matplotlib >=3.6.3
+  - tabulate >=0.9.0
+  - zstandard >=0.19.0
+  - bottleneck >=1.3.6
+  - lxml >=4.9.2
+  - python-calamine >=0.1.7
+  - pyxlsb >=1.0.10
+  - xarray >=2022.12.0
+  - qtpy >=2.3.0
+  - fastparquet >=2022.12.0
+  - s3fs >=2022.11.0
+  - pyreadstat >=1.2.0
+  - sqlalchemy >=2.0.0
+  - numba >=0.56.4
+  - pandas-gbq >=0.19.0
+  - scipy >=1.10.0
+  - odfpy >=1.4.1
+  - pyqt5 >=5.15.9
+  - numexpr >=2.8.4
+  - blosc >=1.21.3
+  - openpyxl >=3.1.0
+  - tzdata >=2022.7
+  - psycopg2 >=2.9.6
+  - pytables >=3.8.0
+  - beautifulsoup4 >=4.11.2
+  - xlsxwriter >=3.0.5
+  - fsspec >=2022.11.0
+  license: BSD-3-Clause
+  license_family: BSD
+  purls:
+  - pkg:pypi/pandas?source=hash-mapping
+  size: 14227769
+  timestamp: 1759267028292
 - conda: https://conda.anaconda.org/conda-forge/osx-arm64/pandoc-3.6.3-hce30654_0.conda
   sha256: 2013114d2405b4a4e9d9b62522eb09111e1b9e3cd2e902a42e7ccc8a88a2b05a
   md5: 41603d280df06636257acd79ea326be9
@@ -3362,6 +3416,17 @@ packages:
   - pkg:pypi/python-json-logger?source=hash-mapping
   size: 13383
   timestamp: 1677079727691
+- conda: https://conda.anaconda.org/conda-forge/noarch/python-tzdata-2025.2-pyhd8ed1ab_0.conda
+  sha256: e8392a8044d56ad017c08fec2b0eb10ae3d1235ac967d0aab8bd7b41c4a5eaf0
+  md5: 88476ae6ebd24f39261e0854ac244f33
+  depends:
+  - python >=3.9
+  license: Apache-2.0
+  license_family: APACHE
+  purls:
+  - pkg:pypi/tzdata?source=hash-mapping
+  size: 144160
+  timestamp: 1742745254292
 - conda: https://conda.anaconda.org/conda-forge/noarch/python_abi-3.14-8_cp314.conda
   build_number: 8
   sha256: ad6d2e9ac39751cc0529dd1566a26751a0bf2542adb0c232533d32e176e21db5
