@@ -49,3 +49,6 @@
 
 8.
     - [ ] try refitting alpha, beta, and k(safe model) parameters to our data (to validate the modeling approach; keeping these constant makes sense for the purpose of a replication of the model (to the extent that this makes any sense... since we're not measuring model fit), but refitting the parameters makes sense for replicating the *modeling approach*)
+
+9.
+    - [ ] try transforming utility with a proper concave utility function (possibly incorporating previously earned rewards as well)
