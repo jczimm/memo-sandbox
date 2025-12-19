@@ -64,7 +64,7 @@ def lift2(strength1, strength2, effort1, effort2, model_features):
 def gini(effort1, effort2):
     """Gini coefficient for inequality aversion"""
     return np.where(
-        np.abs(effort1 - effort2) < 1e-8, # instead of effort1 == effort2
+        np.abs(effort1 - effort2) < 1e-8, # instead of effort1 == effort2 (to bypass floating point error)
         0.0,
         np.abs(effort1 - effort2) / 4 / (effort1 + effort2)
     )
@@ -145,7 +145,6 @@ def infer_strengths[query_sa: strength_values, query_sb: strength_values](
     participant: knows(query_sa)
     participant: knows(query_sb)
     return participant[Pr[agent_a.sa == query_sa and agent_b.sb == query_sb]]
-    # (Using helper function for bitwise-and since & operator not supported in memo DSL)
 ```
 
 ## Game-Theoretic Joint Effort Model
