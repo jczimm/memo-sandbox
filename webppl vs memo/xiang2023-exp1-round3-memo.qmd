@@ -16,6 +16,7 @@ from functools import partial
 # Model parameters (from original WebPPL code)
 alpha = 13.5  # effort cost coefficient, from original paper; kept fixed for replication
 beta = 24.5   # inequality aversion coefficient, from original paper; kept fixed for replication
+gamma = 1. # strength of belief that agent will achieve optimal effort # TEMP
 weight_box = 5  # weight of the box
 low_reward = 10
 high_reward = 20
@@ -30,13 +31,9 @@ efforts = np.array([0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5,
 # # [1,10] with step size of .05
 # strength_values = np.linspace(1., 10., 181)
 
-# [1,10] with step size of .03
-strength_values = np.linspace(1., 10., 301)
-
-# # TEMP
-# # Dummy inputs for debugging
-# efforts = np.linspace(0., 1., 5)
-# strength_values = np.linspace(1., 10., 10)
+# [1,10] with step size of .9
+strength_values = np.linspace(1., 10., 11) #TEMP
+# strength_values = np.linspace(1., 10., 301)
 
 DEBUG = True
 ```
@@ -69,6 +66,13 @@ def gini(effort1, effort2):
         np.abs(effort1 - effort2) / 4 / (effort1 + effort2)
     )
 
+```
+
+## Bayesian Inference Over Agent Strengths
+
+The original WebPPL code infers agent strengths from observed outcomes in rounds 1 and 2.
+
+```{python}
 @jax.jit
 def argmax_utility(strength, reward, effort_space=efforts):
     """Find effort that maximizes utility for single agent"""
@@ -81,32 +85,26 @@ def outcome(strength, reward):
     opt_effort = argmax_utility(strength, reward)
     return lift(strength, opt_effort)
 
-# DEBUG: Test helper functions with sample values
-print("=== HELPER FUNCTION TESTS ===")
-test_strength = 5.0
-test_effort = .5
-test_lift_result = lift(test_strength, test_effort)
-print(f"lift(strength=5.0, effort=.5): {test_lift_result}")
+# # DEBUG: Test helper functions with sample values
+# print("=== HELPER FUNCTION TESTS ===")
+# test_strength = 5.0
+# test_effort = .5
+# test_lift_result = lift(test_strength, test_effort)
+# print(f"lift(strength=5.0, effort=.5): {test_lift_result}")
 
-test_optE_low = argmax_utility(test_strength, low_reward)
-print(f"optE(strength=5.0, reward=10): {test_optE_low}")
+# test_optE_low = argmax_utility(test_strength, low_reward)
+# print(f"optE(strength=5.0, reward=10): {test_optE_low}")
 
-test_optE_high = argmax_utility(test_strength, high_reward)
-print(f"optE(strength=5.0, reward=20): {test_optE_high}")
+# test_optE_high = argmax_utility(test_strength, high_reward)
+# print(f"optE(strength=5.0, reward=20): {test_optE_high}")
 
-test_outcome_low = outcome(test_strength, low_reward)
-print(f"outcome(strength=5.0, reward=10): {test_outcome_low}")
+# test_outcome_low = outcome(test_strength, low_reward)
+# print(f"outcome(strength=5.0, reward=10): {test_outcome_low}")
 
-test_outcome_high = outcome(test_strength, high_reward)
-print(f"outcome(strength=5.0, reward=20): {test_outcome_high}")
-```
+# test_outcome_high = outcome(test_strength, high_reward)
+# print(f"outcome(strength=5.0, reward=20): {test_outcome_high}")
 
-## Bayesian Inference Over Agent Strengths
-
-The original WebPPL code infers agent strengths from observed outcomes in rounds 1 and 2.
-
-```{python}
-@memo(save_comic="memo-comic-xiang-strength-inference")
+@memo(save_comic="memo-comic-xiang-strength-inference", debug_trace=DEBUG)
 def infer_strengths[query_sa: strength_values, query_sb: strength_values](
     r1_outcome_a, r1_outcome_b, r2_outcome_a, r2_outcome_b
 ):
@@ -119,13 +117,8 @@ def infer_strengths[query_sa: strength_values, query_sb: strength_values](
 
     Returns: Pr[strength_a == query_sa AND strength_b == query_sb | observations]
     """
-    # Prior: Agent A has some strength uniformly distributed in [1, 10]
-    agent_a: given(sa in strength_values, wpp=1)
 
-    # Prior: Agent B has some strength uniformly distributed in [1, 10]
-    agent_b: given(sb in strength_values, wpp=1)
-
-    # The participant models that the agents have some strength
+    # The participant models that the agents have some strength in [1, 10]
     participant: thinks[
         agent_a: given(sa in strength_values, wpp=1),
         agent_b: given(sb in strength_values, wpp=1)
@@ -147,7 +140,118 @@ def infer_strengths[query_sa: strength_values, query_sb: strength_values](
     return participant[Pr[agent_a.sa == query_sa and agent_b.sb == query_sb]]
 ```
 
-## Game-Theoretic Joint Effort Model
+TEMP
+```{python}
+@jax.jit
+def utility(effort, strength, reward):
+    return reward * lift(strength, effort) - alpha * effort
+
+@jax.jit
+def normal(mu, sigma, x):
+    return jax.scipy.stats.norm.pdf(x, loc=mu, scale=sigma)
+
+@memo(save_comic="memo-comic-xiang-strength-inference_add_perceived_effort", debug_trace=DEBUG)
+def infer_strengths_w_perceived_effort[query_sa: strength_values, query_sb: strength_values](
+    r1_outcome_a, r1_outcome_b, r2_outcome_a, r2_outcome_b,
+    r1_perceived_effort_a, r1_perceived_effort_b, r2_perceived_effort_a, r2_perceived_effort_b
+):
+    """
+    Same as infer_strengths but tries to pull everything closer together (and maybe avoid model implementation errors) by using memo features for maximization. Also exposes target effort as a parameter that could be separated from actual effort. Downside is that since we are now modeling uncertainty about not only strength but also about effort, the model takes a lot longer to run. Probably necessary for a model with nested uncertainty, but apparently not for the Xiang2023 model.
+
+    Infer posterior distribution over agent strengths given observed outcomes.
+
+    Observations:
+    - Round 1 (low reward = 10): A and B each attempt individual lifts
+    - Round 2 (high reward = 20): A and B each attempt individual lifts
+
+    Returns: Pr[strength_a == query_sa AND strength_b == query_sb | observations]
+    """
+
+    # The participant models that the agents have some strength in [1,10], and that each chooses target effort to optimize utility
+    participant: thinks[
+        agent_a: given(sa in strength_values, wpp=1),
+        agent_b: given(sb in strength_values, wpp=1)
+    ]
+    
+    # Participant witnesses the outcomes and conditions on them
+
+    participant: thinks[
+        agent_a: chooses(r1_opt_effort in efforts,
+            to_maximize=utility(r1_opt_effort, sa, {low_reward})),
+        
+        # MVP of way to sample actual effort based on optimal effort, just for agent a for round 1 for this demo. gamma is a free parameter that should be fit to the data (this free parameter is strength of optimal effort as prior, i.e. strength of belief that agent will achieve optimal effort).
+        agent_a: given(r1_actual_effort in efforts,
+            wpp=
+            # = P(r1_actual_effort|observation) = P(observation|r1_actual_effort)P(r1_actual_effort)/P(observation). P(observation) is constant across values of r1_actual_effort so can omit, since using wpp (proportional probability)
+            # so:
+            # P(r1_actual_effort|observation) is prop to P(r1_actual_effort)P(observation|r1_actual_effort)
+            normal(r1_opt_effort, {gamma}, r1_actual_effort) *
+            normal(r1_actual_effort, {gamma}, r1_perceived_effort_a)
+            
+            # MVP ^this conditioning instead would be done using a world model's expected value of effort. here, my goal is to compute the posterior, which is approximately: P(r1_actual_effort | sample(r1_actual_effort) == r1_perceived_effort_a) given the prior P(r1_actual_effort) ~ N(r1_opt_effort, gamma). I want to make sure that I'm conditioning only r1_actual_effort and not the entire trace (which I think observes_event would be doing)
+        )
+    ]
+    participant: observes_that [lift(agent_a.sa, agent_a.r1_actual_effort) == r1_outcome_a]
+
+    participant: thinks[
+        agent_b: chooses(r1_opt_effort in efforts,
+            to_maximize=utility(r1_opt_effort, sb, {low_reward})),
+        agent_b: given(r1_actual_effort in efforts,
+            wpp=
+                normal(r1_opt_effort, {gamma}, r1_actual_effort) *
+                normal(r1_actual_effort, {gamma}, r1_perceived_effort_b)
+        )
+    ]
+    participant: observes_that [lift(agent_b.sb, agent_b.r1_actual_effort) == r1_outcome_b]
+
+    # Round 2
+
+    participant: thinks[
+        agent_a: chooses(r2_opt_effort in efforts,
+            to_maximize=utility(r2_opt_effort, sa, {high_reward})),
+        agent_a: given(r2_actual_effort in efforts,
+            wpp=
+                normal(r2_opt_effort, {gamma}, r2_actual_effort) *
+                normal(r2_actual_effort, {gamma}, r2_perceived_effort_a)
+        )
+    ]
+    participant: observes_that [lift(agent_a.sa, agent_a.r2_actual_effort) == r2_outcome_a]
+    
+    participant: thinks[
+        agent_b: chooses(r2_opt_effort in efforts,
+            to_maximize=utility(r2_opt_effort, sb, {high_reward})),
+        agent_b: given(r2_actual_effort in efforts,
+            wpp=
+                normal(r2_opt_effort, {gamma}, r2_actual_effort) *
+                normal(r2_actual_effort, {gamma}, r2_perceived_effort_b)
+        )
+    ]
+    participant: observes_that [lift(agent_b.sb, agent_b.r2_actual_effort) == r2_outcome_b]
+
+    # Push query variables into participant frame 
+    # and return participant's estimate of the posterior probability for the agents having these given (query) strengths
+    participant: knows(query_sa)
+    participant: knows(query_sb)
+    return participant[Pr[agent_a.sa == query_sa and agent_b.sb == query_sb]]
+```
+
+TEMP
+```{python}
+sample_strengths = infer_strengths_w_perceived_effort(1.0, 0.0, 1.0, 0.0, 7.5, 0., 7.5, 0.)
+fig, axes = plt.subplots(1, 2, figsize=(15, 6))
+
+# Posterior heatmap
+im = axes[0].imshow(sample_strengths, origin='lower', extent=[1, 10, 1, 10], aspect='auto')
+axes[0].set_xlabel('Agent B Strength')
+axes[0].set_ylabel('Agent A Strength')
+axes[0].set_title('Posterior P(strength_A, strength_B | outcomes, perceived efforts)')
+plt.colorbar(im, ax=axes[0], label='Probability')
+
+plt.tight_layout()
+plt.show()
+```
+
+## Game-Theoretic Joint Optimization of Effort
 
 This is the most complex part. The original WebPPL code models:
 1. Two agents with uncertain strengths (posterior distributions from rounds 1-2)
@@ -168,6 +272,26 @@ class ModelFeatures(Flag):
     NONE = 0
     GINI = auto()
     SAFE = auto()
+
+@partial(jax.jit, static_argnames=['model_features'])
+def lift2(strength1, strength2, effort1, effort2, model_features):
+    """Two-agent joint lift: can they lift the box together?"""
+    k = 3.5 # from original paper; kept fixed for replication
+    return jax.lax.cond(
+        ModelFeatures.SAFE in model_features,
+        lambda _: (effort1*strength1 + effort2*strength2) >= (weight_box + ((1-effort1)+(1-effort2))*k),
+        lambda _: (effort1 * strength1 + effort2 * strength2 >= weight_box),
+        operand=None
+    ).astype(float)
+
+@jax.jit
+def gini(effort1, effort2):
+    """Gini coefficient for inequality aversion"""
+    return np.where(
+        np.abs(effort1 - effort2) < 1e-8, # instead of effort1 == effort2 (to bypass floating point error)
+        0.0,
+        np.abs(effort1 - effort2) / 4 / (effort1 + effort2)
+    )
 
 @partial(jax.jit, static_argnames=['model_features'])
 def outcome2(strength_a, strength_b, effort_a, effort_b, model_features):
@@ -842,7 +966,7 @@ model_fits_df = pd.DataFrame.from_dict(
 model_fits_df.rename(columns={'level_0': 'model', 'level_1': 'scenario'}, inplace=True)
 
 # save to csv
-model_fits_df.to_csv('xiang2023-exp1-round3-model_fits_results.csv', index=False)
+model_fits_df.to_csv('xiang2023-exp1-round3-model_2fits_results.csv', index=False)
 ```
 
 ## Notes on Conversion Strategy
