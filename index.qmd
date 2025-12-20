@@ -5,7 +5,7 @@ listing:
   - id: webppl-vs-memo  
     contents:
       - "webppl vs memo/index.qmd"
-      - "webppl vs memo/xiang2023-exp1-round3-*.qmd"
+      - "webppl vs memo/xiang2023-*.qmd"
     type: table
     fields: [title, file-modified]
 ---
