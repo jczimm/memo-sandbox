@@ -1,4 +1,5 @@
 ---
+title: "Xiang2023 Exp1 Round3 Modeling in Memo"
 format: html
 ---
 
@@ -138,6 +139,7 @@ if DEBUG:
 ## Game-Theoretic Joint Optimization of Effort
 
 The original WebPPL code models:
+
 1. Two agents with uncertain strengths (posterior distributions from rounds 1-2)
 2. Agents reason about each other's efforts in round 3 (joint task)
 3. Iterative best-response until Nash equilibrium
@@ -146,6 +148,7 @@ The original WebPPL code models:
 **Key insight**: The game-theoretic reasoning operates on *expected utilities* over the posterior distribution of strengths. This is not purely probabilistic reasoning (like the inference above), but rather decision-theoretic optimization under uncertainty.
 
 **Proposed approach**:
+
 - Keep the Bayesian inference in `@memo` (already done above)
 - Implement the game-theoretic equilibrium finding in pure JAX (deterministic optimization)
 - Combine them: compute equilibrium for each strength pair, weighted by posterior

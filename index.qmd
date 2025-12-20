@@ -1,0 +1,16 @@
+---
+title: "memo-sandbox"
+author: "Jacob Zimmerman"
+listing:
+  - id: webppl-vs-memo  
+    contents:
+      - "webppl vs memo/index.qmd"
+      - "webppl vs memo/xiang2023-exp1-round3-*.csv"
+    type: table
+    fields: [date, title, file-modified]
+---
+
+## `webppl vs memo/`
+
+::: {#webppl-vs-memo}
+:::

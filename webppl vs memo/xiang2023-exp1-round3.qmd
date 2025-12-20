@@ -1,4 +1,5 @@
 ---
+title: "Xiang2023 Exp1 Round3 Modeling in WebPPL"
 ---
 
 code adapted from https://github.com/jczimm/competence_effort/blob/main/Code/main_text/exp1_simulation.R

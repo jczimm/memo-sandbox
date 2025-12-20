@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>xiang2023-exp1-round3-memo</title>
+<title>Xiang2023 Exp1 Round3 Modeling in Memo</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -122,6 +122,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#setup" id="toc-setup" class="nav-link active" data-scroll-target="#setup">Setup</a></li>
+  <li><a href="#helper-functions-jax-compatible" id="toc-helper-functions-jax-compatible" class="nav-link" data-scroll-target="#helper-functions-jax-compatible">Helper Functions (JAX-compatible)</a></li>
   <li><a href="#bayesian-inference-over-agent-strengths" id="toc-bayesian-inference-over-agent-strengths" class="nav-link" data-scroll-target="#bayesian-inference-over-agent-strengths">Bayesian Inference Over Agent Strengths</a></li>
   <li><a href="#game-theoretic-joint-optimization-of-effort" id="toc-game-theoretic-joint-optimization-of-effort" class="nav-link" data-scroll-target="#game-theoretic-joint-optimization-of-effort">Game-Theoretic Joint Optimization of Effort</a></li>
   <li><a href="#running-the-model-for-a-scenario" id="toc-running-the-model-for-a-scenario" class="nav-link" data-scroll-target="#running-the-model-for-a-scenario">Running the Model for a Scenario</a>
@@ -146,7 +147,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Helper Functions (JAX-compatible)</h1>
+<h1 class="title">Xiang2023 Exp1 Round3 Modeling in Memo</h1>
 </div>
 
 
@@ -166,7 +167,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Code adapted from https://github.com/jczimm/competence_effort/blob/main/Code/main_text/exp1_simulation.R</p>
 <section id="setup" class="level2">
 <h2 class="anchored" data-anchor-id="setup">Setup</h2>
-<div id="688a4adf" class="cell" data-execution_count="1">
+<div id="1885817c" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jax</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jax.numpy <span class="im">as</span> np</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> memo <span class="im">import</span> memo</span>
@@ -189,7 +190,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>DEBUG <span class="op">=</span> <span class="va">True</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="2584d845" class="cell" data-execution_count="2">
+</section>
+<section id="helper-functions-jax-compatible" class="level2">
+<h2 class="anchored" data-anchor-id="helper-functions-jax-compatible">Helper Functions (JAX-compatible)</h2>
+<div id="adb76d2c" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="at">@jax.jit</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> lift(strength, effort):</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Single agent lift: can they lift the box?"""</span></span>
@@ -219,7 +223,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="bayesian-inference-over-agent-strengths" class="level2">
 <h2 class="anchored" data-anchor-id="bayesian-inference-over-agent-strengths">Bayesian Inference Over Agent Strengths</h2>
 <p>The original WebPPL code infers agent strengths from observed outcomes in rounds 1 and 2.</p>
-<div id="b1337e5e" class="cell" data-execution_count="3">
+<div id="4c532f7d" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="at">@jax.jit</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> argmax_utility(strength, reward, effort_space<span class="op">=</span>efforts):</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Find effort that maximizes utility for single agent"""</span></span>
@@ -270,10 +274,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="game-theoretic-joint-optimization-of-effort" class="level2">
 <h2 class="anchored" data-anchor-id="game-theoretic-joint-optimization-of-effort">Game-Theoretic Joint Optimization of Effort</h2>
-<p>The original WebPPL code models: 1. Two agents with uncertain strengths (posterior distributions from rounds 1-2) 2. Agents reason about each other’s efforts in round 3 (joint task) 3. Iterative best-response until Nash equilibrium 4. Optimization over initial effort to maximize joint utility</p>
+<p>The original WebPPL code models:</p>
+<ol type="1">
+<li>Two agents with uncertain strengths (posterior distributions from rounds 1-2)</li>
+<li>Agents reason about each other’s efforts in round 3 (joint task)</li>
+<li>Iterative best-response until Nash equilibrium</li>
+<li>Optimization over initial effort to maximize joint utility</li>
+</ol>
 <p><strong>Key insight</strong>: The game-theoretic reasoning operates on <em>expected utilities</em> over the posterior distribution of strengths. This is not purely probabilistic reasoning (like the inference above), but rather decision-theoretic optimization under uncertainty.</p>
-<p><strong>Proposed approach</strong>: - Keep the Bayesian inference in <code>@memo</code> (already done above) - Implement the game-theoretic equilibrium finding in pure JAX (deterministic optimization) - Combine them: compute equilibrium for each strength pair, weighted by posterior</p>
-<div id="2448ba5c" class="cell" data-execution_count="5">
+<p><strong>Proposed approach</strong>:</p>
+<ul>
+<li>Keep the Bayesian inference in <code>@memo</code> (already done above)</li>
+<li>Implement the game-theoretic equilibrium finding in pure JAX (deterministic optimization)</li>
+<li>Combine them: compute equilibrium for each strength pair, weighted by posterior</li>
+</ul>
+<div id="2e4734e1" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> enum <span class="im">import</span> Flag, auto</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ModelFeatures(Flag):</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    NONE <span class="op">=</span> <span class="dv">0</span></span>
@@ -572,7 +587,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="running-the-model-for-a-scenario" class="level2">
 <h2 class="anchored" data-anchor-id="running-the-model-for-a-scenario">Running the Model for a Scenario</h2>
-<div id="bd1343f3" class="cell" data-execution_count="6">
+<div id="c39c2b64" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Model():</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, r1_outcome_a, r1_outcome_b, r2_outcome_a, r2_outcome_b):</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 1. Get posterior over strengths</span></span>
@@ -699,14 +714,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb5-124"><a href="#cb5-124" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._check_stats(stats)</span>
 <span id="cb5-125"><a href="#cb5-125" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> stats</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="22a47209" class="cell" data-execution_count="7">
+<div id="f6405095" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>Model(<span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>).joint_effort()</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>Model(<span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">1.0</span>).solitary_effort()</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>Model(<span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>).compensatory_effort()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <section id="visualization-of-inferred-strength" class="level3">
 <h3 class="anchored" data-anchor-id="visualization-of-inferred-strength">Visualization of inferred strength</h3>
-<div id="e2f9ceaa" class="cell" data-execution_count="8">
+<div id="9c570c13" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>sample_model <span class="op">=</span> Model(<span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize posterior over agent strengths</span></span>
@@ -738,7 +753,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 Computing posterior over agent strengths...
  --&gt; infer_strengths((0.0, 0.0, 0.0, 0.0))
 &lt;--  infer_strengths((0.0, 0.0, 0.0, 0.0)) has shape (301, 301)
-     time = 0.091715 sec
+     time = 0.198271 sec
 
 === BAYESIAN INFERENCE STATISTICS ===
 Posterior shape: (301, 301)
@@ -769,7 +784,7 @@ First 5 samples (sa, sb): [[4.9900002 4.9900002]
 </section>
 <section id="compute-predictions-for-all-scenarios" class="level2">
 <h2 class="anchored" data-anchor-id="compute-predictions-for-all-scenarios">Compute predictions for all scenarios</h2>
-<div id="bf799c3a" class="cell" data-execution_count="9">
+<div id="cee2be42" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>DEBUG <span class="op">=</span> <span class="va">False</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>models <span class="op">=</span> {</span>
@@ -807,25 +822,25 @@ First 5 samples (sa, sb): [[4.9900002 4.9900002]
 <div class="cell-output cell-output-stdout">
 <pre><code> --&gt; infer_strengths((0.0, 0.0, 0.0, 0.0))
 &lt;--  infer_strengths((0.0, 0.0, 0.0, 0.0)) has shape (301, 301)
-     time = 0.000715 sec
+     time = 0.000718 sec
  --&gt; infer_strengths((0.0, 0.0, 0.0, 1.0))
 &lt;--  infer_strengths((0.0, 0.0, 0.0, 1.0)) has shape (301, 301)
-     time = 0.000393 sec
+     time = 0.000504 sec
  --&gt; infer_strengths((0.0, 0.0, 1.0, 1.0))
 &lt;--  infer_strengths((0.0, 0.0, 1.0, 1.0)) has shape (301, 301)
-     time = 0.000348 sec
+     time = 0.000509 sec
  --&gt; infer_strengths((0.0, 1.0, 0.0, 1.0))
 &lt;--  infer_strengths((0.0, 1.0, 0.0, 1.0)) has shape (301, 301)
-     time = 0.000337 sec
+     time = 0.000501 sec
  --&gt; infer_strengths((0.0, 1.0, 1.0, 1.0))
 &lt;--  infer_strengths((0.0, 1.0, 1.0, 1.0)) has shape (301, 301)
-     time = 0.000317 sec
+     time = 0.000495 sec
  --&gt; infer_strengths((1.0, 1.0, 1.0, 1.0))
 &lt;--  infer_strengths((1.0, 1.0, 1.0, 1.0)) has shape (301, 301)
-     time = 0.000297 sec</code></pre>
+     time = 0.000517 sec</code></pre>
 </div>
 </div>
-<div id="7d31df2f" class="cell" data-execution_count="10">
+<div id="bef99896" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert model fits to DataFrame for easier manipulation, converting key (e.g. "joint") to a column called "model"</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>model_fits_df <span class="op">=</span> pd.DataFrame.from_dict(</span>
@@ -1192,7 +1207,7 @@ First 5 samples (sa, sb): [[4.9900002 4.9900002]
 </div>
 </div>
 </div>
-<div id="d408415c" class="cell" data-execution_count="11">
+<div id="a0a19adb" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># save to csv</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>model_fits_df.to_csv(<span class="st">'xiang2023-exp1-round3-model_fits_results.csv'</span>, index<span class="op">=</span><span class="va">False</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
