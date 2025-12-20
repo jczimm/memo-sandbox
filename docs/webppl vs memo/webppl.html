@@ -113,15 +113,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="99">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#cards" id="toc-cards" class="nav-link active" data-scroll-target="#cards">Cards</a></li>
-  <li><a href="#basic-conditioning" id="toc-basic-conditioning" class="nav-link" data-scroll-target="#basic-conditioning">Basic conditioning</a></li>
-  </ul>
-</nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
@@ -129,8 +122,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<section id="cards" class="level3">
-<h3 class="anchored" data-anchor-id="cards">Cards</h3>
+<p><strong>Cards</strong></p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
@@ -155,7 +147,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="st">'</span></span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>alice_chooses_card_E <span class="ot">&lt;-</span> rwebppl<span class="sc">::</span><span class="fu">webppl</span>(alice_chooses_card_model)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>using webppl version: main v0.9.15-cf87b2a /Users/jacobzimmerman/ucsd/fyp/memo-sandbox/.pixi/envs/default/lib/R/library/rwebppl/js/webppl</code></pre>
+<pre><code>using webppl version: main v0.9.15-276a71d /Users/jacobzimmerman/ucsd/fyp/memo-sandbox/.pixi/envs/default/lib/R/library/rwebppl/js/webppl</code></pre>
 </div>
 </div>
 <div class="cell">
@@ -164,19 +156,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code>[1] 2</code></pre>
 </div>
 </div>
-</section>
-<section id="basic-conditioning" class="level3">
-<h3 class="anchored" data-anchor-id="basic-conditioning">Basic conditioning</h3>
-<!--
-ran this, but not sure if needed anymore
-```r
-suppressMessages(devtools::install_github("IRkernel/IRkernel"))
-IRkernel::installspec()
-
-try(reticulate::install_miniconda(), silent=TRUE) # inspired by https://github.com/rstudio/reticulate/issues/1650#issuecomment-2312389854; necessary until https://github.com/rstudio/reticulate/issues/1650 is closed
-reticulate::use_python("./.pixi/envs/default/bin/python3")
-```
--->
+<p><strong>Basic conditioning</strong></p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>basic_inference_model <span class="ot">&lt;-</span> <span class="st">'</span></span>
@@ -216,9 +196,18 @@ reticulate::use_python("./.pixi/envs/default/bin/python3")
 </div>
 </div>
 </div>
+<!--
+ran this, but not sure if needed anymore
+```r
+suppressMessages(devtools::install_github("IRkernel/IRkernel"))
+IRkernel::installspec()
+
+try(reticulate::install_miniconda(), silent=TRUE) # inspired by https://github.com/rstudio/reticulate/issues/1650#issuecomment-2312389854; necessary until https://github.com/rstudio/reticulate/issues/1650 is closed
+reticulate::use_python("./.pixi/envs/default/bin/python3")
+```
+-->
 
 
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
