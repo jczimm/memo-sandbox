@@ -17,7 +17,7 @@ Sandbox environment for building up memo models alongside reference examples (bo
 | **`xiang2023-exp1-round3-model_fits_results.csv`** | Predictions from the models defined in `xiang2023-exp1-round3-memo.qmd` |
 | `*.png` | Diagrammatic representations of memo models |
 
-> [!INFO]
+> [!NOTE]
 > See https://github.com/psyc-201/xiang2023 for more information regarding the models for the replication of Xiang2023.
 > 
 > **`xiang2023-exp1-round3-memo.qmd`** is all that is necessary to reproduce the model fit results, **`xiang2023-exp1-round3-model_fits_results.csv`**. These model fit results are all that is necessary for reproducing the Xiang2023 replication. The remaining files are for reference in comparing WebPPL and memo implementations of probabilistic models, and for tracing the model's intermediate results to verify the equivalence between the WebPPL and memo models of Xiang2023 experiment 1 round 3.
