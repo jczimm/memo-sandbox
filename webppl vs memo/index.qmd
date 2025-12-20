@@ -1,5 +1,5 @@
 ---
-title: "Basic comparison of WebPPL vs Memo"
+title: Basic comparison of WebPPL vs Memo
 format:
   html:
     embed-resources: true

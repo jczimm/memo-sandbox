@@ -2,7 +2,7 @@
 format: html
 ---
 
-### Cards
+**Cards**
 
 ```{python}
 # adapted from https://github.com/kach/memo/blob/main/demo/Memonomicon.ipynb
@@ -24,7 +24,7 @@ def alice_chooses_card_E():
 print(alice_chooses_card_E())
 ```
 
-### Basic conditioning
+**Basic conditioning**
 
 ```{python}
 from memo import memo
