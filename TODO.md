@@ -1,9 +1,11 @@
 # TODO
 
-0. paper results
-1. webppl mcmc (below)
-2. webppl mcmc discrete (below)
-3. webppl enumerate (below)
+## `webppl vs memo/`
+
+0. extract paper results
+1. reproduce using webppl mcmc
+2. reproduce using webppl mcmc discrete
+3. reproduce using webppl enumerate
     - [x] determine if need to use (1,10) (or another variant) instead of [1,10] for strength prior. I think we should be able to use [1,10] unless we see mismatch with original method
         - [c] not sure why P jumps to 1 so fast after F,F;F,F!
         - [x] figure out how the mcmc mode of my current debugging webppl version diverged from the original mcmc version (reproduced at top)
@@ -44,11 +46,17 @@
 6.
     - [x] try modified joint effort model (as used in supplement)
 
-7.
-    - [ ] moonshot: memo enumerate, but the equilibrium-finding process uses memo frames in order to model agent's uncertainty about each other (still accelerated by JAX, but now in the language of memo, and considering the uncertainty)
+### Further Ideas
 
-8.
-    - [ ] try refitting alpha, beta, and k(safe model) parameters to our data (to validate the modeling approach; keeping these constant makes sense for the purpose of a replication of the model (to the extent that this makes any sense... since we're not measuring model fit), but refitting the parameters makes sense for replicating the *modeling approach*)
+- [ ] modify memo implementation so that the equilibrium-finding process uses memo frames in order to model agent's uncertainty about each other in the equilibrium-finding step (still accelerated by JAX, but now in the language of memo, and considering the uncertainty)
+  - _this would be a tweak to the model's implementation_
+  - _see related notes at end of xiang2023-exp1-round3-memo.qmd_
 
-9.
-    - [ ] try transforming utility with a proper concave utility function (possibly incorporating previously earned rewards as well)
+- [ ] try refitting alpha, beta, and k(safe model) parameters to our data (to validate the modeling approach; keeping these constant makes sense for the purpose of a replication of the model (to the extent that this makes any sense... since we're not measuring model fit), but refitting the parameters makes sense for replicating the _modeling approach_)
+
+- [ ] try transforming utility with a proper convex utility function (possibly incorporating previously earned rewards as well), per utility/prospect theory
+  - _this would be an extension of the model_
+
+## `xiang2023-extension/`
+
+- [ ] patch the linting modifications to xiang2023-exp1-round3-memo.qmd onto xiang2023-extension/xiang2023-exp1-round3-memo.qmd (so it matches and is clean) and rename it to xiang2023-extension/add_perceived_effort.qmd

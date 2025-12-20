@@ -12,6 +12,7 @@
 **/*.quarto_ipynb
 
 *.dot
+/memo-comic-*.png
 
 .Rhistory
 

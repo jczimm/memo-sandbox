@@ -1,5 +1,8 @@
 # Tracing Guide: Comparing WebPPL and Memo Equilibrium Finding
 
+> [!WARNING]
+> Disclaimer: Large portions of this section were written in collaboration with Claude Code and verified and edited for accuracy by the author. Of course, author takes responsibility for any inaccuracies and strongly welcomes corrections.
+
 This guide explains how to use the detailed tracing features added to both the WebPPL and memo implementations to validate that they follow identical execution paths.
 
 ## Purpose
