@@ -166,7 +166,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Code adapted from https://github.com/jczimm/competence_effort/blob/main/Code/main_text/exp1_simulation.R</p>
 <section id="setup" class="level2">
 <h2 class="anchored" data-anchor-id="setup">Setup</h2>
-<div id="e5dc8f18" class="cell" data-execution_count="1">
+<div id="688a4adf" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jax</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jax.numpy <span class="im">as</span> np</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> memo <span class="im">import</span> memo</span>
@@ -189,7 +189,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>DEBUG <span class="op">=</span> <span class="va">True</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="cfa0f5e2" class="cell" data-execution_count="2">
+<div id="2584d845" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="at">@jax.jit</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> lift(strength, effort):</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Single agent lift: can they lift the box?"""</span></span>
@@ -219,7 +219,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="bayesian-inference-over-agent-strengths" class="level2">
 <h2 class="anchored" data-anchor-id="bayesian-inference-over-agent-strengths">Bayesian Inference Over Agent Strengths</h2>
 <p>The original WebPPL code infers agent strengths from observed outcomes in rounds 1 and 2.</p>
-<div id="d782b7cf" class="cell" data-execution_count="3">
+<div id="b1337e5e" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="at">@jax.jit</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> argmax_utility(strength, reward, effort_space<span class="op">=</span>efforts):</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Find effort that maximizes utility for single agent"""</span></span>
@@ -273,7 +273,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>The original WebPPL code models: 1. Two agents with uncertain strengths (posterior distributions from rounds 1-2) 2. Agents reason about each other’s efforts in round 3 (joint task) 3. Iterative best-response until Nash equilibrium 4. Optimization over initial effort to maximize joint utility</p>
 <p><strong>Key insight</strong>: The game-theoretic reasoning operates on <em>expected utilities</em> over the posterior distribution of strengths. This is not purely probabilistic reasoning (like the inference above), but rather decision-theoretic optimization under uncertainty.</p>
 <p><strong>Proposed approach</strong>: - Keep the Bayesian inference in <code>@memo</code> (already done above) - Implement the game-theoretic equilibrium finding in pure JAX (deterministic optimization) - Combine them: compute equilibrium for each strength pair, weighted by posterior</p>
-<div id="740a79bd" class="cell" data-execution_count="5">
+<div id="2448ba5c" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> enum <span class="im">import</span> Flag, auto</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ModelFeatures(Flag):</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    NONE <span class="op">=</span> <span class="dv">0</span></span>
@@ -572,7 +572,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="running-the-model-for-a-scenario" class="level2">
 <h2 class="anchored" data-anchor-id="running-the-model-for-a-scenario">Running the Model for a Scenario</h2>
-<div id="9c700d29" class="cell" data-execution_count="6">
+<div id="bd1343f3" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Model():</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, r1_outcome_a, r1_outcome_b, r2_outcome_a, r2_outcome_b):</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 1. Get posterior over strengths</span></span>
@@ -699,14 +699,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb5-124"><a href="#cb5-124" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._check_stats(stats)</span>
 <span id="cb5-125"><a href="#cb5-125" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> stats</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="737bf700" class="cell" data-execution_count="7">
+<div id="22a47209" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>Model(<span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>).joint_effort()</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>Model(<span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">1.0</span>).solitary_effort()</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>Model(<span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>).compensatory_effort()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <section id="visualization-of-inferred-strength" class="level3">
 <h3 class="anchored" data-anchor-id="visualization-of-inferred-strength">Visualization of inferred strength</h3>
-<div id="29b02dea" class="cell" data-execution_count="8">
+<div id="e2f9ceaa" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>sample_model <span class="op">=</span> Model(<span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize posterior over agent strengths</span></span>
@@ -738,7 +738,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 Computing posterior over agent strengths...
  --&gt; infer_strengths((0.0, 0.0, 0.0, 0.0))
 &lt;--  infer_strengths((0.0, 0.0, 0.0, 0.0)) has shape (301, 301)
-     time = 0.092283 sec
+     time = 0.091715 sec
 
 === BAYESIAN INFERENCE STATISTICS ===
 Posterior shape: (301, 301)
@@ -769,7 +769,7 @@ First 5 samples (sa, sb): [[4.9900002 4.9900002]
 </section>
 <section id="compute-predictions-for-all-scenarios" class="level2">
 <h2 class="anchored" data-anchor-id="compute-predictions-for-all-scenarios">Compute predictions for all scenarios</h2>
-<div id="569ebeea" class="cell" data-execution_count="9">
+<div id="bf799c3a" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>DEBUG <span class="op">=</span> <span class="va">False</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>models <span class="op">=</span> {</span>
@@ -807,25 +807,25 @@ First 5 samples (sa, sb): [[4.9900002 4.9900002]
 <div class="cell-output cell-output-stdout">
 <pre><code> --&gt; infer_strengths((0.0, 0.0, 0.0, 0.0))
 &lt;--  infer_strengths((0.0, 0.0, 0.0, 0.0)) has shape (301, 301)
-     time = 0.000166 sec
+     time = 0.000715 sec
  --&gt; infer_strengths((0.0, 0.0, 0.0, 1.0))
 &lt;--  infer_strengths((0.0, 0.0, 0.0, 1.0)) has shape (301, 301)
-     time = 0.000440 sec
+     time = 0.000393 sec
  --&gt; infer_strengths((0.0, 0.0, 1.0, 1.0))
 &lt;--  infer_strengths((0.0, 0.0, 1.0, 1.0)) has shape (301, 301)
-     time = 0.000424 sec
+     time = 0.000348 sec
  --&gt; infer_strengths((0.0, 1.0, 0.0, 1.0))
 &lt;--  infer_strengths((0.0, 1.0, 0.0, 1.0)) has shape (301, 301)
-     time = 0.000332 sec
+     time = 0.000337 sec
  --&gt; infer_strengths((0.0, 1.0, 1.0, 1.0))
 &lt;--  infer_strengths((0.0, 1.0, 1.0, 1.0)) has shape (301, 301)
-     time = 0.000419 sec
+     time = 0.000317 sec
  --&gt; infer_strengths((1.0, 1.0, 1.0, 1.0))
 &lt;--  infer_strengths((1.0, 1.0, 1.0, 1.0)) has shape (301, 301)
-     time = 0.000474 sec</code></pre>
+     time = 0.000297 sec</code></pre>
 </div>
 </div>
-<div id="3f3a7c63" class="cell" data-execution_count="10">
+<div id="7d31df2f" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert model fits to DataFrame for easier manipulation, converting key (e.g. "joint") to a column called "model"</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>model_fits_df <span class="op">=</span> pd.DataFrame.from_dict(</span>
@@ -1192,35 +1192,76 @@ First 5 samples (sa, sb): [[4.9900002 4.9900002]
 </div>
 </div>
 </div>
-<div id="282eb738" class="cell" data-execution_count="11">
+<div id="d408415c" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># save to csv</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>model_fits_df.to_csv(<span class="st">'xiang2023-exp1-round3-model_fits_results.csv'</span>, index<span class="op">=</span><span class="va">False</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="notes-on-conversion-strategy" class="level2">
 <h2 class="anchored" data-anchor-id="notes-on-conversion-strategy">Notes on Conversion Strategy</h2>
-<blockquote class="blockquote">
-<p>[!WARNING] Disclaimer: Large portions of this section were written in collaboration with Claude Code and verified and edited for accuracy by the author. Of course, author takes responsibility for any inaccuracies and strongly welcomes corrections.</p>
-</blockquote>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Disclaimer: Large portions of this section were written in collaboration with Claude Code and verified and edited for accuracy by the author. Of course, author takes responsibility for any inaccuracies and strongly welcomes corrections.</p>
+</div>
+</div>
 <p>The conversion from WebPPL to memo revealed important distinctions:</p>
 <section id="probabilistic-inference-vs.-decision-theory" class="level3">
 <h3 class="anchored" data-anchor-id="probabilistic-inference-vs.-decision-theory">1. Probabilistic Inference vs.&nbsp;Decision Theory</h3>
-<p>The original WebPPL code mixes two types of reasoning: - <strong>Bayesian inference</strong> (rounds 1-2): Infer agent strengths from observed outcomes - <strong>Game-theoretic optimization</strong> (round 3): Find Nash equilibrium efforts</p>
-<p>In the memo conversion: - <strong>Bayesian inference</strong>: Use <code>@memo</code> with <code>given()</code>, <code>observes_that[]</code>, and <code>thinks[]</code> - <strong>Game-theoretic optimization</strong>: Use pure JAX functions (no probabilistic reasoning, just optimization)</p>
+<p>The original WebPPL code mixes two types of reasoning:</p>
+<ul>
+<li><strong>Bayesian inference</strong> (rounds 1-2): Infer agent strengths from observed outcomes</li>
+<li><strong>Game-theoretic optimization</strong> (round 3): Find Nash equilibrium efforts</li>
+</ul>
+<p>In the memo conversion:</p>
+<ul>
+<li><strong>Bayesian inference</strong>: Use <code>@memo</code> with <code>given()</code>, <code>observes_that[]</code>, and <code>thinks[]</code></li>
+<li><strong>Game-theoretic optimization</strong>: Use pure JAX functions (no probabilistic reasoning, just optimization)</li>
+</ul>
 </section>
 <section id="key-conversion-decisions" class="level3">
 <h3 class="anchored" data-anchor-id="key-conversion-decisions">2. Key Conversion Decisions</h3>
-<p><strong>Mutable arrays (x2a, x2b)</strong>: - WebPPL: Pushes strength posterior samples to arrays, uses them later - memo: Query the posterior distribution directly (more principled)</p>
-<p><strong>Nested agent reasoning</strong>: - WebPPL: Nested JavaScript functions with recursive best-response - JAX: Iterative best-response in pure JAX (not probabilistic, so no <code>thinks[]</code> needed here)</p>
-<p><strong>Expected utilities</strong>: - WebPPL: Implicitly handles through sampling or enumeration - JAX: Explicit loop over posterior, computing equilibrium for each strength pair</p>
+<p><strong>Mutable arrays (x2a, x2b)</strong>:</p>
+<ul>
+<li>WebPPL: Pushes strength posterior samples to arrays, uses them later</li>
+<li>memo: Query the posterior distribution directly (more principled)</li>
+</ul>
+<p><strong>Nested agent reasoning</strong>:</p>
+<ul>
+<li>WebPPL: Nested JavaScript functions with recursive best-response</li>
+<li>JAX: Iterative best-response in pure JAX (not probabilistic, so no <code>thinks[]</code> needed here)</li>
+</ul>
+<p><strong>Expected utilities</strong>:</p>
+<ul>
+<li>WebPPL: Implicitly handles through sampling or enumeration</li>
+<li>JAX: Explicit loop over posterior, computing equilibrium for each strength pair</li>
+</ul>
 </section>
 <section id="computational-considerations" class="level3">
 <h3 class="anchored" data-anchor-id="computational-considerations">3. Computational Considerations</h3>
-<p>The original uses either: - MCMC with 10,000 samples (slow but handles continuous distributions) - Enumeration with discrete values (exact but potentially more expensive)</p>
+<p>The original uses either:</p>
+<ul>
+<li>MCMC with 10,000 samples (slow but handles continuous distributions)</li>
+<li>Enumeration with discrete values (exact but potentially more expensive)</li>
+</ul>
 </section>
 <section id="what-could-be-improved" class="level3">
 <h3 class="anchored" data-anchor-id="what-could-be-improved">4. What Could Be Improved</h3>
-<p><strong>Further extension with memo</strong>: Currently, the game-theoretic reasoning is outside of <code>@memo</code>. One could potentially: - Model agents’ beliefs about each other’s strengths using nested <code>thinks[]</code> - Model agents’ choices as <code>chooses(e in efforts, wpp=utility(e))</code> - But this might be overkill and harder to reason about - However, this does incorporate uncertainty about the other agent into the model, which might add richness</p>
+<p><strong>Further extension with memo</strong>:</p>
+<p>Currently, the game-theoretic reasoning is outside of <code>@memo</code>. One could potentially:</p>
+<ul>
+<li>Model agents’ beliefs about each other’s strengths using nested <code>thinks[]</code></li>
+<li>Model agents’ choices as <code>chooses(e in efforts, wpp=utility(e))</code></li>
+<li>But this might be overkill and harder to reason about</li>
+<li>However, this does incorporate uncertainty about the other agent into the model, which might add richness</li>
+</ul>
 </section>
 </section>
 <section id="how-to-compare-outputs" class="level2">

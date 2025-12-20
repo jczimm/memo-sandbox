@@ -676,45 +676,54 @@ model_fits_df.to_csv('xiang2023-exp1-round3-model_fits_results.csv', index=False
 
 ## Notes on Conversion Strategy
 
-> [!WARNING]
-> Disclaimer: Large portions of this section were written in collaboration with Claude Code and verified and edited for accuracy by the author. Of course, author takes responsibility for any inaccuracies and strongly welcomes corrections.
+::: {.callout-warning}
+Disclaimer: Large portions of this section were written in collaboration with Claude Code and verified and edited for accuracy by the author. Of course, author takes responsibility for any inaccuracies and strongly welcomes corrections.
+:::
 
 The conversion from WebPPL to memo revealed important distinctions:
 
 ### 1. Probabilistic Inference vs. Decision Theory
 
 The original WebPPL code mixes two types of reasoning:
+
 - **Bayesian inference** (rounds 1-2): Infer agent strengths from observed outcomes
 - **Game-theoretic optimization** (round 3): Find Nash equilibrium efforts
 
 In the memo conversion:
+
 - **Bayesian inference**: Use `@memo` with `given()`, `observes_that[]`, and `thinks[]`
 - **Game-theoretic optimization**: Use pure JAX functions (no probabilistic reasoning, just optimization)
 
 ### 2. Key Conversion Decisions
 
 **Mutable arrays (x2a, x2b)**:
+
 - WebPPL: Pushes strength posterior samples to arrays, uses them later
 - memo: Query the posterior distribution directly (more principled)
 
 **Nested agent reasoning**:
+
 - WebPPL: Nested JavaScript functions with recursive best-response
 - JAX: Iterative best-response in pure JAX (not probabilistic, so no `thinks[]` needed here)
 
 **Expected utilities**:
+
 - WebPPL: Implicitly handles through sampling or enumeration
 - JAX: Explicit loop over posterior, computing equilibrium for each strength pair
 
 ### 3. Computational Considerations
 
 The original uses either:
+
 - MCMC with 10,000 samples (slow but handles continuous distributions)
 - Enumeration with discrete values (exact but potentially more expensive)
 
 ### 4. What Could Be Improved
 
 **Further extension with memo**:
+
 Currently, the game-theoretic reasoning is outside of `@memo`. One could potentially:
+
 - Model agents' beliefs about each other's strengths using nested `thinks[]`
 - Model agents' choices as `chooses(e in efforts, wpp=utility(e))`
 - But this might be overkill and harder to reason about
@@ -743,7 +752,6 @@ Compare outcome probability (here, `expected_outcome`), strength posteriors, and
 2. **Known differences:**
    - See above
    - Small numerical differences due to different underlying computation engines
-
 
 ## Notes on the alternative models
 
