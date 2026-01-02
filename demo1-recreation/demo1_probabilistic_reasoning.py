@@ -1,5 +1,11 @@
 # %%
 # Reimplement the tug-of-war model from gabegrand/world-models using the memo DSL
+
+# fixes error "Check failed: ret == 0 (11 vs. 0) Thread tf_foreach creation via pthread_create() failed.": 
+import os
+os.environ['OPENBLAS_NUM_THREADS'] = '1'
+os.environ['XLA_FLAGS'] = '--xla_force_host_platform_device_count=1' # force to use the exact number of GPUs allocated (assuming only one allocated)
+
 import jax
 import jax.numpy as np
 from memo import memo
@@ -7,13 +13,19 @@ import matplotlib.pyplot as plt
 from typing import no_type_check
 
 # Discretize strength, effort, and laziness for memo's discrete choices
-strength_levels = np.linspace(0, 100, num=4, endpoint=True)  # 0..100
+strength_levels = np.linspace(0, 100, num=6, endpoint=True)  # 0..100
 effort_levels = np.concat([
     strength_levels / 2,
     np.max(strength_levels / 2) + strength_levels / 2
 ])  # 0..100, but with twice the precision, since half-strength can be applied (in cases that lazy1 == 1)
-laziness_levels = np.linspace(0, 1, num=4, endpoint=True) # 0..1
+laziness_levels = np.linspace(0, 1, num=5, endpoint=True) # 0..1
 lazy_levels = np.array([0, 1])
+
+# on a cluster, be sure to allocate enough memory for the job, e.g.:
+# $ salloc --gres=gpu:1 --mem-per-gpu=48gb
+# then run using:
+# $ pixi shell
+# $ srun python3 demo1_probabilistic_reasoning.py
 
 # %%
 # *for optimization, LLM translator should be instructed to use jax.jit functions, e.g. for PDFs
@@ -48,7 +60,7 @@ def won_against(team1, team2):
 @no_type_check
 @memo
 def tug_of_war[S: strength_levels]():
-    # cast: [tom, john, mary, sue, obs]
+    cast: [obs, tom, john, mary, sue] # *ensure that cast is specified as a sort of "strict" mode
     
     obs: thinks[ # *need to model an observer thinking so we're explicitly querying as an observer
         # *note that we're explicitly setting up the characters, whereas in Church you don't have to, and you just declare character properties using memoized functions which are called by team-strength. there may be a way to do this over an array, but then we're referring to characters by index and it becomes less expressive, which might be harder for the NL-to-PLoT translator
@@ -63,7 +75,7 @@ def tug_of_war[S: strength_levels]():
         sue: given(laziness in laziness_levels, wpp=1),
         
         tom: given(lazy in lazy_levels, wpp=lazy_pdf(lazy, laziness)),
-        # *can't say tom.laziness, must just be laziness!
+        # *can't say tom.laziness, must just be laziness! this is because we're referencing laziness within the scope of tom already
         john: given(lazy in lazy_levels, wpp=lazy_pdf(lazy, laziness)),
         mary: given(lazy in lazy_levels, wpp=lazy_pdf(lazy, laziness)),
         sue: given(lazy in lazy_levels, wpp=lazy_pdf(lazy, laziness)),
@@ -71,7 +83,9 @@ def tug_of_war[S: strength_levels]():
         tom: chooses(eff in effort_levels, wpp=eff_pdf(eff, lazy, st)),
         john: chooses(eff in effort_levels, wpp=eff_pdf(eff, lazy, st)),
         mary: chooses(eff in effort_levels, wpp=eff_pdf(eff, lazy, st)),
-        sue: chooses(eff in effort_levels, wpp=eff_pdf(eff, lazy, st))
+        sue: chooses(eff in effort_levels, wpp=eff_pdf(eff, lazy, st)),
+
+        mary: snapshots_self_as(past_mary)
     ]
 
     obs: observes_that[tom.eff > john.eff]
@@ -87,18 +101,20 @@ def tug_of_war[S: strength_levels]():
 # *maybe the llm translation layer should thoroughly learn the DSL parser to know the rules, or maybe do trial and error to learn for itself where the pitfalls are
 # also maybe the llm translation layer should learn how to convert from imperative (Church-like) PPL code to declarative (memo) code
 
-@memo
-def get_cost():
-    return cost @ tug_of_war()
-
 choices = [strength_levels, effort_levels, laziness_levels, lazy_levels]
 choices_arithmetic = " * ".join(str(len(c)) for c in choices)
 choices_count = np.multiply.reduce(np.array([len(c) for c in choices]))
 print(f"total choices = {choices_arithmetic} = {choices_count}")
 
-flops = get_cost()
-print(f"FLOPs = {format(flops)}")
-print(f"Avg FLOPs per choice = {format(flops/choices_count)}")
+# %%
+# might not work when using CUDA
+# @memo
+# def get_cost():
+#     return cost @ tug_of_war()
+
+# flops = get_cost()
+# print(f"FLOPs = {format(flops)}")
+# print(f"Avg FLOPs per choice = {format(flops/choices_count)}")
 
 # estimate memory needed?
 
@@ -114,4 +130,4 @@ plt.title("Posterior over Mary's strength (memo conditioned)")
 plt.xlim(0,100)
 plt.show()
 
-# %%
+plt.savefig('./demo1.png')
