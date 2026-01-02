@@ -24,7 +24,7 @@ Sandbox environment for building up memo models alongside reference examples (bo
 
 ## Usage
 
-- First, set up environment using `pixi install`
+- First, set up environment using `pixi install` and install rwebppl (run `pixi shell`, then `R`, then `devtools::install_github("mhtess/rwebppl")`)
 - Can preview using `pixi run preview`
 - Can render using `pixi run render`
 - To deploy rendered documents, render locally then deploy the rendered files

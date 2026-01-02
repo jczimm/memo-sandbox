@@ -13,6 +13,7 @@ force_rerender = "rm -rf .quarto && quarto render"
 
 [pypi-dependencies]
 memo-lang = ">=1.2.7, <2"
+jax = { version = ">=0.4.21, <0.9", extras = ["cuda12"] }
 
 [dependencies]
 python = ">=3.14.0,<3.15"
