@@ -59,4 +59,4 @@
 
 ## `xiang2023-extension/`
 
-- [ ] patch the linting modifications to xiang2023-exp1-round3-memo.qmd onto xiang2023-extension/xiang2023-exp1-round3-memo.qmd (so it matches and is clean) and rename it to xiang2023-extension/add_perceived_effort.qmd
+- [-] patch the linting modifications to xiang2023-exp1-round3-memo.qmd onto xiang2023-extension/xiang2023-exp1-round3-memo.qmd (so it matches and is clean) and rename it to xiang2023-extension/add_perceived_effort.qmd

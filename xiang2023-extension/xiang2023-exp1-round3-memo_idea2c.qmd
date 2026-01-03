@@ -1,13 +1,15 @@
 ---
+title: "Xiang2023 Exp1 Round3 Modeling in Memo (idea2c)"
 format: html
 ---
 
-Code adapted from https://github.com/jczimm/competence_effort/blob/main/Code/main_text/exp1_simulation.R
+Code adapted from https://github.com/jczimm/competence_effort/blob/main/Code/main_text/exp1_simulation.R and memo-sandbox/xiang2023-extension/xiang2023-exp1-round3-memo_idea2b_archive.qmd
 
 ## Setup
 
 ```{python}
 import jax
+from jax.scipy.stats import norm
 import jax.numpy as np
 from memo import memo
 from matplotlib import pyplot as plt
@@ -16,7 +18,8 @@ from functools import partial
 # Model parameters (from original WebPPL code)
 alpha = 13.5  # effort cost coefficient, from original paper; kept fixed for replication
 beta = 24.5   # inequality aversion coefficient, from original paper; kept fixed for replication
-gamma = 1. # strength of belief that agent will achieve optimal effort # TEMP
+gamma = 1. # strength of belief that agent will achieve optimal effort
+delta = 1. # strength of belief in perceived effort
 weight_box = 5  # weight of the box
 low_reward = 10
 high_reward = 20
@@ -26,14 +29,7 @@ efforts = np.array([0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5,
                     0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0])
 
 # Discretized strength space (replacing continuous uniform(1,10))
-# # (1,10) with digits=1
-# strength_values = np.linspace(1.1, 9.9, 89)
-# # [1,10] with step size of .05
-# strength_values = np.linspace(1., 10., 181)
-
-# [1,10] with step size of .9
-strength_values = np.linspace(1., 10., 11) #TEMP
-# strength_values = np.linspace(1., 10., 301)
+strength_values = np.linspace(1., 10., 301) # [1,10] with step size of .03
 
 DEBUG = True
 ```
@@ -65,7 +61,6 @@ def gini(effort1, effort2):
         0.0,
         np.abs(effort1 - effort2) / 4 / (effort1 + effort2)
     )
-
 ```
 
 ## Bayesian Inference Over Agent Strengths
@@ -74,89 +69,18 @@ The original WebPPL code infers agent strengths from observed outcomes in rounds
 
 ```{python}
 @jax.jit
-def argmax_utility(strength, reward, effort_space=efforts):
-    """Find effort that maximizes utility for single agent"""
-    utilities = reward * lift(strength, effort_space) - alpha * effort_space
-    return effort_space[np.argmax(utilities)]
-
-@jax.jit
-def outcome(strength, reward):
-    """Predicted outcome (success probability) for single agent at optimal effort"""
-    opt_effort = argmax_utility(strength, reward)
-    return lift(strength, opt_effort)
-
-# DEBUG: Test helper functions with sample values
-print("=== HELPER FUNCTION TESTS ===")
-test_strength = 5.0
-test_effort = .5
-test_lift_result = lift(test_strength, test_effort)
-print(f"lift(strength=5.0, effort=.5): {test_lift_result}")
-
-test_optE_low = argmax_utility(test_strength, low_reward)
-print(f"optE(strength=5.0, reward=10): {test_optE_low}")
-
-test_optE_high = argmax_utility(test_strength, high_reward)
-print(f"optE(strength=5.0, reward=20): {test_optE_high}")
-
-test_outcome_low = outcome(test_strength, low_reward)
-print(f"outcome(strength=5.0, reward=10): {test_outcome_low}")
-
-test_outcome_high = outcome(test_strength, high_reward)
-print(f"outcome(strength=5.0, reward=20): {test_outcome_high}")
-
-@memo(save_comic="memo-comic-xiang-strength-inference", debug_trace=DEBUG)
-def infer_strengths[query_sa: strength_values, query_sb: strength_values](
-    r1_outcome_a, r1_outcome_b, r2_outcome_a, r2_outcome_b
-):
-    """
-    Infer posterior distribution over agent strengths given observed outcomes.
-
-    Observations:
-    - Round 1 (low reward = 10): A and B each attempt individual lifts
-    - Round 2 (high reward = 20): A and B each attempt individual lifts
-
-    Returns: Pr[strength_a == query_sa AND strength_b == query_sb | observations]
-    """
-
-    # The participant models that the agents have some strength in [1, 10]
-    participant: thinks[
-        agent_a: given(sa in strength_values, wpp=1),
-        agent_b: given(sb in strength_values, wpp=1)
-    ]
-
-    # Participant witnesses the outcomes and conditions on them
-    # Condition on round 1 outcomes (low reward)
-    participant: observes_that [outcome(agent_a.sa, {low_reward}) == r1_outcome_a]
-    participant: observes_that [outcome(agent_b.sb, {low_reward}) == r1_outcome_b]
-
-    # Condition on round 2 outcomes (high reward)
-    participant: observes_that [outcome(agent_a.sa, {high_reward}) == r2_outcome_a]
-    participant: observes_that [outcome(agent_b.sb, {high_reward}) == r2_outcome_b]
-
-    # Push query variables into participant frame 
-    # and return participant's estimate of the posterior probability for the agents having these given (query) strengths
-    participant: knows(query_sa)
-    participant: knows(query_sb)
-    return participant[Pr[agent_a.sa == query_sa and agent_b.sb == query_sb]]
-```
-
-TEMP
-```{python}
-@jax.jit
 def utility(effort, strength, reward):
     return reward * lift(strength, effort) - alpha * effort
 
-@jax.jit
-def normal(mu, sigma, x):
-    return jax.scipy.stats.norm.pdf(x, loc=mu, scale=sigma)
-
-@memo(save_comic="memo-comic-xiang-strength-inference_add_perceived_effort", debug_trace=DEBUG)
-def infer_strengths_w_perceived_effort[query_sa: strength_values, query_sb: strength_values](
+@memo(save_comic="memo-comic-xiang-strength-inference", debug_trace=DEBUG)
+def infer_strengths[query_sa: strength_values, query_sb: strength_values](
     r1_outcome_a, r1_outcome_b, r2_outcome_a, r2_outcome_b,
     r1_perceived_effort_a, r1_perceived_effort_b, r2_perceived_effort_a, r2_perceived_effort_b
 ):
     """
-    Same as infer_strengths but tries to pull everything closer together (and maybe avoid model implementation errors) by using memo features for utility maximization. Also exposes target effort as a parameter that could be separated from actual effort. Downside is that since we are now modeling uncertainty about not only strength but also about effort, the model takes a lot longer to run. Probably necessary for a model with nested uncertainty, but apparently not for the Xiang2023 model.
+    Infer posterior distribution over agent strengths given observed outcomes.
+
+    Same as the original infer_strengths but tries to pull everything closer together (and maybe avoid model implementation errors) by using memo features for utility maximization. Also exposes target effort as a parameter that could be separated from actual effort. Downside is that since we are now modeling uncertainty about not only strength but also about effort, the model takes a lot longer to run. Probably necessary for a model with nested uncertainty, but apparently not for the Xiang2023 model.
 
     Infer posterior distribution over agent strengths given observed outcomes.
 
@@ -167,30 +91,35 @@ def infer_strengths_w_perceived_effort[query_sa: strength_values, query_sb: stre
     Returns: Pr[strength_a == query_sa AND strength_b == query_sb | observations]
     """
 
-    # The participant models that the agents have some strength in [1,10], and that each chooses target effort to optimize utility
+    # The participant models that the agents have some strength in [1,10], and then that each chooses target effort to optimize utility
+    
     participant: thinks[
         agent_a: given(sa in strength_values, wpp=1),
         agent_b: given(sb in strength_values, wpp=1)
     ]
     
-    # Participant witnesses the outcomes and conditions on them
-
     participant: thinks[
         agent_a: chooses(r1_opt_effort in efforts,
             to_maximize=utility(r1_opt_effort, sa, {low_reward})),
         
-        # MVP of way to sample actual effort based on optimal effort, just for agent a for round 1 for this demo. gamma is a free parameter that should be fit to the data (this free parameter is strength of optimal effort as prior, i.e. strength of belief that agent will achieve optimal effort).
+        # MVP of way to sample actual effort based on optimal effort, just for agent a for round 1 for this demo. gamma is a free parameter that should be fit to the data (this free parameter is strength of optimal effort as prior, i.e. strength of belief that agent will achieve optimal effort)
+        # delta is another free parameter and is the strength of actual effort as prior, i.e. the strength of belief in the observation.
         agent_a: given(r1_actual_effort in efforts,
             wpp=
             # = P(r1_actual_effort|observation) = P(observation|r1_actual_effort)P(r1_actual_effort)/P(observation). P(observation) is constant across values of r1_actual_effort so can omit, since using wpp (proportional probability)
             # so:
             # P(r1_actual_effort|observation) is prop to P(r1_actual_effort)P(observation|r1_actual_effort)
-            normal(r1_opt_effort, {gamma}, r1_actual_effort) *
-            normal(r1_actual_effort, {gamma}, r1_perceived_effort_a)
-            
-            # MVP ^this conditioning instead would be done using a world model's expected value of effort. here, my goal is to compute the posterior, which is approximately: P(r1_actual_effort | sample(r1_actual_effort) == r1_perceived_effort_a) given the prior P(r1_actual_effort) ~ N(r1_opt_effort, gamma). I want to make sure that I'm conditioning only r1_actual_effort and not the entire trace (which I think observes_event would be doing)
+            norm.pdf(r1_actual_effort, {gamma}, r1_opt_effort) *
+            norm.pdf(r1_perceived_effort_a, {delta}, r1_actual_effort)
+
+            # i.e.: P(actual_effort) ~ N(optimal_effort, gamma)
+            # and P(perceived_effort) ~ N(actual_effort, delta)
+            # then we condition actual_effort using the observation of perceived_effort, computing the posterior P(actual_effort|perceived_effort=X):
+            # P(actual_effort|perceived_effort=X) = P(perceived_effort=X|actual_effort)P(actual_effort)/P(perceived_effort=X)
         )
     ]
+
+    # Participant witnesses the outcomes and conditions on them
     participant: observes_that [lift(agent_a.sa, agent_a.r1_actual_effort) == r1_outcome_a]
 
     participant: thinks[
@@ -198,8 +127,8 @@ def infer_strengths_w_perceived_effort[query_sa: strength_values, query_sb: stre
             to_maximize=utility(r1_opt_effort, sb, {low_reward})),
         agent_b: given(r1_actual_effort in efforts,
             wpp=
-                normal(r1_opt_effort, {gamma}, r1_actual_effort) *
-                normal(r1_actual_effort, {gamma}, r1_perceived_effort_b)
+                norm.pdf(r1_actual_effort, {gamma}, r1_opt_effort) *
+                norm.pdf(r1_perceived_effort_b, {delta}, r1_actual_effort)
         )
     ]
     participant: observes_that [lift(agent_b.sb, agent_b.r1_actual_effort) == r1_outcome_b]
@@ -211,8 +140,8 @@ def infer_strengths_w_perceived_effort[query_sa: strength_values, query_sb: stre
             to_maximize=utility(r2_opt_effort, sa, {high_reward})),
         agent_a: given(r2_actual_effort in efforts,
             wpp=
-                normal(r2_opt_effort, {gamma}, r2_actual_effort) *
-                normal(r2_actual_effort, {gamma}, r2_perceived_effort_a)
+                norm.pdf(r2_actual_effort, {gamma}, r2_opt_effort) *
+                norm.pdf(r2_perceived_effort_a, {delta}, r2_actual_effort)
         )
     ]
     participant: observes_that [lift(agent_a.sa, agent_a.r2_actual_effort) == r2_outcome_a]
@@ -222,8 +151,8 @@ def infer_strengths_w_perceived_effort[query_sa: strength_values, query_sb: stre
             to_maximize=utility(r2_opt_effort, sb, {high_reward})),
         agent_b: given(r2_actual_effort in efforts,
             wpp=
-                normal(r2_opt_effort, {gamma}, r2_actual_effort) *
-                normal(r2_actual_effort, {gamma}, r2_perceived_effort_b)
+                norm.pdf(r2_actual_effort, {gamma}, r2_opt_effort) *
+                norm.pdf(r2_perceived_effort_b, {gamma}, r2_actual_effort)
         )
     ]
     participant: observes_that [lift(agent_b.sb, agent_b.r2_actual_effort) == r2_outcome_b]
@@ -235,9 +164,19 @@ def infer_strengths_w_perceived_effort[query_sa: strength_values, query_sb: stre
     return participant[Pr[agent_a.sa == query_sa and agent_b.sb == query_sb]]
 ```
 
-TEMP
 ```{python}
-sample_strengths = infer_strengths_w_perceived_effort(1.0, 0.0, 1.0, 0.0, 7.5, 0., 7.5, 0.)
+#| include: false
+if DEBUG:
+    # DEBUG: Test helper functions with sample values
+    print("=== HELPER FUNCTION TESTS ===")
+    test_strength = 5.0
+    test_effort = .5
+    test_lift_result = lift(test_strength, test_effort)
+    print(f"lift(strength=5.0, effort=.5): {test_lift_result}")
+```
+
+```{python}
+sample_strengths = infer_strengths(1.0, 0.0, 1.0, 0.0, 7.5, 0., 7.5, 0.)
 fig, axes = plt.subplots(1, 2, figsize=(15, 6))
 
 # Posterior heatmap
@@ -253,7 +192,8 @@ plt.show()
 
 ## Game-Theoretic Joint Optimization of Effort
 
-This is the most complex part. The original WebPPL code models:
+The original WebPPL code models:
+
 1. Two agents with uncertain strengths (posterior distributions from rounds 1-2)
 2. Agents reason about each other's efforts in round 3 (joint task)
 3. Iterative best-response until Nash equilibrium
@@ -262,6 +202,7 @@ This is the most complex part. The original WebPPL code models:
 **Key insight**: The game-theoretic reasoning operates on *expected utilities* over the posterior distribution of strengths. This is not purely probabilistic reasoning (like the inference above), but rather decision-theoretic optimization under uncertainty.
 
 **Proposed approach**:
+
 - Keep the Bayesian inference in `@memo` (already done above)
 - Implement the game-theoretic equilibrium finding in pure JAX (deterministic optimization)
 - Combine them: compute equilibrium for each strength pair, weighted by posterior
@@ -297,6 +238,8 @@ def gini(effort1, effort2):
 def outcome2(strength_a, strength_b, effort_a, effort_b, model_features):
     """Predicted outcome (success probability) for joint action"""
     if np.ndim(strength_a) > 0:
+        # translation of listMean(map2(function(i,j){return lift2(i,j,box,effort,effort2)}, strength,strength2))
+        # note that map2 maps over the input arrays *concurrently*
         outcomes = jax.vmap(
             lambda sa, sb: lift2(sa, sb, effort_a, effort_b, model_features)
         )(strength_a, strength_b)
@@ -304,38 +247,13 @@ def outcome2(strength_a, strength_b, effort_a, effort_b, model_features):
     else:
         return lift2(strength_a, strength_b, effort_a, effort_b, model_features)
 
-# @jax.jit
-# def joint_utility_single_strength(strength_a, strength_b, effort_a, effort_b):
-#     """
-#     Compute utilities for both agents given fixed strengths and efforts.
-
-#     Returns: (utility_a, utility_b, success_prob)
-#     """
-#     reward = high_reward  # Round 3 uses high reward
-#     success = lift2(strength_a, strength_b, effort_a, effort_b)
-#     gini_coef = gini(effort_a, effort_b)
-
-#     utility_a = reward * success - alpha * effort_a - beta * gini_coef
-#     utility_b = reward * success - alpha * effort_b - beta * gini_coef
-
-#     return utility_a, utility_b, success
-
 @partial(jax.jit, static_argnames=['model_features'])
 def joint_utility_multiple_strength(strength_a, strength_b, effort_a, effort_b, model_features):
     """
     Compute utilities for both agents given multiple fixed strengths and efforts.
-
     Returns: (utility_a, utility_b, success_prob)
     """
     reward = high_reward  # Round 3 uses high reward
-
-    # translation of listMean(map2(function(i,j){return lift2(i,j,box,effort,effort2)}, strength,strength2))
-    # note that map2 maps over the input arrays *concurrently*
-    # success = np.mean(
-    #     jax.vmap(
-    #         lambda sa, sb: lift2(sa, sb, effort_a, effort_b)
-    #     )(strength_a, strength_b)
-    # )
     
     success = outcome2(strength_a, strength_b, effort_a, effort_b, model_features=model_features)
     gini_coef = jax.lax.cond(
@@ -354,20 +272,11 @@ def joint_utility_multiple_strength(strength_a, strength_b, effort_a, effort_b, 
 def best_response_a(strength_a, strength_b, effort_b, model_features):
     """
     Find agent A's best response to agent B's effort.
-
     Agent A optimizes: max_{e_a} E[utility_a(e_a, e_b) | s_a, s_b]
     """
-    # if np.ndim(strength_a) > 0 or np.ndim(strength_b) > 0:
-    # Multiple strength values
     utilities = jax.vmap(
         lambda ea: joint_utility_multiple_strength(strength_a, strength_b, ea, effort_b, model_features=model_features)[0]
     )(efforts)
-    # else:
-    #     # Single strength values
-    #     utilities = jax.vmap(
-    #         lambda ea: joint_utility_single_strength(strength_a, strength_b, ea, effort_b)[0]
-    #     )(efforts)
-
     return efforts[np.argmax(utilities)]
 
 @partial(jax.jit, static_argnames=['model_features'])
@@ -375,17 +284,9 @@ def best_response_b(strength_a, strength_b, effort_a, model_features):
     """
     Find agent B's best response to agent A's effort.
     """
-    # if np.ndim(strength_a) > 0 or np.ndim(strength_b) > 0:
-    # Multiple strength values
     utilities = jax.vmap(
         lambda eb: joint_utility_multiple_strength(strength_a, strength_b, effort_a, eb, model_features=model_features)[1]
     )(efforts)
-    # else:
-    #     # Single strength values
-    #     utilities = jax.vmap(
-    #         lambda eb: joint_utility_single_strength(strength_a, strength_b, effort_a, eb)[1]
-    #     )(efforts)
-
     return efforts[np.argmax(utilities)]
 
 def find_equilibrium(strength_a, strength_b, init_effort, model_features, max_depth=10, verbose=False, trace=False):
@@ -608,7 +509,8 @@ def independent_effort_optimization(others_effort, posterior_sa, posterior_sb):
 ```{python}
 class Model():
     def __init__(self, r1_outcome_a, r1_outcome_b, r2_outcome_a, r2_outcome_b):
-        # Get posterior over strengths
+        # 1. Get posterior over strengths
+
         if DEBUG:
             print("\nComputing posterior over agent strengths...")
 
@@ -626,34 +528,17 @@ class Model():
             marginal_a = np.sum(posterior_2d, axis=1)
             marginal_b = np.sum(posterior_2d, axis=0)
 
-            # # Compute statistics
-            # mean_sa = np.sum(marginal_a * strength_values)
-            # mean_sb = np.sum(marginal_b * strength_values)
-            # print(f"Agent A strength - mean: {mean_sa:.4f}, min: {strength_values[0]:.4f}, max: {strength_values[-1]:.4f}")
-            # print(f"Agent B strength - mean: {mean_sb:.4f}, min: {strength_values[0]:.4f}, max: {strength_values[-1]:.4f}")
+            # Compute statistics
+            mean_sa = np.sum(marginal_a * strength_values)
+            mean_sb = np.sum(marginal_b * strength_values)
+            print(f"Agent A strength - mean: {mean_sa:.4f}, min: {strength_values[0]:.4f}, max: {strength_values[-1]:.4f}")
+            print(f"Agent B strength - mean: {mean_sb:.4f}, min: {strength_values[0]:.4f}, max: {strength_values[-1]:.4f}")
 
-            # # Find high-probability regions
-            # high_prob_threshold = np.max(posterior_2d) * 0.1
-            # high_prob_indices = np.where(posterior_2d > high_prob_threshold)
-            # print(f"High probability region (top 10%): strength_a in [{strength_values[np.min(high_prob_indices[0])]:.2f}, {strength_values[np.max(high_prob_indices[0])]:.2f}]")
-            # print(f"                                     strength_b in [{strength_values[np.min(high_prob_indices[1])]:.2f}, {strength_values[np.max(high_prob_indices[1])]:.2f}]")
-
-            # # For F,F;F,F scenario, agents fail at BOTH low_reward=10 and high_reward=20
-            # # This means they cannot lift box even with high incentive
-            # # Let's check what strengths are actually consistent with failing both rounds
-            # print("\n=== FIXME #1: Investigating strength bounds ===")
-            # print("For F,F;F,F: agents fail at reward=10 AND reward=20")
-            # print(f"Box weight: {weight_box}")
-            # print(f"Alpha (effort cost): {alpha}")
-
-            # # Check a few sample strengths to see if they would fail
-            # test_strengths = [3.0, 4.0, 4.5, 4.9, 5.0, 5.5, 6.0, 7.0]
-            # for s in test_strengths:
-            #     outcome_low = outcome(s, low_reward)
-            #     outcome_high = outcome(s, high_reward)
-            #     opt_e_low = argmax_utility(s, low_reward)
-            #     opt_e_high = argmax_utility(s, high_reward)
-            #     print(f"  strength={s:.1f}: outcome(R=10)={outcome_low:.0f} (effort={opt_e_low:.2f}), outcome(R=20)={outcome_high:.0f} (effort={opt_e_high:.2f})")
+            # Find high-probability regions
+            high_prob_threshold = np.max(posterior_2d) * 0.1
+            high_prob_indices = np.where(posterior_2d > high_prob_threshold)
+            print(f"High probability region (top 10%): strength_a in [{strength_values[np.min(high_prob_indices[0])]:.2f}, {strength_values[np.max(high_prob_indices[0])]:.2f}]")
+            print(f"                                     strength_b in [{strength_values[np.min(high_prob_indices[1])]:.2f}, {strength_values[np.max(high_prob_indices[1])]:.2f}]")
 
             # Find the actual support of the posterior (non-zero probability mass)
             posterior_support = posterior_2d > 1e-10
@@ -678,7 +563,8 @@ class Model():
         # posterior_sb.extend([sb] * num_samples)
         # posterior_sa.extend([sa] * num_samples)
         
-        # convert from point probabilities to samples; there should be sample counts proportional to the posterior probabilities
+        # 2. Convert from posterior point probabilities to posterior samples
+        # (there should be sample counts proportional to the posterior probabilities)
         posterior_sa = []
         posterior_sb = []
         for i, sa in enumerate(strength_values):
@@ -755,10 +641,11 @@ Model(0.0, 0.0, 0.0, 1.0).solitary_effort()
 Model(0.0, 0.0, 0.0, 0.0).compensatory_effort()
 ```
 
-### Visualization
+### Visualization of inferred strength
 
 ```{python}
-#| eval: false
+sample_model = Model(0.0, 0.0, 0.0, 0.0)
+
 # Visualize posterior over agent strengths
 fig, axes = plt.subplots(1, 2, figsize=(15, 6))
 
@@ -785,136 +672,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-```{python}
-#| include: false
-# Visualize outcome variables like did for webppl
-
-# compare_results <- function(...) {
-#   # Accepts data frames as inputs
-#   results_list <- list(...)
-#   if (length(results_list) == 0) {
-#     stop("At least one set of results must be provided")
-#   }
-
-#   # Build summaries
-#   results_combined <- bind_rows(results_list, .id="method")
-#   P_results_summary <- results_combined |> select(method, scenario, P)
-#   posteriors_summary <- results_combined |> select(method, scenario, aStrength_posterior, bStrength_posterior)
-
-#   message("Now compare visually")
-
-#   show(P_results_summary)
-
-#   # Make posteriors_summary longer for plotting (cols: method, agent, scenario, strength)
-#   posteriors_long <- posteriors_summary |>
-#     pivot_longer(cols = c(aStrength_posterior, bStrength_posterior),
-#                   names_to = "agent",
-#                   values_to = "strength") |>
-#     mutate(agent = ifelse(agent == "aStrength_posterior", "a", "b")) |>
-#     unnest_longer(strength)
-
-#   # Plot density of posteriors for each scenario
-#   show(
-#     ggplot(posteriors_long, aes(x = strength, color = method, linetype = agent)) +
-#       geom_density() +
-#       facet_wrap(~scenario, scales = "free_y") +
-#       labs(
-#         title = "Strength Posteriors Across Scenarios",
-#         x = "Strength",
-#         y = "Density",
-#         color = "Method",
-#         linetype = "Agent"
-#       ) +
-#       theme_minimal() +
-#       theme(legend.position = "bottom")
-#   )
-
-#   message("Now separately for each method (or method and agent) and so that we can ensure that there are no missing posteriors")
-
-#   show(
-#     ggplot(posteriors_long, aes(x = strength, color = method, linetype = agent)) +
-#       geom_density() +
-#       facet_grid(method~scenario, scales = "free_y") +
-#       labs(
-#         title = "Strength Posteriors Across Scenarios",
-#         x = "Strength",
-#         y = "Density",
-#         color = "Method",
-#         linetype = "Agent"
-#       ) +
-#       theme_minimal() +
-#       theme(legend.position = "bottom")
-#   )
-
-#   show(
-#     ggplot(posteriors_long, aes(x = strength, color = method, linetype = agent)) +
-#       geom_density() +
-#       facet_grid(method~scenario+agent, scales = "free_y") +
-#       labs(
-#         title = "Strength Posteriors Across Scenarios",
-#         x = "Strength",
-#         y = "Density",
-#         color = "Method",
-#         linetype = "Agent"
-#       ) +
-#       theme_minimal() +
-#       theme(legend.position = "bottom")
-#   )
-
-#   message("Compare all output values across methods")
-
-#   show(results_combined |> select(-aStrength_posterior, -bStrength_posterior, -startingE_table))
-
-#   message("Extract all final_table values into a comprehensive summary")
-
-#   # Plot comparisons for the rest of the variables
-#   results_combined_vars_long <- results_combined |>
-#     select(-where(is.list)) |>
-#     pivot_longer(-c(method, scenario), values_to="value", names_to="variable")
-  
-#   show(
-#     ggplot(results_combined_vars_long, aes(x = scenario, y = value, fill = method)) +
-#       geom_col(position = "dodge") +
-#       facet_wrap(~variable, scales = "free_y", ncol = 2) +
-#       labs(
-#         title = "Output Variables Comparison Across Methods and Scenarios",
-#         x = "Scenario",
-#         y = "Value",
-#         fill = "Method"
-#       ) +
-#       theme_minimal() +
-#       theme(axis.text.x = element_text(angle = 45, hjust = 1))
-#   )
-
-#   message("Look at startingE details")
-#   results_combined_startingE_vars <- results_combined |>
-#     select(method, scenario, startingE, startingE_table) |>
-#     unnest_wider(startingE_table)
-#   show(results_combined_startingE_vars)
-
-#   results_combined_startingE_vars_long <- results_combined |>
-#     select(method, scenario, startingE_table) |>
-#     unnest_longer(startingE_table, indices_to = "variable", values_to = "value") |>
-#     unnest_longer(value)
-  
-#   show(
-#     ggplot(results_combined_startingE_vars_long, aes(x = scenario, y = value, fill = method)) +
-#       geom_col(position = "dodge") +
-#       facet_wrap(~variable, scales = "free_y", ncol = 2) +
-#       labs(
-#         title = "startingE_table Variables Comparison Across Methods and Scenarios",
-#         x = "Scenario",
-#         y = "Value",
-#         fill = "Method"
-#       ) +
-#       theme_minimal() +
-#       theme(axis.text.x = element_text(angle = 45, hjust = 1))
-#   )
-# }
-
-```
-
-## Now get all predictions
+## Compute predictions for all scenarios
 
 ```{python}
 DEBUG = False
@@ -954,7 +712,6 @@ model_fits['safe_joint_w_gini'] = {
 ```
 
 ```{python}
-#| eval: false
 import pandas as pd
 # Convert model fits to DataFrame for easier manipulation, converting key (e.g. "joint") to a column called "model"
 model_fits_df = pd.DataFrame.from_dict(
@@ -965,95 +722,11 @@ model_fits_df = pd.DataFrame.from_dict(
 ).reset_index()
 model_fits_df.rename(columns={'level_0': 'model', 'level_1': 'scenario'}, inplace=True)
 
-# save to csv
-model_fits_df.to_csv('xiang2023-exp1-round3-model_2fits_results.csv', index=False)
+model_fits_df
 ```
 
-## Notes on Conversion Strategy
-
-The conversion from WebPPL to memo revealed important distinctions:
-
-### 1. Probabilistic Inference vs. Decision Theory
-
-The original WebPPL code mixes two types of reasoning:
-- **Bayesian inference** (rounds 1-2): Infer agent strengths from observed outcomes
-- **Game-theoretic optimization** (round 3): Find Nash equilibrium efforts
-
-In the memo conversion:
-- **Bayesian inference**: Use `@memo` with `given()`, `observes_that[]`, and `thinks[]`
-- **Game-theoretic optimization**: Use pure JAX functions (no probabilistic reasoning, just optimization)
-
-### 2. Key Conversion Decisions
-
-**Mutable arrays (x2a, x2b)**:
-- WebPPL: Pushes strength posterior samples to arrays, uses them later
-- memo: Query the posterior distribution directly (more principled)
-
-**Nested agent reasoning**:
-- WebPPL: Nested JavaScript functions with recursive best-response
-- memo/JAX: Iterative best-response in pure JAX (not probabilistic, so no `thinks[]` needed here)
-
-**Expected utilities**:
-- WebPPL: Implicitly handles through sampling or enumeration
-- memo/JAX: Explicit loop over posterior, computing equilibrium for each strength pair
-
-### 3. Computational Considerations
-
-The original uses either:
-- MCMC with 10,000 samples (slow but handles continuous distributions)
-- Enumeration with discrete values (exact but potentially more expensive)
-
-### 4. What Could Be Improved
-
-**Potential optimizations (if using pure game-theoretic optimization)**:
-- Use coarser grid for exploration, then refine around high-probability regions
-- Vectorize the equilibrium finding across strength pairs (currently sequential)
-- Use automatic differentiation to find equilibrium (gradient-based instead of grid search)
-
-**Further extension with memo**:
-Currently, the game-theoretic reasoning is outside of `@memo`. One could potentially:
-- Model agents' beliefs about each other's strengths using nested `thinks[]`
-- Model agents' choices as `chooses(e in efforts, wpp=utility(e))`
-- But this might be overkill and harder to reason about
-- However, this does incorporate uncertainty about the other agent into the model, which might add richness
-
-## How to Compare Outputs
-
-To verify that the WebPPL and memo implementations produce the same results:
-
-These should match (up to numerical precision and discretization choices).
-
-Compare outcome probability (here, `expected_outcome`), strength posteriors, and joint utility results for r3 outcome and for starting effort.
-
-1. **Expected matches:**
-   - Helper functions (lift, optE, outcome) should return identical values for test inputs
-   - Bayesian inference statistics should show similar:
-     - Posterior means (agent strengths)
-     - Non-neglible-probability regions
-   - Equilibrium finding should show similar:
-     - Convergence depth (may vary slightly due to discretization)
-     - Equilibrium efforts
-   - Final outcome probability should be close
-
-2. **Known differences:**
-   - See above
-   - Small numerical differences due to different underlying computation engines
-
-
-## Notes on the alternative models
-
-The joint effort model and the solitary/compensatory models are fundamentally different in their computational structure:
-
-**Joint Effort Model:**
-
-- Uses game-theoretic Nash equilibrium finding
-- Agents engage in mutually recursive best-response reasoning
-- Includes inequality aversion (Gini coefficient with β=24.5)
-- Optimizes `init_effort` to maximize joint utility
-
-**Solitary/Compensatory Models:**
-
-- Use independent optimization with **fixed assumption** of partner's effort (0 or 1, resp.)
-- Each agent independently maximizes their utility assuming partner uses fixed effort
-- **No mutual recursion** - direct calculation
-- **No Gini coefficient** - agents don't care about effort matching
+```{python}
+#| eval: false
+# save to csv
+model_fits_df.to_csv('xiang2023-exp1-round3-model_fits_results_2c.csv', index=False)
+```
