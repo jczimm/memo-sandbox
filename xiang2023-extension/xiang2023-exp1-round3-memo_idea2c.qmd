@@ -8,6 +8,16 @@ Code adapted from https://github.com/jczimm/competence_effort/blob/main/Code/mai
 ## Setup
 
 ```{python}
+# fixes error "Check failed: ret == 0 (11 vs. 0) Thread tf_foreach creation via pthread_create() failed.": 
+import os
+os.environ['OPENBLAS_NUM_THREADS'] = '1'
+os.environ['XLA_FLAGS'] = '--xla_force_host_platform_device_count=1' # force to use the exact number of GPUs allocated (assuming only one allocated)
+# on a cluster, be sure to allocate enough memory for the job, e.g.:
+# $ salloc --gres=gpu:1 --mem-per-gpu=48gb
+# then run using:
+# $ pixi shell
+# $ srun quarto render xiang2023-extension/xiang2023-exp1-round3-memo_idea2c.qmd # NOT YET TESTED -26/1/2
+
 import jax
 from jax.scipy.stats import norm
 import jax.numpy as np
