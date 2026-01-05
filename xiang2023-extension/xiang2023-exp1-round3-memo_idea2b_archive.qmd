@@ -152,7 +152,7 @@ def utility(effort, strength, reward):
 def normal(mu, sigma, x):
     return jax.scipy.stats.norm.pdf(x, loc=mu, scale=sigma)
 
-@memo(save_comic="memo-comic-xiang-strength-inference_add_perceived_effort", debug_trace=DEBUG)
+@memo(save_comic="memo-comic-xiang-strength-inference_add_perceived_effort", debug_trace=DEBUG, debug_print_compiled=DEBUG)
 def infer_strengths_w_perceived_effort[query_sa: strength_values, query_sb: strength_values](
     r1_outcome_a, r1_outcome_b, r2_outcome_a, r2_outcome_b,
     r1_perceived_effort_a, r1_perceived_effort_b, r2_perceived_effort_a, r2_perceived_effort_b

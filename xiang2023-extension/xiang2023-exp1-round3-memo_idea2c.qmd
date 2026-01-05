@@ -19,7 +19,6 @@ os.environ['XLA_FLAGS'] = '--xla_force_host_platform_device_count=1' # force to 
 # $ srun quarto render xiang2023-extension/xiang2023-exp1-round3-memo_idea2c.qmd # NOT YET TESTED -26/1/2
 
 import jax
-from jax.scipy.stats import norm
 import jax.numpy as np
 from memo import memo
 from matplotlib import pyplot as plt
@@ -39,7 +38,7 @@ efforts = np.array([0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5,
                     0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0])
 
 # Discretized strength space (replacing continuous uniform(1,10))
-strength_values = np.linspace(1., 10., 301) # [1,10] with step size of .03
+strength_values = np.linspace(1., 10., 11) # [1,10] with step size of .9
 
 DEBUG = True
 ```
@@ -82,7 +81,11 @@ The original WebPPL code infers agent strengths from observed outcomes in rounds
 def utility(effort, strength, reward):
     return reward * lift(strength, effort) - alpha * effort
 
-@memo(save_comic="memo-comic-xiang-strength-inference", debug_trace=DEBUG)
+@jax.jit
+def norm_pdf(x, mu, sigma):
+    return jax.scipy.stats.norm.pdf(x, loc=mu, scale=sigma)
+
+@memo(save_comic="memo-comic-xiang-strength-inference", debug_trace=DEBUG, debug_print_compiled=DEBUG)
 def infer_strengths[query_sa: strength_values, query_sb: strength_values](
     r1_outcome_a, r1_outcome_b, r2_outcome_a, r2_outcome_b,
     r1_perceived_effort_a, r1_perceived_effort_b, r2_perceived_effort_a, r2_perceived_effort_b
@@ -119,8 +122,8 @@ def infer_strengths[query_sa: strength_values, query_sb: strength_values](
             # = P(r1_actual_effort|observation) = P(observation|r1_actual_effort)P(r1_actual_effort)/P(observation). P(observation) is constant across values of r1_actual_effort so can omit, since using wpp (proportional probability)
             # so:
             # P(r1_actual_effort|observation) is prop to P(r1_actual_effort)P(observation|r1_actual_effort)
-            norm.pdf(r1_actual_effort, {gamma}, r1_opt_effort) *
-            norm.pdf(r1_perceived_effort_a, {delta}, r1_actual_effort)
+            norm_pdf(r1_actual_effort, r1_opt_effort, {gamma}) *
+            norm_pdf(r1_perceived_effort_a, r1_actual_effort, {delta})
 
             # i.e.: P(actual_effort) ~ N(optimal_effort, gamma)
             # and P(perceived_effort) ~ N(actual_effort, delta)
@@ -137,8 +140,8 @@ def infer_strengths[query_sa: strength_values, query_sb: strength_values](
             to_maximize=utility(r1_opt_effort, sb, {low_reward})),
         agent_b: given(r1_actual_effort in efforts,
             wpp=
-                norm.pdf(r1_actual_effort, {gamma}, r1_opt_effort) *
-                norm.pdf(r1_perceived_effort_b, {delta}, r1_actual_effort)
+                norm_pdf(r1_actual_effort, r1_opt_effort, {gamma}) *
+                norm_pdf(r1_perceived_effort_b, r1_actual_effort, {delta})
         )
     ]
     participant: observes_that [lift(agent_b.sb, agent_b.r1_actual_effort) == r1_outcome_b]
@@ -150,8 +153,8 @@ def infer_strengths[query_sa: strength_values, query_sb: strength_values](
             to_maximize=utility(r2_opt_effort, sa, {high_reward})),
         agent_a: given(r2_actual_effort in efforts,
             wpp=
-                norm.pdf(r2_actual_effort, {gamma}, r2_opt_effort) *
-                norm.pdf(r2_perceived_effort_a, {delta}, r2_actual_effort)
+                norm_pdf(r2_actual_effort, r2_opt_effort, {gamma}) *
+                norm_pdf(r2_perceived_effort_a, r2_actual_effort, {delta})
         )
     ]
     participant: observes_that [lift(agent_a.sa, agent_a.r2_actual_effort) == r2_outcome_a]
@@ -161,8 +164,8 @@ def infer_strengths[query_sa: strength_values, query_sb: strength_values](
             to_maximize=utility(r2_opt_effort, sb, {high_reward})),
         agent_b: given(r2_actual_effort in efforts,
             wpp=
-                norm.pdf(r2_actual_effort, {gamma}, r2_opt_effort) *
-                norm.pdf(r2_perceived_effort_b, {gamma}, r2_actual_effort)
+                norm_pdf(r2_actual_effort, r2_opt_effort, {gamma}) *
+                norm_pdf(r2_perceived_effort_b, r2_actual_effort, {delta})
         )
     ]
     participant: observes_that [lift(agent_b.sb, agent_b.r2_actual_effort) == r2_outcome_b]
@@ -187,6 +190,9 @@ if DEBUG:
 
 ```{python}
 sample_strengths = infer_strengths(1.0, 0.0, 1.0, 0.0, 7.5, 0., 7.5, 0.)
+```
+
+```{python}
 fig, axes = plt.subplots(1, 2, figsize=(15, 6))
 
 # Posterior heatmap
