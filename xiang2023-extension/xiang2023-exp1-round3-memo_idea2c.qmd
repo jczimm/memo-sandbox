@@ -20,6 +20,7 @@ os.environ['XLA_FLAGS'] = '--xla_force_host_platform_device_count=1' # force to 
 
 import jax
 import jax.numpy as np
+from jax.scipy.stats.norm import pdf as norm_pdf
 from memo import memo
 from matplotlib import pyplot as plt
 from functools import partial
@@ -27,8 +28,8 @@ from functools import partial
 # Model parameters (from original WebPPL code)
 alpha = 13.5  # effort cost coefficient, from original paper; kept fixed for replication
 beta = 24.5   # inequality aversion coefficient, from original paper; kept fixed for replication
-gamma = 1. # strength of belief that agent will achieve optimal effort
-delta = 1. # strength of belief in perceived effort
+gamma = .3 # strength of belief that agent will achieve optimal effort (relative to scale of effort: [0, 1])
+delta = .2 # strength of belief in perceived effort (relative to scale of effort: [0, 1])
 weight_box = 5  # weight of the box
 low_reward = 10
 high_reward = 20
@@ -46,6 +47,23 @@ DEBUG = True
 ## Helper Functions (JAX-compatible)
 
 ```{python}
+@jax.jit
+def effort_is(effort1, effort2):
+    """
+    Compare efforts by checking if both `effort1` and `effort2` round to the same item in `efforts`
+    
+    Allows effort1 and effort2 to come from different discretizations and also works around floating point error
+
+    Efficient comparison by mapping efforts to their discrete indices via arithmetic, given that the step size is consistent
+
+    As it is used in an observes_that statement to condition a parameter, given an effort2, it should (probably) only return True for one effort1 (*this is an indicator function*)
+    """
+    n = efforts.shape[0]
+    step = efforts[1] - efforts[0]
+    idx1 = np.clip(np.rint(effort1 / step).astype(float), 0, n - 1)
+    idx2 = np.clip(np.rint(effort2 / step).astype(float), 0, n - 1)
+    return (idx1 == idx2).reshape(())
+
 @jax.jit
 def lift(strength, effort):
     """Single agent lift: can they lift the box?"""
@@ -66,7 +84,7 @@ def lift2(strength1, strength2, effort1, effort2, model_features):
 def gini(effort1, effort2):
     """Gini coefficient for inequality aversion"""
     return np.where(
-        np.abs(effort1 - effort2) < 1e-8, # instead of effort1 == effort2 (to bypass floating point error)
+        effort_is(effort1, effort2), # instead of effort1 == effort2
         0.0,
         np.abs(effort1 - effort2) / 4 / (effort1 + effort2)
     )
@@ -81,12 +99,8 @@ The original WebPPL code infers agent strengths from observed outcomes in rounds
 def utility(effort, strength, reward):
     return reward * lift(strength, effort) - alpha * effort
 
-@jax.jit
-def norm_pdf(x, mu, sigma):
-    return jax.scipy.stats.norm.pdf(x, loc=mu, scale=sigma)
-
-@memo(save_comic="memo-comic-xiang-strength-inference", debug_trace=DEBUG, debug_print_compiled=DEBUG)
-def infer_strengths[query_sa: strength_values, query_sb: strength_values](
+@memo(save_comic="memo-comic-xiang-strength-inference", debug_trace=DEBUG)
+def infer_strengths[query_strength_a: strength_values, query_strength_b: strength_values](
     r1_outcome_a, r1_outcome_b, r2_outcome_a, r2_outcome_b,
     r1_perceived_effort_a, r1_perceived_effort_b, r2_perceived_effort_a, r2_perceived_effort_b
 ):
@@ -101,80 +115,76 @@ def infer_strengths[query_sa: strength_values, query_sb: strength_values](
     - Round 1 (low reward = 10): A and B each attempt individual lifts
     - Round 2 (high reward = 20): A and B each attempt individual lifts
 
-    Returns: Pr[strength_a == query_sa AND strength_b == query_sb | observations]
+    Returns: Pr[strength_a == query_strength_a AND strength_b == query_strength_b | observations]
     """
 
     # The participant models that the agents have some strength in [1,10], and then that each chooses target effort to optimize utility
     
     participant: thinks[
-        agent_a: given(sa in strength_values, wpp=1),
-        agent_b: given(sb in strength_values, wpp=1)
+        agent_a: given(strength in strength_values, wpp=1),
+        agent_b: given(strength in strength_values, wpp=1)
     ]
     
     participant: thinks[
         agent_a: chooses(r1_opt_effort in efforts,
-            to_maximize=utility(r1_opt_effort, sa, {low_reward})),
+            to_maximize=utility(r1_opt_effort, strength, {low_reward})),
         
-        # MVP of way to sample actual effort based on optimal effort, just for agent a for round 1 for this demo. gamma is a free parameter that should be fit to the data (this free parameter is strength of optimal effort as prior, i.e. strength of belief that agent will achieve optimal effort)
-        # delta is another free parameter and is the strength of actual effort as prior, i.e. the strength of belief in the observation.
-        agent_a: given(r1_actual_effort in efforts,
-            wpp=
-            # = P(r1_actual_effort|observation) = P(observation|r1_actual_effort)P(r1_actual_effort)/P(observation). P(observation) is constant across values of r1_actual_effort so can omit, since using wpp (proportional probability)
-            # so:
-            # P(r1_actual_effort|observation) is prop to P(r1_actual_effort)P(observation|r1_actual_effort)
-            norm_pdf(r1_actual_effort, r1_opt_effort, {gamma}) *
-            norm_pdf(r1_perceived_effort_a, r1_actual_effort, {delta})
+        # Sample actual effort based on optimal effort, just for agent a for round 1 for this demo. gamma is a free parameter that should be fit to the data (this free parameter is strength of optimal effort as prior, i.e. strength of belief that agent will achieve optimal effort)
+        agent_a: chooses(r1_actual_effort in efforts,
+            wpp=norm_pdf(r1_actual_effort, r1_opt_effort, {gamma})),
 
-            # i.e.: P(actual_effort) ~ N(optimal_effort, gamma)
-            # and P(perceived_effort) ~ N(actual_effort, delta)
-            # then we condition actual_effort using the observation of perceived_effort, computing the posterior P(actual_effort|perceived_effort=X):
-            # P(actual_effort|perceived_effort=X) = P(perceived_effort=X|actual_effort)P(actual_effort)/P(perceived_effort=X)
-        )
+        # delta is another free parameter and is the strength of the strength of belief in the observation
+        agent_a: given(r1_perceived_effort in efforts,
+            wpp=norm_pdf(r1_perceived_effort, r1_actual_effort, {delta}))
+
+        # i.e.: P(actual_effort) ~ N(optimal_effort, gamma)
+        # and P(perceived_effort) ~ N(actual_effort, delta)
+        # then we condition actual_effort using the observation of perceived_effort, behind-the-scenes computing the posterior P(actual_effort|perceived_effort=X)
     ]
-
-    # Participant witnesses the outcomes and conditions on them
-    participant: observes_that [lift(agent_a.sa, agent_a.r1_actual_effort) == r1_outcome_a]
+    # Participant witnesses the behavior and outcomes and conditions on both
+    # use a custom `effort_is` function to compare efforts, since they may be discretized differently (this function checks if they round to the same value of `efforts`-- and here, we're asserting that they do)
+    participant: observes_that [effort_is(agent_a.r1_perceived_effort, r1_perceived_effort_a)]
+    participant: observes_that [lift(agent_a.strength, agent_a.r1_actual_effort) == r1_outcome_a]
 
     participant: thinks[
-        agent_b: chooses(r1_opt_effort in efforts,
-            to_maximize=utility(r1_opt_effort, sb, {low_reward})),
-        agent_b: given(r1_actual_effort in efforts,
-            wpp=
-                norm_pdf(r1_actual_effort, r1_opt_effort, {gamma}) *
-                norm_pdf(r1_perceived_effort_b, r1_actual_effort, {delta})
-        )
+        agent_b: given(r1_opt_effort in efforts,
+            to_maximize=utility(r1_opt_effort, strength, {low_reward})),
+        agent_b: chooses(r1_actual_effort in efforts,
+            wpp=norm_pdf(r1_actual_effort, r1_opt_effort, {gamma})),
+        agent_b: given(r1_perceived_effort in efforts,
+            wpp=norm_pdf(r1_perceived_effort, r1_actual_effort, {delta}))
     ]
-    participant: observes_that [lift(agent_b.sb, agent_b.r1_actual_effort) == r1_outcome_b]
+    participant: observes_that [effort_is(agent_b.r1_perceived_effort, r1_perceived_effort_b)]
+    participant: observes_that [lift(agent_b.strength, agent_b.r1_actual_effort) == r1_outcome_b]
 
     # Round 2
 
     participant: thinks[
-        agent_a: chooses(r2_opt_effort in efforts,
-            to_maximize=utility(r2_opt_effort, sa, {high_reward})),
-        agent_a: given(r2_actual_effort in efforts,
-            wpp=
-                norm_pdf(r2_actual_effort, r2_opt_effort, {gamma}) *
-                norm_pdf(r2_perceived_effort_a, r2_actual_effort, {delta})
-        )
+        agent_a: given(r2_opt_effort in efforts,
+            to_maximize=utility(r2_opt_effort, strength, {high_reward})),
+        agent_a: chooses(r2_actual_effort in efforts,
+            wpp=norm_pdf(r2_actual_effort, r2_opt_effort, {gamma})),
+        agent_a: given(r2_perceived_effort in efforts,
+            wpp=norm_pdf(r2_perceived_effort, r2_actual_effort, {delta}))
     ]
-    participant: observes_that [lift(agent_a.sa, agent_a.r2_actual_effort) == r2_outcome_a]
+    participant: observes_that [effort_is(agent_a.r2_perceived_effort, r2_perceived_effort_a)]
+    participant: observes_that [lift(agent_a.strength, agent_a.r2_actual_effort) == r2_outcome_a]
     
     participant: thinks[
-        agent_b: chooses(r2_opt_effort in efforts,
-            to_maximize=utility(r2_opt_effort, sb, {high_reward})),
-        agent_b: given(r2_actual_effort in efforts,
-            wpp=
-                norm_pdf(r2_actual_effort, r2_opt_effort, {gamma}) *
-                norm_pdf(r2_perceived_effort_b, r2_actual_effort, {delta})
-        )
+        agent_b: given(r2_opt_effort in efforts,
+            to_maximize=utility(r2_opt_effort, strength, {high_reward})),
+        agent_b: chooses(r2_actual_effort in efforts,
+            wpp=norm_pdf(r2_actual_effort, r2_opt_effort, {gamma})),
+        agent_b: given(r2_perceived_effort in efforts,
+            wpp=norm_pdf(r2_perceived_effort, r2_actual_effort, {delta}))
     ]
-    participant: observes_that [lift(agent_b.sb, agent_b.r2_actual_effort) == r2_outcome_b]
+    participant: observes_that [effort_is(agent_b.r2_perceived_effort, r2_perceived_effort_b)]
+    participant: observes_that [lift(agent_b.strength, agent_b.r2_actual_effort) == r2_outcome_b]
 
     # Push query variables into participant frame 
     # and return participant's estimate of the posterior probability for the agents having these given (query) strengths
-    participant: knows(query_sa)
-    participant: knows(query_sb)
-    return participant[Pr[agent_a.sa == query_sa and agent_b.sb == query_sb]]
+    participant: knows(query_strength_a, query_strength_b)
+    return participant[Pr[agent_a.strength == query_strength_a and agent_b.strength == query_strength_b]]
 ```
 
 ```{python}
@@ -189,7 +199,7 @@ if DEBUG:
 ```
 
 ```{python}
-sample_strengths = infer_strengths(1.0, 0.0, 1.0, 0.0, 7.5, 0., 7.5, 0.)
+sample_strengths = infer_strengths(1.0, 0.0, 1.0, 0.0, .75, 0., .75, 0.)
 ```
 
 ```{python}
@@ -240,15 +250,6 @@ def lift2(strength1, strength2, effort1, effort2, model_features):
         lambda _: (effort1 * strength1 + effort2 * strength2 >= weight_box),
         operand=None
     ).astype(float)
-
-@jax.jit
-def gini(effort1, effort2):
-    """Gini coefficient for inequality aversion"""
-    return np.where(
-        np.abs(effort1 - effort2) < 1e-8, # instead of effort1 == effort2 (to bypass floating point error)
-        0.0,
-        np.abs(effort1 - effort2) / 4 / (effort1 + effort2)
-    )
 
 @partial(jax.jit, static_argnames=['model_features'])
 def outcome2(strength_a, strength_b, effort_a, effort_b, model_features):
