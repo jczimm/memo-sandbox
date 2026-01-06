@@ -99,7 +99,7 @@ The original WebPPL code infers agent strengths from observed outcomes in rounds
 def utility(effort, strength, reward):
     return reward * lift(strength, effort) - alpha * effort
 
-@memo(save_comic="memo-comic-xiang-strength-inference", debug_trace=DEBUG)
+@memo(save_comic="memo-comic-xiang-strength-inference", debug_trace=DEBUG, debug_print_compiled=DEBUG)
 def infer_strengths[query_strength_a: strength_values, query_strength_b: strength_values](
     r1_outcome_a, r1_outcome_b, r2_outcome_a, r2_outcome_b,
     r1_perceived_effort_a, r1_perceived_effort_b, r2_perceived_effort_a, r2_perceived_effort_b
@@ -185,6 +185,248 @@ def infer_strengths[query_strength_a: strength_values, query_strength_b: strengt
     # and return participant's estimate of the posterior probability for the agents having these given (query) strengths
     participant: knows(query_strength_a, query_strength_b)
     return participant[Pr[agent_a.strength == query_strength_a and agent_b.strength == query_strength_b]]
+
+# Compiled:
+# def _make_infer_strengths():  #     1
+#     from memo.lib import AuxInfo, Bool, IntEnum, MemoError, array_index, cache, check_domains, check_exotic_param, check_scalar_param, check_which_retval, collapse_diagonal, ffi, jax, jnp, make_pandas_data, make_xarray_data, marg, maxx, memo_result, pad, pprint_table, time  #     2
+#   #     3
+#     @jax.jit  #     4
+#     def _jit_infer_strengths(r1_outcome_a, r1_outcome_b, r2_outcome_a, r2_outcome_b, r1_perceived_effort_a, r1_perceived_effort_b, r2_perceived_effort_a, r2_perceived_effort_b, lit_3, lit_7, inline_10, inline_14, inline_18, lit_21, lit_24, inline_27, inline_31, inline_35, lit_38, lit_41, inline_44, inline_48, inline_52, lit_55, lit_58, inline_61, inline_65, inline_69, lit_72, lit_75):  #     5
+#         forall_query_strength_a_0 = jnp.array(strength_values).reshape(*(-1,))  #     6
+#         forall_query_strength_b_1 = jnp.array(strength_values).reshape(*(-1, 1))  #     7
+#         # agent_a choose strength  #     8
+#         agent_a_strength_2 = jnp.array(strength_values).reshape(*(-1, 1, 1))  #     9
+#         strength_ll_4 = jnp.ones(jnp.broadcast_shapes(agent_a_strength_2.shape), dtype=jnp.float32) * lit_3  #    10
+#         strength_ll_4 = jnp.nan_to_num(strength_ll_4 / marg(strength_ll_4, (2,)))  #    11
+#         participant_ll_5 = 1.0  #    12
+#         participant_ll_5 = strength_ll_4 * participant_ll_5  #    13
+#         # agent_b choose strength  #    14
+#         agent_b_strength_6 = jnp.array(strength_values).reshape(*(-1, 1, 1, 1))  #    15
+#         strength_ll_8 = jnp.ones(jnp.broadcast_shapes(agent_b_strength_6.shape), dtype=jnp.float32) * lit_7  #    16
+#         strength_ll_8 = jnp.nan_to_num(strength_ll_8 / marg(strength_ll_8, (3,)))  #    17
+#         participant_ll_5 = strength_ll_8 * participant_ll_5  #    18
+#         # agent_a choose r1_opt_effort  #    19
+#         agent_a_r1_opt_effort_9 = jnp.array(efforts).reshape(*(-1, 1, 1, 1, 1))  #    20
+#         ffi_utility_11 = ffi(utility, [False, False, True], agent_a_r1_opt_effort_9, agent_a_strength_2, inline_10)  #    21
+#         r1_opt_effort_ll_12 = jnp.ones(jnp.broadcast_shapes(agent_a_r1_opt_effort_9.shape), dtype=jnp.float32) * ffi_utility_11  #    22
+#         r1_opt_effort_ll_12 = 1.0 * (r1_opt_effort_ll_12 == maxx(r1_opt_effort_ll_12, (4,)))  #    23
+#         r1_opt_effort_ll_12 = jnp.nan_to_num(r1_opt_effort_ll_12 / marg(r1_opt_effort_ll_12, (4,)))  #    24
+#         participant_ll_5 = r1_opt_effort_ll_12 * participant_ll_5  #    25
+#         # agent_a choose r1_actual_effort  #    26
+#         agent_a_r1_actual_effort_13 = jnp.array(efforts).reshape(*(-1, 1, 1, 1, 1, 1))  #    27
+#         ffi_norm_pdf_15 = ffi(norm_pdf, [False, False, True], agent_a_r1_actual_effort_13, agent_a_r1_opt_effort_9, inline_14)  #    28
+#         r1_actual_effort_ll_16 = jnp.ones(jnp.broadcast_shapes(agent_a_r1_actual_effort_13.shape), dtype=jnp.float32) * ffi_norm_pdf_15  #    29
+#         r1_actual_effort_ll_16 = jnp.nan_to_num(r1_actual_effort_ll_16 / marg(r1_actual_effort_ll_16, (5,)))  #    30
+#         participant_ll_5 = r1_actual_effort_ll_16 * participant_ll_5  #    31
+#         # agent_a choose r1_perceived_effort  #    32
+#         agent_a_r1_perceived_effort_17 = jnp.array(efforts).reshape(*(-1, 1, 1, 1, 1, 1, 1))  #    33
+#         ffi_norm_pdf_19 = ffi(norm_pdf, [False, False, True], agent_a_r1_perceived_effort_17, agent_a_r1_actual_effort_13, inline_18)  #    34
+#         r1_perceived_effort_ll_20 = jnp.ones(jnp.broadcast_shapes(agent_a_r1_perceived_effort_17.shape), dtype=jnp.float32) * ffi_norm_pdf_19  #    35
+#         r1_perceived_effort_ll_20 = jnp.nan_to_num(r1_perceived_effort_ll_20 / marg(r1_perceived_effort_ll_20, (6,)))  #    36
+#         participant_ll_5 = r1_perceived_effort_ll_20 * participant_ll_5  #    37
+#         ffi_effort_is_22 = ffi(effort_is, [False, True], agent_a_r1_perceived_effort_17, lit_21)  #    38
+#         # participant factors  #    39
+#         ffi_effort_is_22 = jnp.bool(ffi_effort_is_22) * 1.0  #    40
+#         participant_ll_5 = participant_ll_5 * ffi_effort_is_22  #    41
+#         participant_ll_5 = jnp.nan_to_num(participant_ll_5 / marg(participant_ll_5, (2, 3, 4, 5, 6)))  #    42
+#         ffi_lift_23 = ffi(lift, [False, False], agent_a_strength_2, agent_a_r1_actual_effort_13)  #    43
+#         op_eq_25 = ffi_lift_23 == lit_24  #    44
+#         # participant factors  #    45
+#         op_eq_25 = jnp.bool(op_eq_25) * 1.0  #    46
+#         participant_ll_5 = participant_ll_5 * op_eq_25  #    47
+#         participant_ll_5 = jnp.nan_to_num(participant_ll_5 / marg(participant_ll_5, (2, 3, 4, 5, 6)))  #    48
+#         # agent_b choose r1_opt_effort  #    49
+#         agent_b_r1_opt_effort_26 = jnp.array(efforts).reshape(*(-1, 1, 1, 1, 1, 1, 1, 1))  #    50
+#         ffi_utility_28 = ffi(utility, [False, False, True], agent_b_r1_opt_effort_26, agent_b_strength_6, inline_27)  #    51
+#         r1_opt_effort_ll_29 = jnp.ones(jnp.broadcast_shapes(agent_b_r1_opt_effort_26.shape), dtype=jnp.float32) * ffi_utility_28  #    52
+#         r1_opt_effort_ll_29 = 1.0 * (r1_opt_effort_ll_29 == maxx(r1_opt_effort_ll_29, (7,)))  #    53
+#         r1_opt_effort_ll_29 = jnp.nan_to_num(r1_opt_effort_ll_29 / marg(r1_opt_effort_ll_29, (7,)))  #    54
+#         participant_ll_5 = r1_opt_effort_ll_29 * participant_ll_5  #    55
+#         # agent_b choose r1_actual_effort  #    56
+#         agent_b_r1_actual_effort_30 = jnp.array(efforts).reshape(*(-1, 1, 1, 1, 1, 1, 1, 1, 1))  #    57
+#         ffi_norm_pdf_32 = ffi(norm_pdf, [False, False, True], agent_b_r1_actual_effort_30, agent_b_r1_opt_effort_26, inline_31)  #    58
+#         r1_actual_effort_ll_33 = jnp.ones(jnp.broadcast_shapes(agent_b_r1_actual_effort_30.shape), dtype=jnp.float32) * ffi_norm_pdf_32  #    59
+#         r1_actual_effort_ll_33 = jnp.nan_to_num(r1_actual_effort_ll_33 / marg(r1_actual_effort_ll_33, (8,)))  #    60
+#         participant_ll_5 = r1_actual_effort_ll_33 * participant_ll_5  #    61
+#         # agent_b choose r1_perceived_effort  #    62
+#         agent_b_r1_perceived_effort_34 = jnp.array(efforts).reshape(*(-1, 1, 1, 1, 1, 1, 1, 1, 1, 1))  #    63
+#         ffi_norm_pdf_36 = ffi(norm_pdf, [False, False, True], agent_b_r1_perceived_effort_34, agent_b_r1_actual_effort_30, inline_35)  #    64
+#         r1_perceived_effort_ll_37 = jnp.ones(jnp.broadcast_shapes(agent_b_r1_perceived_effort_34.shape), dtype=jnp.float32) * ffi_norm_pdf_36  #    65
+#         r1_perceived_effort_ll_37 = jnp.nan_to_num(r1_perceived_effort_ll_37 / marg(r1_perceived_effort_ll_37, (9,)))  #    66
+#         participant_ll_5 = r1_perceived_effort_ll_37 * participant_ll_5  #    67
+#         ffi_effort_is_39 = ffi(effort_is, [False, True], agent_b_r1_perceived_effort_34, lit_38)  #    68
+#         # participant factors  #    69
+#         ffi_effort_is_39 = jnp.bool(ffi_effort_is_39) * 1.0  #    70
+#         participant_ll_5 = participant_ll_5 * ffi_effort_is_39  #    71
+#         participant_ll_5 = jnp.nan_to_num(participant_ll_5 / marg(participant_ll_5, (2, 3, 4, 5, 6, 7, 8, 9)))  #    72
+#         ffi_lift_40 = ffi(lift, [False, False], agent_b_strength_6, agent_b_r1_actual_effort_30)  #    73
+#         op_eq_42 = ffi_lift_40 == lit_41  #    74
+#         # participant factors  #    75
+#         op_eq_42 = jnp.bool(op_eq_42) * 1.0  #    76
+#         participant_ll_5 = participant_ll_5 * op_eq_42  #    77
+#         participant_ll_5 = jnp.nan_to_num(participant_ll_5 / marg(participant_ll_5, (2, 3, 4, 5, 6, 7, 8, 9)))  #    78
+#         # agent_a choose r2_opt_effort  #    79
+#         agent_a_r2_opt_effort_43 = jnp.array(efforts).reshape(*(-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1))  #    80
+#         ffi_utility_45 = ffi(utility, [False, False, True], agent_a_r2_opt_effort_43, agent_a_strength_2, inline_44)  #    81
+#         r2_opt_effort_ll_46 = jnp.ones(jnp.broadcast_shapes(agent_a_r2_opt_effort_43.shape), dtype=jnp.float32) * ffi_utility_45  #    82
+#         r2_opt_effort_ll_46 = 1.0 * (r2_opt_effort_ll_46 == maxx(r2_opt_effort_ll_46, (10,)))  #    83
+#         r2_opt_effort_ll_46 = jnp.nan_to_num(r2_opt_effort_ll_46 / marg(r2_opt_effort_ll_46, (10,)))  #    84
+#         participant_ll_5 = r2_opt_effort_ll_46 * participant_ll_5  #    85
+#         # agent_a choose r2_actual_effort  #    86
+#         agent_a_r2_actual_effort_47 = jnp.array(efforts).reshape(*(-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1))  #    87
+#         ffi_norm_pdf_49 = ffi(norm_pdf, [False, False, True], agent_a_r2_actual_effort_47, agent_a_r2_opt_effort_43, inline_48)  #    88
+#         r2_actual_effort_ll_50 = jnp.ones(jnp.broadcast_shapes(agent_a_r2_actual_effort_47.shape), dtype=jnp.float32) * ffi_norm_pdf_49  #    89
+#         r2_actual_effort_ll_50 = jnp.nan_to_num(r2_actual_effort_ll_50 / marg(r2_actual_effort_ll_50, (11,)))  #    90
+#         participant_ll_5 = r2_actual_effort_ll_50 * participant_ll_5  #    91
+#         # agent_a choose r2_perceived_effort  #    92
+#         agent_a_r2_perceived_effort_51 = jnp.array(efforts).reshape(*(-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1))  #    93
+#         ffi_norm_pdf_53 = ffi(norm_pdf, [False, False, True], agent_a_r2_perceived_effort_51, agent_a_r2_actual_effort_47, inline_52)  #    94
+#         r2_perceived_effort_ll_54 = jnp.ones(jnp.broadcast_shapes(agent_a_r2_perceived_effort_51.shape), dtype=jnp.float32) * ffi_norm_pdf_53  #    95
+#         r2_perceived_effort_ll_54 = jnp.nan_to_num(r2_perceived_effort_ll_54 / marg(r2_perceived_effort_ll_54, (12,)))  #    96
+#         participant_ll_5 = r2_perceived_effort_ll_54 * participant_ll_5  #    97
+#         ffi_effort_is_56 = ffi(effort_is, [False, True], agent_a_r2_perceived_effort_51, lit_55)  #    98
+#         # participant factors  #    99
+#         ffi_effort_is_56 = jnp.bool(ffi_effort_is_56) * 1.0  #   100
+#         participant_ll_5 = participant_ll_5 * ffi_effort_is_56  #   101
+#         participant_ll_5 = jnp.nan_to_num(participant_ll_5 / marg(participant_ll_5, (2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)))  #   102
+#         ffi_lift_57 = ffi(lift, [False, False], agent_a_strength_2, agent_a_r2_actual_effort_47)  #   103
+#         op_eq_59 = ffi_lift_57 == lit_58  #   104
+#         # participant factors  #   105
+#         op_eq_59 = jnp.bool(op_eq_59) * 1.0  #   106
+#         participant_ll_5 = participant_ll_5 * op_eq_59  #   107
+#         participant_ll_5 = jnp.nan_to_num(participant_ll_5 / marg(participant_ll_5, (2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)))  #   108
+#         # agent_b choose r2_opt_effort  #   109
+#         agent_b_r2_opt_effort_60 = jnp.array(efforts).reshape(*(-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1))  #   110
+#         ffi_utility_62 = ffi(utility, [False, False, True], agent_b_r2_opt_effort_60, agent_b_strength_6, inline_61)  #   111
+#         r2_opt_effort_ll_63 = jnp.ones(jnp.broadcast_shapes(agent_b_r2_opt_effort_60.shape), dtype=jnp.float32) * ffi_utility_62  #   112
+#         r2_opt_effort_ll_63 = 1.0 * (r2_opt_effort_ll_63 == maxx(r2_opt_effort_ll_63, (13,)))  #   113
+#         r2_opt_effort_ll_63 = jnp.nan_to_num(r2_opt_effort_ll_63 / marg(r2_opt_effort_ll_63, (13,)))  #   114
+#         participant_ll_5 = r2_opt_effort_ll_63 * participant_ll_5  #   115
+#         # agent_b choose r2_actual_effort  #   116
+#         agent_b_r2_actual_effort_64 = jnp.array(efforts).reshape(*(-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1))  #   117
+#         ffi_norm_pdf_66 = ffi(norm_pdf, [False, False, True], agent_b_r2_actual_effort_64, agent_b_r2_opt_effort_60, inline_65)  #   118
+#         r2_actual_effort_ll_67 = jnp.ones(jnp.broadcast_shapes(agent_b_r2_actual_effort_64.shape), dtype=jnp.float32) * ffi_norm_pdf_66  #   119
+#         r2_actual_effort_ll_67 = jnp.nan_to_num(r2_actual_effort_ll_67 / marg(r2_actual_effort_ll_67, (14,)))  #   120
+#         participant_ll_5 = r2_actual_effort_ll_67 * participant_ll_5  #   121
+#         # agent_b choose r2_perceived_effort  #   122
+#         agent_b_r2_perceived_effort_68 = jnp.array(efforts).reshape(*(-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1))  #   123
+#         ffi_norm_pdf_70 = ffi(norm_pdf, [False, False, True], agent_b_r2_perceived_effort_68, agent_b_r2_actual_effort_64, inline_69)  #   124
+#         r2_perceived_effort_ll_71 = jnp.ones(jnp.broadcast_shapes(agent_b_r2_perceived_effort_68.shape), dtype=jnp.float32) * ffi_norm_pdf_70  #   125
+#         r2_perceived_effort_ll_71 = jnp.nan_to_num(r2_perceived_effort_ll_71 / marg(r2_perceived_effort_ll_71, (15,)))  #   126
+#         participant_ll_5 = r2_perceived_effort_ll_71 * participant_ll_5  #   127
+#         ffi_effort_is_73 = ffi(effort_is, [False, True], agent_b_r2_perceived_effort_68, lit_72)  #   128
+#         # participant factors  #   129
+#         ffi_effort_is_73 = jnp.bool(ffi_effort_is_73) * 1.0  #   130
+#         participant_ll_5 = participant_ll_5 * ffi_effort_is_73  #   131
+#         participant_ll_5 = jnp.nan_to_num(participant_ll_5 / marg(participant_ll_5, (2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)))  #   132
+#         ffi_lift_74 = ffi(lift, [False, False], agent_b_strength_6, agent_b_r2_actual_effort_64)  #   133
+#         op_eq_76 = ffi_lift_74 == lit_75  #   134
+#         # participant factors  #   135
+#         op_eq_76 = jnp.bool(op_eq_76) * 1.0  #   136
+#         participant_ll_5 = participant_ll_5 * op_eq_76  #   137
+#         participant_ll_5 = jnp.nan_to_num(participant_ll_5 / marg(participant_ll_5, (2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)))  #   138
+#         pass  # participant knows self.query_strength_a  #   139
+#         pass  # participant knows self.query_strength_b  #   140
+#         posterior_77 = marg(participant_ll_5, (4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15))  #   141
+#         posterior_77 = pad(posterior_77, 16)  #   142
+#         if posterior_77.shape[-1 - 0] == 1:  #   143
+#             posterior_77 = jnp.swapaxes(posterior_77, -1 - 2, -1 - 0)  #   144
+#         else:  #   145
+#             posterior_77 = collapse_diagonal(posterior_77, -1 - 0, -1 - 2)  #   146
+#         if posterior_77.shape[-1 - 1] == 1:  #   147
+#             posterior_77 = jnp.swapaxes(posterior_77, -1 - 3, -1 - 1)  #   148
+#         else:  #   149
+#             posterior_77 = collapse_diagonal(posterior_77, -1 - 1, -1 - 3)  #   150
+#         # prepare output  #   151
+#         posterior_77 = jnp.array(posterior_77)  # ensure output is an array  #   152
+#         posterior_77 = pad(posterior_77, 16)  #   153
+#         posterior_77 = posterior_77.squeeze(axis=(-3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15, -16)).transpose()  #   154
+#         return posterior_77  #   155
+#   #   156
+#   #   157
+#   #   158
+#     def _out_infer_strengths(  #   159
+#         r1_outcome_a, r1_outcome_b, r2_outcome_a, r2_outcome_b, r1_perceived_effort_a, r1_perceived_effort_b, r2_perceived_effort_a, r2_perceived_effort_b, *,  #   160
+#         return_aux=False,  #   161
+#         return_pandas=False,  #   162
+#         return_xarray=False,  #   163
+#         return_cost=False,  #   164
+#         print_table=False  #   165
+#     ):  #   166
+#         aux = AuxInfo()  #   167
+#         if return_pandas or return_xarray:  #   168
+#             return_aux = True  #   169
+#         if return_cost:  #   170
+#             return_aux = True  #   171
+#             aux.cost = 0.  #   172
+#         check_scalar_param(r1_outcome_a, "r1_outcome_a")  #   173
+#         check_scalar_param(r1_outcome_b, "r1_outcome_b")  #   174
+#         check_scalar_param(r2_outcome_a, "r2_outcome_a")  #   175
+#         check_scalar_param(r2_outcome_b, "r2_outcome_b")  #   176
+#         check_scalar_param(r1_perceived_effort_a, "r1_perceived_effort_a")  #   177
+#         check_scalar_param(r1_perceived_effort_b, "r1_perceived_effort_b")  #   178
+#         check_scalar_param(r2_perceived_effort_a, "r2_perceived_effort_a")  #   179
+#         check_scalar_param(r2_perceived_effort_b, "r2_perceived_effort_b")  #   180
+#         cost_ = 0  #   181
+#         _time_ = time.time()  #   182
+#         print(f' --> infer_strengths({ r1_outcome_a, r1_outcome_b, r2_outcome_a, r2_outcome_b, r1_perceived_effort_a, r1_perceived_effort_b, r2_perceived_effort_a, r2_perceived_effort_b })')  #   183
+#         lit_3 = 1  #   184
+#         lit_7 = 1  #   185
+#         inline_10 = low_reward  #   186
+#         inline_14 = gamma  #   187
+#         inline_18 = delta  #   188
+#         lit_21 = r1_perceived_effort_a  #   189
+#         lit_24 = r1_outcome_a  #   190
+#         inline_27 = low_reward  #   191
+#         inline_31 = gamma  #   192
+#         inline_35 = delta  #   193
+#         lit_38 = r1_perceived_effort_b  #   194
+#         lit_41 = r1_outcome_b  #   195
+#         inline_44 = high_reward  #   196
+#         inline_48 = gamma  #   197
+#         inline_52 = delta  #   198
+#         lit_55 = r2_perceived_effort_a  #   199
+#         lit_58 = r2_outcome_a  #   200
+#         inline_61 = high_reward  #   201
+#         inline_65 = gamma  #   202
+#         inline_69 = delta  #   203
+#         lit_72 = r2_perceived_effort_b  #   204
+#         lit_75 = r2_outcome_b  #   205
+#         _out_ = _jit_infer_strengths(r1_outcome_a, r1_outcome_b, r2_outcome_a, r2_outcome_b, r1_perceived_effort_a, r1_perceived_effort_b, r2_perceived_effort_a, r2_perceived_effort_b, lit_3, lit_7, inline_10, inline_14, inline_18, lit_21, lit_24, inline_27, inline_31, inline_35, lit_38, lit_41, inline_44, inline_48, inline_52, lit_55, lit_58, inline_61, inline_65, inline_69, lit_72, lit_75)  #   206
+#   #   207
+#         if return_cost:  #   208
+#             #  https://jax.readthedocs.io/en/latest/aot.html  #   209
+#             _lowered_ = _jit_infer_strengths.lower(r1_outcome_a, r1_outcome_b, r2_outcome_a, r2_outcome_b, r1_perceived_effort_a, r1_perceived_effort_b, r2_perceived_effort_a, r2_perceived_effort_b, lit_3, lit_7, inline_10, inline_14, inline_18, lit_21, lit_24, inline_27, inline_31, inline_35, lit_38, lit_41, inline_44, inline_48, inline_52, lit_55, lit_58, inline_61, inline_65, inline_69, lit_72, lit_75)  #   210
+#             _cost_ = _lowered_.cost_analysis()  #   211
+#             _cost_ = dict(  #   212
+#                 flops=_cost_.get('flops', 0),  #   213
+#                 transcendentals=_cost_.get('transcendentals', 0),  #   214
+#                 bytes=_cost_.get('bytes accessed', 0)  #   215
+#             )  #   216
+#             aux.cost += _cost_['flops'] + _cost_['transcendentals']  #   217
+#   #   218
+#         print(f'<--  infer_strengths({ r1_outcome_a, r1_outcome_b, r2_outcome_a, r2_outcome_b, r1_perceived_effort_a, r1_perceived_effort_b, r2_perceived_effort_a, r2_perceived_effort_b }) has shape { _out_.shape }')  #   219
+#         if return_cost:  #   220
+#             print(f'     cost = {aux.cost} operations')  #   221
+#   #   222
+#         print(f'     time = {time.time() - _time_:.6f} sec')  #   223
+#         if print_table: pprint_table(_out_infer_strengths, _out_)  #   224
+#         if return_pandas: aux.pandas = make_pandas_data(_out_infer_strengths, _out_)  #   225
+#         if return_xarray: aux.xarray = make_xarray_data(_out_infer_strengths, _out_)  #   226
+#         return memo_result(data=_out_, aux=aux) if return_aux else _out_  #   227
+#   #   228
+#   #   229
+#     _out_infer_strengths._shape = tuple([len(strength_values), len(strength_values)])  #   230
+#     _out_infer_strengths._axes = tuple(['query_strength_a', 'query_strength_b'])  #   231
+#     _out_infer_strengths._doms = tuple(['strength_values', 'strength_values'])  #   232
+#     _out_infer_strengths._vals = tuple([strength_values, strength_values])  #   233
+#     _out_infer_strengths._num_retvals = 1  #   234
+#     return _out_infer_strengths  #   235
+#   #   236
+# infer_strengths = _make_infer_strengths()  #   237
+# infer_strengths.__name__ = 'infer_strengths'  #   238
+# infer_strengths.__qualname__ = 'infer_strengths'  #   239
+# infer_strengths.__doc__ = '\n    Infer posterior distribution over agent strengths given observed outcomes.\n\n    Same as the original infer_strengths but tries to pull everything closer together (and maybe avoid model implementation errors) by using memo features for utility maximization. Also exposes target effort as a parameter that could be separated from actual effort. Downside is that since we are now modeling uncertainty about not only strength but also about effort, the model takes a lot longer to run. Probably necessary for a model with nested uncertainty, but apparently not for the Xiang2023 model.\n\n    Infer posterior distribution over agent strengths given observed outcomes.\n\n    Observations:\n    - Round 1 (low reward = 10): A and B each attempt individual lifts\n    - Round 2 (high reward = 20): A and B each attempt individual lifts\n\n    Returns: Pr[strength_a == query_strength_a AND strength_b == query_strength_b | observations]\n    '  #   240
 ```
 
 ```{python}
