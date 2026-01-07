@@ -37,8 +37,9 @@ low_reward = 10
 high_reward = 20
 
 # Discretized spaces (for computational tractability)
-efforts = np.array([0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5,
-                    0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0])
+# efforts = np.array([0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5,
+#                     0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0])
+efforts = np.linspace(0., 1., 41) # [0,1] with step size of .025
 
 # Discretized strength space (replacing continuous uniform(1,10))
 strength_values = np.linspace(1., 10., 301) # [1,10] with step size of .03
@@ -199,7 +200,7 @@ plt.show()
 
 NOTE: Remember that we're not including the possibility that one agent is lazy! (alpha is laziness for both agents; Xiang2023 experiment 3 considers different alpha per agent) they'll go try for the optimal effort at all times, and their strength is independent of what their effort will be (since they're choosing optimal effort after strength has already been sampled; this could mean they "know" their strength, or at least that their strength is not up to them).
 
-TODO: keep just one observes_event instance and test that the results are the same if we replaced it with the original code (to test that the marginalization that's happening due to the function calls isn't disrupting the model/e.g. adding new assumptions about what parameters are fixed)
+TODO: ~~keep just one observes_event instance and test that the results are the same if we replaced it with the original code~~ compare results of posteriors for current implementation with delta==99999 and gamma==0.0001. to results of posteriors in original xiang2023-replication implementation (to test that the marginalization that's happening due to the function calls isn't disrupting the model/e.g. adding new assumptions about what parameters are fixed)
 
 ## Game-Theoretic Joint Optimization of Effort
 
