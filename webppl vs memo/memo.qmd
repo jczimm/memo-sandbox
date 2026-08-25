@@ -57,3 +57,35 @@ def model[query_v: possible_values]():
 from matplotlib import pyplot as plt
 plt.plot(possible_values, model())
 ```
+
+**Observing a sample**
+
+```{python}
+from memo import memo
+import jax.numpy as np
+from jax.scipy.stats.norm import pdf as norm_pdf
+
+possible_values = np.array(range(-500,501)) / 100
+
+@memo
+def model[query_v: possible_values]():
+    # first, establish the prior in the valuator's frame: have the valuator model that the value generator chose some value from -1 to 1, with mu=0 and sigma=1
+    valuator: thinks[
+        value_gen: given(v in possible_values, wpp=norm_pdf(v, 0, 1)),
+        # then, now that the value is modeled by the valuator, observe that value with some degree of belief
+        value_gen: given(observed_v in possible_values, wpp=norm_pdf(observed_v, v, .5))
+    ]
+    valuator: observes_that [value_gen.observed_v == 2]
+
+    # return the estimated probability of the generator's value for being each queried v, *estimated according to the valuator/from the valuator's frame*
+    valuator: knows(query_v) # first, push query_v into the frame of the valuator
+    return valuator[Pr[value_gen.v == query_v]]
+
+    # or return the expected value in the valuator's frame:
+    # return valuator[E[value_gen.v]]
+```
+
+```{python}
+from matplotlib import pyplot as plt
+plt.plot(possible_values, model())
+```

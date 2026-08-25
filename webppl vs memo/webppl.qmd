@@ -30,7 +30,7 @@ var model = function() {
    // uniform prior of true value, discretized for parity with memo
    var value = randomInteger(101) / 100; // uniform(0, 1)
 
-   // someone has observed that value is >.5
+   // someone knows that value is >.5
    condition(value > .5)
    
    // return the estimated probability of each possible value
@@ -54,6 +54,29 @@ posterior |>
    mutate(support = round(support, 3)) |>
    complete(support = seq(0, 1, by = 0.01) |> round(3), fill = list(prob = 0)) |>
    ggplot() + geom_line(aes(x=support, y=prob)) + lims(x=c(0,1), y=c(0, NA))
+```
+
+**Observing a sample**
+
+```{r}
+library(tidyverse)
+basic_inference_model_2 <- '
+var model = function() {
+   // normal prior of true value
+   var value = gaussian(0, 1)
+
+   // someone has observed a value of 2 with strong belief
+   observe(Gaussian({mu: value, sigma: .5}), 2);
+   
+   // return the estimated probability of each possible value
+   return value
+}
+Infer(model)
+'
+posterior <- rwebppl::webppl(basic_inference_model_2)
+
+posterior |>
+   ggplot() + geom_density(aes(x=value)) + lims(x=c(-5,5), y=c(0, NA))
 ```
 
 <!--

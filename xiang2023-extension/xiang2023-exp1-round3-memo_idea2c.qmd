@@ -28,10 +28,10 @@ from matplotlib import pyplot as plt
 from functools import partial
 
 # Model parameters (from original WebPPL code)
-alpha = 13.5  # effort cost coefficient, from original paper; kept fixed for replication
+alpha = .001 # 13.5  # effort cost coefficient, from original paper; kept fixed for replication
 beta = 24.5   # inequality aversion coefficient, from original paper; kept fixed for replication
-gamma = 0.1 # inverse strength of belief that agent will achieve optimal effort (relative to scale of effort: [0, 1])
-delta = 0.4 # inverse strength of belief in perceived effort (relative to scale of effort: [0, 1])
+gamma = 1.5 # strength of belief that agent will achieve optimal effort (inverse temperature)
+delta = 6. # strength of belief in perceived effort (inverse temperature)
 weight_box = 5  # weight of the box
 low_reward = 10
 high_reward = 20
@@ -102,8 +102,16 @@ The original WebPPL code infers agent strengths from observed outcomes in rounds
 def utility(effort, strength, reward):
     return reward * lift(strength, effort) - alpha * effort
 
+GAMMA = 0
+DELTA = 1
+def ModelParams(gamma, delta):
+    return np.array([ gamma, delta ])
+
 @memo(save_comic="memo-comic-xiang-strength-inference-inner", debug_trace=DEBUG)
-def likelihood_of_outcome(outcome, strength, perceived_effort, reward):
+def likelihood_of_outcome(
+    outcome, strength, perceived_effort, reward,
+    modelParams: ...
+):
     # participant thinks that
     participant: thinks[
         # the agent has an optimal effort which maximizes utility
@@ -111,10 +119,10 @@ def likelihood_of_outcome(outcome, strength, perceived_effort, reward):
             to_maximize=utility(opt_effort, strength, reward)),
         # and that the agent chooses an actual effort near there
         agent: chooses(actual_effort in efforts,
-            wpp=norm_pdf(actual_effort, opt_effort, {gamma})),
+            wpp=norm_pdf(actual_effort, opt_effort, exp(1 - {modelParams[GAMMA]}))),
         # and that the agent's visible effort is near the actual effort
         agent: given(visible_effort in efforts,
-            wpp=norm_pdf(visible_effort, actual_effort, {delta}))
+            wpp=norm_pdf(visible_effort, actual_effort, exp(1 - {modelParams[DELTA]})))
     ]
     # according to the participant, what is the likelihood that BOTH:
     return participant[Pr[
@@ -137,7 +145,8 @@ def likelihood_of_outcome(outcome, strength, perceived_effort, reward):
 @memo(save_comic="memo-comic-xiang-strength-inference", debug_trace=DEBUG)
 def infer_strengths[query_strength_a: strength_values, query_strength_b: strength_values](
     r1_outcome_a, r1_outcome_b, r2_outcome_a, r2_outcome_b,
-    r1_perceived_effort_a, r1_perceived_effort_b, r2_perceived_effort_a, r2_perceived_effort_b
+    r1_perceived_effort_a, r1_perceived_effort_b, r2_perceived_effort_a, r2_perceived_effort_b,
+    modelParams: ...
 ):
     """
     Infer posterior distribution over agent strengths given observed outcomes.
@@ -161,10 +170,10 @@ def infer_strengths[query_strength_a: strength_values, query_strength_b: strengt
     ]
 
     # Participant witnesses the behavior and outcomes and conditions on both. The purpose is to condition the strength values
-    participant: observes_event(wpp=likelihood_of_outcome(r1_outcome_a, agent_a.strength, r1_perceived_effort_a, {low_reward}))
-    participant: observes_event(wpp=likelihood_of_outcome(r1_outcome_b, agent_b.strength, r1_perceived_effort_b, {low_reward}))
-    participant: observes_event(wpp=likelihood_of_outcome(r2_outcome_a, agent_a.strength, r2_perceived_effort_a, {high_reward}))
-    participant: observes_event(wpp=likelihood_of_outcome(r2_outcome_b, agent_b.strength, r2_perceived_effort_b, {high_reward}))
+    participant: observes_event(wpp=likelihood_of_outcome(r1_outcome_a, agent_a.strength, r1_perceived_effort_a, {low_reward}, modelParams))
+    participant: observes_event(wpp=likelihood_of_outcome(r1_outcome_b, agent_b.strength, r1_perceived_effort_b, {low_reward}, modelParams))
+    participant: observes_event(wpp=likelihood_of_outcome(r2_outcome_a, agent_a.strength, r2_perceived_effort_a, {high_reward}, modelParams))
+    participant: observes_event(wpp=likelihood_of_outcome(r2_outcome_b, agent_b.strength, r2_perceived_effort_b, {high_reward}, modelParams))
 
     # Push query variables into participant frame 
     # and return participant's estimate of the posterior probability for the agents having these given (query) strengths
@@ -184,7 +193,7 @@ if DEBUG:
 ```
 
 ```{python}
-sample_strengths = infer_strengths(1., 0., 1., 1., .5, 1., .5, .5)
+sample_strengths = infer_strengths(0., 0., 0., 0., .0, .0, .4, .4, ModelParams(gamma=2., delta=1.))
 fig, axes = plt.subplots(1, 2, figsize=(15, 6))
 
 # Posterior heatmap
@@ -196,6 +205,41 @@ plt.colorbar(im, ax=axes[0], label='Probability')
 
 plt.tight_layout()
 plt.show()
+```
+
+```{python}
+# only show agent A
+fig, axes = plt.subplots(1, 3, figsize=(15, 6))
+
+# if we don't give any credence to perceived effort, if the person fails both times, they're most likely below the requisite strength
+sample_strengths = infer_strengths(0., 0., 0., 0., .5, .0, .5, .0, ModelParams(gamma=1., delta=.0001))
+axes[0].plot(strength_values, np.sum(sample_strengths, axis=1))
+axes[0].set_xlabel('Agent Strength')
+axes[0].set_ylabel('Posterior Probability')
+axes[0].set_title('P(strength | FAIL)')
+# axes[0].set_ylim(0, 0.008)
+
+# if we believe somewhat in perceived effort, if the person fails both times, since the person still looks to have put in full effort, we have reason to believe they have strength 5
+# NOTE: setting gamma to ~0 does not prevent the model from incorporating the information about the outcome! it just makes the model less certain that effort is intended to be optimal (conditioning on the outcome is not affected by gamma)
+sample_strengths = infer_strengths(0., 0., 0., 0., 1., .0, 1., .0, ModelParams(gamma=1., delta=3.7))
+axes[1].plot(strength_values, np.sum(sample_strengths, axis=1))
+axes[1].set_xlabel('Agent Strength')
+axes[1].set_ylabel('Posterior Probability')
+axes[1].set_title('P(strength | FAIL, perceived effort = 100%)')
+# axes[1].set_ylim(0, 0.008)
+
+# if perceived effort is 50%, then maybe they are strong enough (closer to strength 10)!
+sample_strengths = infer_strengths(0., 0., 0., 0., .5, .0, .5, .0, ModelParams(gamma=1., delta=3.7))
+axes[2].plot(strength_values, np.sum(sample_strengths, axis=1))
+axes[2].set_xlabel('Agent Strength')
+axes[2].set_ylabel('Posterior Probability')
+axes[2].set_title('P(strength | FAIL, perceived effort = 50%)')
+# axes[2].set_ylim(0, 0.008)
+
+plt.tight_layout()
+plt.show()
+
+# NOTE: easier to interpret when ignoring effort cost
 ```
 
 NOTE: Remember that we're not including the possibility that one agent is lazy! (alpha is laziness for both agents; Xiang2023 experiment 3 considers different alpha per agent) they'll go try for the optimal effort at all times, and their strength is independent of what their effort will be (since they're choosing optimal effort after strength has already been sampled; this could mean they "know" their strength, or at least that their strength is not up to them).
@@ -517,7 +561,7 @@ class Model():
         if DEBUG:
             print("\nComputing posterior over agent strengths...")
 
-        posterior_strengths = infer_strengths(r1_outcome_a, r1_outcome_b, r2_outcome_a, r2_outcome_b)
+        posterior_strengths = infer_strengths(r1_outcome_a, r1_outcome_b, r2_outcome_a, r2_outcome_b, np.array([ gamma, delta ]))
 
         if DEBUG:
             # DEBUG: Bayesian inference statistics
